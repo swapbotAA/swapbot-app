@@ -38,8 +38,8 @@
             </span>
           </div>
           <div id="contentLeft2" v-show="numberl == 1">
-            <img src="../assets/setting-fill.svg"
-              style="width: 30px; height: 30px; position: absolute;right: 10%;top: 12%;" @click="showModal()" />
+            <!-- <img src="../assets/setting-fill.svg"
+              style="width: 30px; height: 30px; position: absolute;right: 10%;top: 12%;" @click="showModal()" /> -->
             <span>
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
                 <a-input v-model:value="ethAmount" placeholder="0" suffix="ETH" style="height: 60px;" />
