@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="header">SwapBot AA</div>
+    <div class="header"><img src="../assets/robot.svg" style="height: 45px;width: 45px; padding-right: 10px;">SwapBot AA</div>
     <div class="leftbar">
       <div class="tableft">
         <div class="content">
@@ -12,10 +12,48 @@
           </div>
           <!--2个div-->
           <div id="contentLeft1" v-show="numberl == 0">
-            <span>Swap</span>
+                <img src="../assets/setting-fill.svg" style="width: 30px; height: 30px; position: absolute;right: 10%;top: 12%;"  @click="showModal()"/>
+                <span>
+                  <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
+                    <a-input v-model:value="ethAmount" placeholder="0" suffix="ETH" style="height: 60px;"/>
+                  </div>
+                  <div style="line-height: 50px;"><img src="../assets/swap.svg" style="height: 25px; width: 25px;"></div>
+                  <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;margin-top: -30px;">
+                    <a-input v-model:value="usdcAmount" placeholder="0" suffix="USDC" style="height: 60px;"/>
+                  </div>
+                  <div style="line-height: 50px;">rate:1850 ETH/USDC</div>
+
+                  <a-button type="primary" :loading="iconLoading" @click="enterIconLoading()">
+                    <template #icon><PoweroffOutlined /></template>
+                      Submit
+                  </a-button>
+                </span>
           </div>
           <div id="contentLeft2" v-show="numberl == 1">
-            <span>Front-running</span>
+            <img src="../assets/setting-fill.svg" style="width: 30px; height: 30px; position: absolute;right: 10%;top: 12%;" @click="showModal()"/>
+                <span>
+                  <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
+                    <a-input v-model:value="ethAmount" placeholder="0" suffix="ETH" style="height: 60px;"/>
+                  </div>
+                  <div style="line-height: 50px;"><img src="../assets/swap.svg" style="height: 25px; width: 25px;"></div>
+                  <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;margin-top: -30px;">
+                    <a-input v-model:value="usdcAmount" placeholder="0" suffix="USDC" style="height: 60px;"/>
+                  </div>
+                  <div style="line-height: 50px;">rate:1850 ETH/USDC</div>
+
+                  <a-button type="primary" :loading="iconLoading" @click="enterIconLoading()">
+                    <template #icon><PoweroffOutlined /></template>
+                      Submit
+                  </a-button>
+                </span>
+          </div>
+          <div>
+            <!-- <a-button type="primary" @click="showModal()">Modal</a-button>
+            <a-button @click="confirm()">Confirm</a-button> -->
+            <a-modal v-model:open="open" title="Setting" ok-text="确认" cancel-text="取消" @ok="hideModal()">
+              <p style="font-size: medium;">Maximum slip point<a-input v-model:value="slipPoint" placeholder="0" suffix="%" style="height: 60px;"/></p>
+              <p style="font-size: medium;">Trade deadline<a-input v-model:value="deadLine" placeholder="30" suffix="mins" style="height: 60px;"/></p>
+            </a-modal>
           </div>
         </div>
       </div>
@@ -141,8 +179,16 @@
       margin: 20px 3px;
       background-color: #8c55ec;
     }
-    #contentLeft1, #contentLeft2 {
+    #contentLeft1 {
       background-color: rgb(245 246 252);
+      height: 500px;
+      font-size: 16px;
+      line-height: 100px;
+      margin-top: 60px;
+      border-radius: 15px;
+    }
+    #contentLeft2 {
+      background-color: #fffefe;
       height: 500px;
       font-size: 16px;
       line-height: 100px;
@@ -158,14 +204,27 @@
       border-radius: 15px;
     }
   }
+  .contentSetting {
+    background-color: rgb(255 244 250);
+      height: 300px;
+      font-size: 16px;
+      line-height: 100px;
+      margin-top: 60px;
+      border-radius: 15px;
+  }
 </style>
 <script>
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
+import { ref, createVNode } from 'vue';
+import { Modal } from 'ant-design-vue';
    export default {
     name: "tableft",
     data() {
       return {
         numberl: 0, //点击后的值，与下标同步，为0表示默认第一个按钮与div为选中状态
         numberr: 0,
+        iconLoading: ref(false),
+        open: ref(false),
         dataListLeft: [
           {option: 'Swap'},
           {option: 'Front-running'},
@@ -186,7 +245,31 @@
       tabright(index) {
         this.numberr = index;
         // console.log(index, this.number);
-      }
+      },
+      enterIconLoading() {
+      this.iconLoading = true;
+      setTimeout(() => {
+        // alert(this.iconLoading);
+        this.iconLoading = false;
+      }, 6000);
+    },
+    showModal() {
+      this.open = true;
+    },
+    hideModal() {
+      this.open = false;
+    },
+    confirm() {
+      {
+        Modal.confirm({
+          title: 'Confirm',
+          icon: createVNode(ExclamationCircleOutlined),
+          content: 'Bla bla ...',
+          okText: '确认',
+          cancelText: '取消',
+        });
+      };
+    }
     }
   }
 </script>
