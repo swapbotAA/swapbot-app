@@ -1,8 +1,18 @@
 <template>
   <div>
-    <div class="header"><img src="../assets/robot.svg" style="height: 45px;width: 45px; padding-right: 10px;">SwapBot
-      AA<a-button type="primary" danger style="position: absolute; right: 10px; top: 10px;"
-        @click="">connect</a-button></div>
+    <!-- <vue-metamask 
+            userMessage="msg" 
+            @onComplete="onComplete"
+        >
+        </vue-metamask> -->
+    <div class="header"><img src="../assets/robot.svg" style="height: 45px;width: 45px; padding-right: 10px;">
+      SwapBotAA
+      <vue-metamask ref="metamask" @onComplete="onComplete"></vue-metamask>
+      <a-button type="primary" danger style="position: absolute; right: 10px; top: 10px;" @click="connect">
+        <span v-if="this.user==null">Connect Wallet</span>
+        <span v-else>{{this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4)}}</span>
+      </a-button>
+    </div>
     <div class="leftbar">
       <div class="tableft">
         <div class="content">
@@ -13,12 +23,13 @@
             </button>
 
             <img src="../assets/setting-fill.svg"
-              style="width: 50px; height: 50px; position: absolute;right: 10%;top: 25%;right: 10%;" @click="showModal()" />
+              style="width: 50px; height: 50px; position: absolute;right: 10%;top: 25%;right: 10%;"
+              @click="showModal()" />
 
           </div>
           <!--2个div-->
           <div id="contentLeft1" v-show="numberl == 0">
-            
+
             <span>
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
                 <a-input v-model:value="ethAmount" placeholder="0" suffix="ETH" style="height: 60px;" />
@@ -240,19 +251,19 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
 import { ref, createVNode } from 'vue';
 import { Modal } from 'ant-design-vue';
-// import { mapState, mapMutations, mapActions } from "vuex";
-// import {
-//   connectMetamask,
-//   accountChangeListener,
-//   getWeb3Provider,
-// } from "../api/contracts";
+import VueMetamask from 'vue-metamask';
 
 export default {
   name: "tableft",
+  components: {
+    VueMetamask,
+  },
   data() {
     return {
       numberl: 0, //点击后的值，与下标同步，为0表示默认第一个按钮与div为选中状态
       numberr: 0,
+      user: null,
+      msg: "This is demo net work",
       iconLoading: ref(false),
       open: ref(false),
       dataListLeft: [
@@ -266,39 +277,7 @@ export default {
       ]
     }
   },
-  // computed: {
-  //   ...mapState(["web3Provider", "user", "userEmail"]),
-  // },
   methods: {
-    // ...mapActions(["set_web3_provider"]),
-    // ...mapMutations(["SET_USER"]),
-    // initProvider() {
-    //   let provider = getWeb3Provider();
-    //   if (provider == null) {
-    //     this.$notify.warning({
-    //       title: "Warning",
-    //       message: "Please install metamask first!",
-    //       duration: 0,
-    //       position: "bottom-right",
-    //     });
-    //   }
-    //   this.set_web3_provider(provider);
-    //   // console.log(this.provider);
-    // },
-    // initUser() {
-    //   let tmpUser = getStore("user");
-    //   let tmpUserEmail = getStore("user_email");
-    //   // user = getStore("userEmail");
-    //   if (tmpUser == null || tmpUser == "null" || tmpUser.length == 0) {
-    //     this.connectWeb3();
-    //   } else {
-    //     this.SET_USER(tmpUser);
-    //   }
-    //   if (tmpUserEmail != null && tmpUserEmail != "null" && tmpUserEmail.length > 0) {
-    //     this.SET_USER_EMAIL(tmpUserEmail);
-    //   }
-    //   console.log("loggin user:", this.user, ", email:", this.userEmail);
-    // },
     //定义切换方法
     tableft(index) {
       this.numberl = index;
@@ -332,49 +311,21 @@ export default {
         });
       };
     },
-    // connectWeb3() {
-    //   if (window.ethereum) {
-    //     window.ethereum.enable().then((res) => {
-    //       alert(res[0]);
-    //       this.SET_USER(res[0]);
-    //       console.log("res:",this.user);
-    //     })
-    //   } else {
-    //     alert("Please install MetaMask～！")
-    //   }
-
-  //     connectMetamask(this.web3Provider).then((response) => {
-  //       if (response.status) {
-  //         if (this.user != null) {
-  //           this.$notify.success({
-  //             title: "Success",
-  //             message: "Account switching succeeded!",
-  //             position: "bottom-right",
-  //           });
-  //         } else {
-  //           this.$notify.success({
-  //             title: "Success",
-  //             message: "Account connect succeeded!",
-  //             position: "bottom-right",
-  //           });
-  //         }
-  //       } else {
-  //         this.$notify.error({
-  //           title: "Error",
-  //           message: "Connect failed!",
-  //           duration: 0,
-  //           position: "bottom-right",
-  //         });
-  //       }
-  //     });
-    // }
+    connect() {
+      this.$refs.metamask.init();
+      console.log(this.$refs.metamask.MetaMaskAddress);
+      this.user = this.$refs.metamask.MetaMaskAddress;
+      console.log('data 318:', this.user);
+    },
+    onComplete(data) {
+      console.log('data:', data);
+      if (data.metaMaskAddress == "") {
+        this.user = null;
+      }else{
+        this.user = data.metaMaskAddress;
+      }
+      console.log('data 323:', this.user);
+    },
   },
-  // mounted() {
-  //   // 连接 IPFS 服务
-  //   // setupIPFS();
-  //   this.initProvider();
-  //   accountChangeListener(this.connectWeb3);
-  //   this.initUser();
-  // },
 };
 </script>
