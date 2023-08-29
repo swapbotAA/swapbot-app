@@ -40,7 +40,7 @@
               </div>
               <div style="line-height: 50px;">rate:1850 ETH/USDC</div>
 
-              <a-button type="primary" :loading="iconLoading" @click="enterIconLoading()">
+              <a-button type="primary" :loading="iconLoading" @click="enterIconLoading()" style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
                 </template>
@@ -61,7 +61,7 @@
               </div>
               <div style="line-height: 50px;">rate:1850 ETH/USDC</div>
 
-              <a-button type="primary" :loading="iconLoading" @click="enterIconLoading()">
+              <a-button type="primary" :loading="iconLoading" @click="enterIconLoading()" style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
                 </template>
@@ -93,10 +93,27 @@
           </div>
           <!--3个div-->
           <div id="contentRight1" v-show="numberr == 0">
-            <span>Balance</span>
+            
+            <span>
+              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
+                <a-input v-model:value="ethBalance" placeholder="1.00" suffix="ETH" disabled="true" style="height: 60px;" />
+              </div>
+              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
+                <a-input v-model:value="usdcBalance" placeholder="10.0" suffix="USDC" disabled="true" style="height: 60px;" />
+              </div>
+            </span>
           </div>
           <div id="contentRight2" v-show="numberr == 1">
-            <span>Hisory</span>
+            <span>
+              <a-list size="large" bordered :data-source="data" style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
+              <template #renderItem="{ item }">
+                <a-list-item>{{ item }}</a-list-item>
+              </template>
+              <template #footer>
+                <div style="text-align: center;">....</div>
+              </template>
+            </a-list>
+            </span>
           </div>
           <div id="contentRight3" v-show="numberr == 2">
             <span>Strategy</span>
@@ -274,7 +291,24 @@ export default {
         { option: 'Balance' },
         { option: 'History' },
         { option: 'Strategy' },
-      ]
+      ],
+      data : [{
+        TxHash: '0xfa191d88acb625ee4381d9208f9e7ad5afcae09941c3301fb4f4977e3850894c',
+        Block: '18021493',
+        Timestamp: '(Aug-29-2023 04:34:47 PM +UTC'
+      }, {
+        TxHash: '0x1a1bd104ec6756d8363dc08c9b735eaca2551da511152d04a484141a882afe10',
+        Block: '18021490',
+        Timestamp: 'Aug-29-2023 04:33:59 PM +UTC'
+      }, {
+        TxHash: '0xb2940bc99e7cedd6c0de907fa682cd0c6210c17b0655237354a08f2f87ce4fc0',
+        Block: '18021476',
+        Timestamp: 'Aug-29-2023 04:31:11 PM +UTC'
+      }, {
+        TxHash: '0xac3d03710a1d26aafbaf8ce35bbfec02376a85ec94963255eb8b85490174e917',
+        Block: '18021450',
+        Timestamp: 'Aug-29-2023 04:29:43 PM +UTC'
+      }],
     }
   },
   methods: {
