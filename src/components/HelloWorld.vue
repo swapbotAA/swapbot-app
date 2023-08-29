@@ -1,58 +1,71 @@
 <template>
   <div>
-    <div class="header"><img src="../assets/robot.svg" style="height: 45px;width: 45px; padding-right: 10px;">SwapBot AA</div>
+    <div class="header"><img src="../assets/robot.svg" style="height: 45px;width: 45px; padding-right: 10px;">SwapBot
+      AA<a-button type="primary" danger style="position: absolute; right: 10px; top: 10px;"
+        @click="">connect</a-button></div>
     <div class="leftbar">
       <div class="tableft">
         <div class="content">
-          <div style="margin: auto;width: 90%;margin-top: -40px;position: absolute;text-align: left;;">
+          <div style="margin: auto;width: 90%;margin-top: -40px;position: absolute;text-align: left;">
             <!--2个按钮-->
-            <button :class="indexl == numberl ? 'btnl1' : 'btnl'" @click="tableft(indexl)" v-for="(iteml, indexl) in dataListLeft"
-              :key="indexl">{{ iteml.option }}
+            <button :class="indexl == numberl ? 'btnl1' : 'btnl'" @click="tableft(indexl)"
+              v-for="(iteml, indexl) in dataListLeft" :key="indexl">{{ iteml.option }}
             </button>
+
+            <img src="../assets/setting-fill.svg"
+              style="width: 50px; height: 50px; position: absolute;right: 10%;top: 25%;right: 10%;" @click="showModal()" />
+
           </div>
           <!--2个div-->
           <div id="contentLeft1" v-show="numberl == 0">
-                <img src="../assets/setting-fill.svg" style="width: 30px; height: 30px; position: absolute;right: 10%;top: 12%;"  @click="showModal()"/>
-                <span>
-                  <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
-                    <a-input v-model:value="ethAmount" placeholder="0" suffix="ETH" style="height: 60px;"/>
-                  </div>
-                  <div style="line-height: 50px;"><img src="../assets/swap.svg" style="height: 25px; width: 25px;"></div>
-                  <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;margin-top: -30px;">
-                    <a-input v-model:value="usdcAmount" placeholder="0" suffix="USDC" style="height: 60px;"/>
-                  </div>
-                  <div style="line-height: 50px;">rate:1850 ETH/USDC</div>
+            
+            <span>
+              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
+                <a-input v-model:value="ethAmount" placeholder="0" suffix="ETH" style="height: 60px;" />
+              </div>
+              <div style="line-height: 50px;"><img src="../assets/swap.svg" style="height: 25px; width: 25px;"></div>
+              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;margin-top: -30px;">
+                <a-input v-model:value="usdcAmount" placeholder="0" suffix="USDC" style="height: 60px;" />
+              </div>
+              <div style="line-height: 50px;">rate:1850 ETH/USDC</div>
 
-                  <a-button type="primary" :loading="iconLoading" @click="enterIconLoading()">
-                    <template #icon><PoweroffOutlined /></template>
-                      Submit
-                  </a-button>
-                </span>
+              <a-button type="primary" :loading="iconLoading" @click="enterIconLoading()">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                Submit
+              </a-button>
+            </span>
           </div>
           <div id="contentLeft2" v-show="numberl == 1">
-            <img src="../assets/setting-fill.svg" style="width: 30px; height: 30px; position: absolute;right: 10%;top: 12%;" @click="showModal()"/>
-                <span>
-                  <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
-                    <a-input v-model:value="ethAmount" placeholder="0" suffix="ETH" style="height: 60px;"/>
-                  </div>
-                  <div style="line-height: 50px;"><img src="../assets/swap.svg" style="height: 25px; width: 25px;"></div>
-                  <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;margin-top: -30px;">
-                    <a-input v-model:value="usdcAmount" placeholder="0" suffix="USDC" style="height: 60px;"/>
-                  </div>
-                  <div style="line-height: 50px;">rate:1850 ETH/USDC</div>
+            <img src="../assets/setting-fill.svg"
+              style="width: 30px; height: 30px; position: absolute;right: 10%;top: 12%;" @click="showModal()" />
+            <span>
+              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
+                <a-input v-model:value="ethAmount" placeholder="0" suffix="ETH" style="height: 60px;" />
+              </div>
+              <div style="line-height: 50px;"><img src="../assets/swap.svg" style="height: 25px; width: 25px;"></div>
+              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;margin-top: -30px;">
+                <a-input v-model:value="usdcAmount" placeholder="0" suffix="USDC" style="height: 60px;" />
+              </div>
+              <div style="line-height: 50px;">rate:1850 ETH/USDC</div>
 
-                  <a-button type="primary" :loading="iconLoading" @click="enterIconLoading()">
-                    <template #icon><PoweroffOutlined /></template>
-                      Submit
-                  </a-button>
-                </span>
+              <a-button type="primary" :loading="iconLoading" @click="enterIconLoading()">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                Submit
+              </a-button>
+            </span>
           </div>
           <div>
             <!-- <a-button type="primary" @click="showModal()">Modal</a-button>
             <a-button @click="confirm()">Confirm</a-button> -->
             <a-modal v-model:open="open" title="Setting" ok-text="确认" cancel-text="取消" @ok="hideModal()">
-              <p style="font-size: medium;">Maximum slip point<a-input v-model:value="slipPoint" placeholder="0" suffix="%" style="height: 60px;"/></p>
-              <p style="font-size: medium;">Trade deadline<a-input v-model:value="deadLine" placeholder="30" suffix="mins" style="height: 60px;"/></p>
+              <p style="font-size: medium;">Maximum slip point<a-input v-model:value="slipPoint" placeholder="0"
+                  suffix="%" style="height: 60px;" /></p>
+              <p style="font-size: medium;">Trade deadline<a-input v-model:value="deadLine" placeholder="30" suffix="mins"
+                  style="height: 60px;" /></p>
             </a-modal>
           </div>
         </div>
@@ -63,8 +76,8 @@
         <div class="content">
           <div style="margin: auto;width: 90%;margin-top: -40px;position: absolute;text-align: left;;">
             <!--3个按钮-->
-            <button :class="indexr == numberr ? 'btnr1' : 'btnr'" @click="tabright(indexr)" v-for="(itemr, indexr) in dataListRight"
-              :key="indexr">{{ itemr.option }}
+            <button :class="indexr == numberr ? 'btnr1' : 'btnr'" @click="tabright(indexr)"
+              v-for="(itemr, indexr) in dataListRight" :key="indexr">{{ itemr.option }}
             </button>
           </div>
           <!--3个div-->
@@ -135,118 +148,167 @@
 }
 
 .content {
-    width: 700px;
-    margin: auto;
-    /*left按钮样式*/
-    /*未选中时*/
-    .btnl {
-      width: 150px;
-      height: 40px;
-      border: 0;
-      border-radius: 5px;
-      color: white;
-      margin: 20px 3px;
-      background-color: #35cc8f;
-    }
-    /*选中时*/
-    .btnl1 {
-      width: 150px;
-      height: 40px;
-      border: 0;
-      border-radius: 5px;
-      color: white;
-      margin: 20px 3px;
-      background-color: #099941;
-    }
-     /*right按钮样式*/
-    /*未选中时*/
-    .btnr {
-      width: 150px;
-      height: 40px;
-      border: 0;
-      border-radius: 5px;
-      color: white;
-      margin: 20px 3px;
-      background-color: #dbc8fd;
-    }
-    /*选中时*/
-    .btnr1 {
-      width: 150px;
-      height: 40px;
-      border: 0;
-      border-radius: 5px;
-      color: white;
-      margin: 20px 3px;
-      background-color: #8c55ec;
-    }
-    #contentLeft1 {
-      background-color: rgb(245 246 252);
-      height: 500px;
-      font-size: 16px;
-      line-height: 100px;
-      margin-top: 60px;
-      border-radius: 15px;
-    }
-    #contentLeft2 {
-      background-color: #fffefe;
-      height: 500px;
-      font-size: 16px;
-      line-height: 100px;
-      margin-top: 60px;
-      border-radius: 15px;
-    }
-    #contentRight1, #contentRight2, #contentRight3 {
-      background-color: rgb(255 244 250);
-      height: 500px;
-      font-size: 16px;
-      line-height: 100px;
-      margin-top: 60px;
-      border-radius: 15px;
-    }
+  width: 700px;
+  margin: auto;
+
+  /*left按钮样式*/
+  /*未选中时*/
+  .btnl {
+    width: 150px;
+    height: 40px;
+    border: 0;
+    border-radius: 5px;
+    color: white;
+    margin: 20px 3px;
+    background-color: #90f6cd;
   }
-  .contentSetting {
+
+  /*选中时*/
+  .btnl1 {
+    width: 150px;
+    height: 40px;
+    border: 0;
+    border-radius: 5px;
+    color: white;
+    margin: 20px 3px;
+    background-color: #099941;
+  }
+
+  /*right按钮样式*/
+  /*未选中时*/
+  .btnr {
+    width: 150px;
+    height: 40px;
+    border: 0;
+    border-radius: 5px;
+    color: white;
+    margin: 20px 3px;
+    background-color: #dbc8fd;
+  }
+
+  /*选中时*/
+  .btnr1 {
+    width: 150px;
+    height: 40px;
+    border: 0;
+    border-radius: 5px;
+    color: white;
+    margin: 20px 3px;
+    background-color: #8c55ec;
+  }
+
+  #contentLeft1 {
+    background-color: rgb(245 246 252);
+    height: 500px;
+    font-size: 16px;
+    line-height: 100px;
+    margin-top: 60px;
+    border-radius: 15px;
+  }
+
+  #contentLeft2 {
+    background-color: #fffefe;
+    height: 500px;
+    font-size: 16px;
+    line-height: 100px;
+    margin-top: 60px;
+    border-radius: 15px;
+  }
+
+  #contentRight1,
+  #contentRight2,
+  #contentRight3 {
     background-color: rgb(255 244 250);
-      height: 300px;
-      font-size: 16px;
-      line-height: 100px;
-      margin-top: 60px;
-      border-radius: 15px;
+    height: 500px;
+    font-size: 16px;
+    line-height: 100px;
+    margin-top: 60px;
+    border-radius: 15px;
   }
+}
+
+.contentSetting {
+  background-color: rgb(255 244 250);
+  height: 300px;
+  font-size: 16px;
+  line-height: 100px;
+  margin-top: 60px;
+  border-radius: 15px;
+}
 </style>
 <script>
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
 import { ref, createVNode } from 'vue';
 import { Modal } from 'ant-design-vue';
-   export default {
-    name: "tableft",
-    data() {
-      return {
-        numberl: 0, //点击后的值，与下标同步，为0表示默认第一个按钮与div为选中状态
-        numberr: 0,
-        iconLoading: ref(false),
-        open: ref(false),
-        dataListLeft: [
-          {option: 'Swap'},
-          {option: 'Front-running'},
-        ],
-        dataListRight: [
-          {option: 'Balance'},
-          {option: 'History'},
-          {option: 'Strategy'},
-        ]
-      }
+// import { mapState, mapMutations, mapActions } from "vuex";
+// import {
+//   connectMetamask,
+//   accountChangeListener,
+//   getWeb3Provider,
+// } from "../api/contracts";
+
+export default {
+  name: "tableft",
+  data() {
+    return {
+      numberl: 0, //点击后的值，与下标同步，为0表示默认第一个按钮与div为选中状态
+      numberr: 0,
+      iconLoading: ref(false),
+      open: ref(false),
+      dataListLeft: [
+        { option: 'Swap' },
+        { option: 'Front-running' },
+      ],
+      dataListRight: [
+        { option: 'Balance' },
+        { option: 'History' },
+        { option: 'Strategy' },
+      ]
+    }
+  },
+  // computed: {
+  //   ...mapState(["web3Provider", "user", "userEmail"]),
+  // },
+  methods: {
+    // ...mapActions(["set_web3_provider"]),
+    // ...mapMutations(["SET_USER"]),
+    // initProvider() {
+    //   let provider = getWeb3Provider();
+    //   if (provider == null) {
+    //     this.$notify.warning({
+    //       title: "Warning",
+    //       message: "Please install metamask first!",
+    //       duration: 0,
+    //       position: "bottom-right",
+    //     });
+    //   }
+    //   this.set_web3_provider(provider);
+    //   // console.log(this.provider);
+    // },
+    // initUser() {
+    //   let tmpUser = getStore("user");
+    //   let tmpUserEmail = getStore("user_email");
+    //   // user = getStore("userEmail");
+    //   if (tmpUser == null || tmpUser == "null" || tmpUser.length == 0) {
+    //     this.connectWeb3();
+    //   } else {
+    //     this.SET_USER(tmpUser);
+    //   }
+    //   if (tmpUserEmail != null && tmpUserEmail != "null" && tmpUserEmail.length > 0) {
+    //     this.SET_USER_EMAIL(tmpUserEmail);
+    //   }
+    //   console.log("loggin user:", this.user, ", email:", this.userEmail);
+    // },
+    //定义切换方法
+    tableft(index) {
+      this.numberl = index;
+      // console.log(index, this.number);
     },
-    methods: {
-      //定义切换方法
-      tableft(index) {
-        this.numberl = index;
-        // console.log(index, this.number);
-      },
-      tabright(index) {
-        this.numberr = index;
-        // console.log(index, this.number);
-      },
-      enterIconLoading() {
+    tabright(index) {
+      this.numberr = index;
+      // console.log(index, this.number);
+    },
+    enterIconLoading() {
       this.iconLoading = true;
       setTimeout(() => {
         // alert(this.iconLoading);
@@ -269,7 +331,50 @@ import { Modal } from 'ant-design-vue';
           cancelText: '取消',
         });
       };
-    }
-    }
-  }
+    },
+    // connectWeb3() {
+    //   if (window.ethereum) {
+    //     window.ethereum.enable().then((res) => {
+    //       alert(res[0]);
+    //       this.SET_USER(res[0]);
+    //       console.log("res:",this.user);
+    //     })
+    //   } else {
+    //     alert("Please install MetaMask～！")
+    //   }
+
+  //     connectMetamask(this.web3Provider).then((response) => {
+  //       if (response.status) {
+  //         if (this.user != null) {
+  //           this.$notify.success({
+  //             title: "Success",
+  //             message: "Account switching succeeded!",
+  //             position: "bottom-right",
+  //           });
+  //         } else {
+  //           this.$notify.success({
+  //             title: "Success",
+  //             message: "Account connect succeeded!",
+  //             position: "bottom-right",
+  //           });
+  //         }
+  //       } else {
+  //         this.$notify.error({
+  //           title: "Error",
+  //           message: "Connect failed!",
+  //           duration: 0,
+  //           position: "bottom-right",
+  //         });
+  //       }
+  //     });
+    // }
+  },
+  // mounted() {
+  //   // 连接 IPFS 服务
+  //   // setupIPFS();
+  //   this.initProvider();
+  //   accountChangeListener(this.connectWeb3);
+  //   this.initUser();
+  // },
+};
 </script>
