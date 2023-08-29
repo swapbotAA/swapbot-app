@@ -4,9 +4,9 @@
     <div class="leftbar">
       <div class="tableft">
         <div class="content">
-          <div style="margin: auto;width: 90%">
+          <div style="margin: auto;width: 90%;margin-top: -40px;position: absolute;text-align: left;;">
             <!--2个按钮-->
-            <button :class="indexl == numberl ? 'btn1' : 'btn'" @click="tableft(indexl)" v-for="(iteml, indexl) in dataListLeft"
+            <button :class="indexl == numberl ? 'btnl1' : 'btnl'" @click="tableft(indexl)" v-for="(iteml, indexl) in dataListLeft"
               :key="indexl">{{ iteml.option }}
             </button>
           </div>
@@ -23,9 +23,9 @@
     <div class="rightbar">
       <div class="tabright">
         <div class="content">
-          <div style="margin: auto;width: 90%">
+          <div style="margin: auto;width: 90%;margin-top: -40px;position: absolute;text-align: left;;">
             <!--3个按钮-->
-            <button :class="indexr == numberr ? 'btn1' : 'btn'" @click="tabright(indexr)" v-for="(itemr, indexr) in dataListRight"
+            <button :class="indexr == numberr ? 'btnr1' : 'btnr'" @click="tabright(indexr)" v-for="(itemr, indexr) in dataListRight"
               :key="indexr">{{ itemr.option }}
             </button>
           </div>
@@ -68,7 +68,7 @@
   bottom: 60px;
   overflow-y: auto;
   /* 当内容过多时y轴出现滚动条 */
-  // background-color: #545c64;
+  // background-color: #f0f4fd;
 }
 
 /* right */
@@ -80,10 +80,9 @@
   bottom: 60px;
   right: 4.5%;
   /* 距离右边0像素 */
-  padding: 10px;
   overflow-y: auto;
   /* 当内容过多时y轴出现滚动条 */
-  /* background-color: #545c64; */
+  // background-color: #f0f4fd;
 }
 
 /* bottom */
@@ -100,9 +99,9 @@
 .content {
     width: 700px;
     margin: auto;
-    /*按钮样式*/
+    /*left按钮样式*/
     /*未选中时*/
-    .btn {
+    .btnl {
       width: 150px;
       height: 40px;
       border: 0;
@@ -112,7 +111,7 @@
       background-color: #35cc8f;
     }
     /*选中时*/
-    .btn1 {
+    .btnl1 {
       width: 150px;
       height: 40px;
       border: 0;
@@ -121,11 +120,42 @@
       margin: 20px 3px;
       background-color: #099941;
     }
-    #contentLeft1, #contentLeft2, #contentRight1, #contentRight2, #contentRight3 {
-      background-color: #c1f8c9;
-      height: 300px;
+     /*right按钮样式*/
+    /*未选中时*/
+    .btnr {
+      width: 150px;
+      height: 40px;
+      border: 0;
+      border-radius: 5px;
+      color: white;
+      margin: 20px 3px;
+      background-color: #dbc8fd;
+    }
+    /*选中时*/
+    .btnr1 {
+      width: 150px;
+      height: 40px;
+      border: 0;
+      border-radius: 5px;
+      color: white;
+      margin: 20px 3px;
+      background-color: #8c55ec;
+    }
+    #contentLeft1, #contentLeft2 {
+      background-color: rgb(245 246 252);
+      height: 500px;
       font-size: 16px;
-      line-height: 40px;
+      line-height: 100px;
+      margin-top: 60px;
+      border-radius: 15px;
+    }
+    #contentRight1, #contentRight2, #contentRight3 {
+      background-color: rgb(255 244 250);
+      height: 500px;
+      font-size: 16px;
+      line-height: 100px;
+      margin-top: 60px;
+      border-radius: 15px;
     }
   }
 </style>
