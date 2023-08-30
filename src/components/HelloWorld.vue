@@ -116,12 +116,12 @@
             </span>
           </div>
           <div id="contentRight3" v-show="numberr == 2">
-            <span>Strategy</span>
+            <span>Comming soon!</span>
           </div>
         </div>
       </div>
     </div>
-    <div class="bottom">bottom</div>
+    <div class="bottom">Designed by BlockModel</div>
   </div>
 </template>
 
@@ -133,8 +133,9 @@
   top: 0px;
   left: 0px;
   right: 0px;
-  color: aliceblue;
-  background-color: #2d3a4b;
+  color: rgb(11, 15, 18);
+  font-size: larger;
+  // background-color: #2d3a4b;
 }
 
 /* left */
@@ -172,7 +173,7 @@
   left: 0px;
   right: 0px;
   color: aliceblue;
-  background-color: #2d3a4b;
+  // background-color: #2d3a4b;
 }
 
 .content {
