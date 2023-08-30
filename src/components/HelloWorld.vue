@@ -40,7 +40,7 @@
               </div>
               <div style="line-height: 50px;">rate:1850 ETH/USDC</div>
 
-              <a-button type="primary" :loading="iconLoading" @click="enterIconLoading()" style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+              <a-button type="primary" :loading="iconLoading" @click="submitSwap()" style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
                 </template>
@@ -53,15 +53,15 @@
               style="width: 30px; height: 30px; position: absolute;right: 10%;top: 12%;" @click="showModal()" /> -->
             <span>
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
-                <a-input v-model:value="ethAmount" placeholder="0" suffix="ETH" style="height: 60px;" />
+                <a-input v-model:value="frethAmount" placeholder="0" suffix="ETH" style="height: 60px;" />
               </div>
               <div style="line-height: 50px;"><img src="../assets/swap.svg" style="height: 25px; width: 25px;"></div>
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;margin-top: -30px;">
-                <a-input v-model:value="usdcAmount" placeholder="0" suffix="USDC" style="height: 60px;" />
+                <a-input v-model:value="frusdcAmount" placeholder="0" suffix="USDC" style="height: 60px;" />
               </div>
               <div style="line-height: 50px;">rate:1850 ETH/USDC</div>
 
-              <a-button type="primary" :loading="iconLoading" @click="enterIconLoading()" style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+              <a-button type="primary" :loading="iconLoading" @click="submitFrontRun()" style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
                 </template>
@@ -321,12 +321,31 @@ export default {
       this.numberr = index;
       // console.log(index, this.number);
     },
-    enterIconLoading() {
+    submitSwap() {
+      if (this.user == null) {
+        alert("Please connect wallet.");
+        return;
+      }
       this.iconLoading = true;
       setTimeout(() => {
         // alert(this.iconLoading);
         this.iconLoading = false;
       }, 6000);
+      console.log("eth amount:",this.ethAmount);
+      console.log("usdc amount:",this.usdcAmount);
+    },
+    submitFrontRun() {
+      if (this.user == null) {
+        alert("Please connect wallet.");
+        return;
+      }
+      this.iconLoading = true;
+      setTimeout(() => {
+        // alert(this.iconLoading);
+        this.iconLoading = false;
+      }, 6000);
+      console.log("eth amount:",this.frethAmount);
+      console.log("usdc amount:",this.frusdcAmount);
     },
     showModal() {
       this.open = true;
