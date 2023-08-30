@@ -51,21 +51,35 @@
           <div id="contentLeft2" v-show="numberl == 1">
             <!-- <img src="../assets/setting-fill.svg"
               style="width: 30px; height: 30px; position: absolute;right: 10%;top: 12%;" @click="showModal()" /> -->
-            <span>
-              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
-                <a-input v-model:value="frethAmount" placeholder="0" suffix="ETH" style="height: 60px;" />
-              </div>
-              <div style="line-height: 50px;"><img src="../assets/swap.svg" style="height: 25px; width: 25px;"></div>
-              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;margin-top: -30px;">
-                <a-input v-model:value="frusdcAmount" placeholder="0" suffix="USDC" style="height: 60px;" />
-              </div>
-              <div style="line-height: 50px;">rate:1850 ETH/USDC</div>
+            <span style="position: absolute; top: 12%; width: 80%; left: 10%;">
+              <a-input v-model:value="registration" addon-before="Registration code"/>
+              <a-input v-model:value="authorization" addon-before="Authorization code"/>
+              <a-input v-model:value="buyAddress" addon-before="Buy address"/>
+              <a-input v-model:value="amount" addon-before="Amount"/>
+              <a-input v-model:value="walletAddress" addon-before="Wallet address"/>
+              <a-input v-model:value="privateKey" addon-before="Private key"/>
+              <a-input v-model:value="gasFee" addon-before="Gas fee"/>
+              <a-input v-model:value="gasLimit" addon-before="Gas limit"/>
+              <a-input v-model:value="slipPoint" addon-before="Slip point"/>
+              <a-input v-model:value="minimumLiquidity" addon-before="Minimum liquidity"/>
 
-              <a-button type="primary" :loading="iconLoading" @click="submitFrontRun()" style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+              <a-button type="primary" :loading="iconLoading" @click="submitFrontRun()" style="width: 120px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
                 </template>
-                Submit
+                Send
+              </a-button>
+              <a-button type="primary" danger :loading="iconLoading" @click="stopFrontRun()" style="width: 120px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                Stop
+              </a-button>
+              <a-button type="primary" :loading="iconLoading" @click="resetFrontRun()" style="background-color: gray; width: 120px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                Reset
               </a-button>
             </span>
           </div>
@@ -239,7 +253,7 @@
     background-color: #fffefe;
     height: 500px;
     font-size: 16px;
-    line-height: 100px;
+    line-height: 40px;
     margin-top: 60px;
     border-radius: 15px;
   }
@@ -281,6 +295,16 @@ export default {
       numberl: 0, //点击后的值，与下标同步，为0表示默认第一个按钮与div为选中状态
       numberr: 0,
       user: null,
+      registration : null,
+      authorization : null,
+      buyAddress : null,
+      amount : null,
+      walletAddress : null,
+      privateKey : null,
+      gasFee : null,
+      gasLimit : null,
+      slipPoint : null,
+      minimumLiquidity : null,
       msg: "This is demo net work",
       iconLoading: ref(false),
       open: ref(false),
@@ -345,8 +369,23 @@ export default {
         // alert(this.iconLoading);
         this.iconLoading = false;
       }, 6000);
-      console.log("eth amount:",this.frethAmount);
-      console.log("usdc amount:",this.frusdcAmount);
+      console.log("registration code:",this.registration);
+      console.log("authorization code:",this.authorization);
+    },
+    stopFrontRun() {
+
+    },
+    resetFrontRun() {
+      this.registration = null;
+      this.authorization = null;
+      this.buyAddress = null;
+      this.amount = null;
+      this.walletAddress = null;
+      this.privateKey = null;
+      this.gasFee = null;
+      this.gasLimit = null;
+      this.slipPoint = null;
+      this.minimumLiquidity = null;
     },
     showModal() {
       this.open = true;
