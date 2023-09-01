@@ -9,8 +9,8 @@
       SwapBotAA
       <vue-metamask ref="metamask" @onComplete="onComplete"></vue-metamask>
       <a-button type="primary" danger style="position: absolute; right: 10px; top: 10px;" @click="connect">
-        <span v-if="this.user==null">Connect Wallet</span>
-        <span v-else>{{this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4)}}</span>
+        <span v-if="this.user == null">Connect Wallet</span>
+        <span v-else>{{ this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4) }}</span>
       </a-button>
     </div>
     <div class="leftbar">
@@ -38,9 +38,10 @@
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;margin-top: -30px;">
                 <a-input v-model:value="usdcAmount" placeholder="0" suffix="USDC" style="height: 60px;" />
               </div>
-              <div style="line-height: 50px;">rate:1850 ETH/USDC</div>
+              <div style="line-height: 50px;" ref="exchangeRate">rate:1 ETH = XXX USDC</div>
 
-              <a-button type="primary" :loading="iconLoading" @click="submitSwap()" style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+              <a-button type="primary" :loading="iconLoading" @click="submitSwap()"
+                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
                 </template>
@@ -52,30 +53,33 @@
             <!-- <img src="../assets/setting-fill.svg"
               style="width: 30px; height: 30px; position: absolute;right: 10%;top: 12%;" @click="showModal()" /> -->
             <span style="position: absolute; top: 12%; width: 80%; left: 10%;">
-              <a-input v-model:value="registration" addon-before="Registration code"/>
-              <a-input v-model:value="authorization" addon-before="Authorization code"/>
-              <a-input v-model:value="buyAddress" addon-before="Buy address"/>
-              <a-input v-model:value="amount" addon-before="Amount"/>
-              <a-input v-model:value="walletAddress" addon-before="Wallet address"/>
-              <a-input v-model:value="privateKey" addon-before="Private key"/>
-              <a-input v-model:value="gasFee" addon-before="Gas fee"/>
-              <a-input v-model:value="gasLimit" addon-before="Gas limit"/>
-              <a-input v-model:value="slipPoint" addon-before="Slip point"/>
-              <a-input v-model:value="minimumLiquidity" addon-before="Minimum liquidity"/>
+              <a-input v-model:value="registration" addon-before="Registration code" />
+              <a-input v-model:value="authorization" addon-before="Authorization code" />
+              <a-input v-model:value="buyAddress" addon-before="Buy address" />
+              <a-input v-model:value="amount" addon-before="Amount" />
+              <a-input v-model:value="walletAddress" addon-before="Wallet address" />
+              <a-input v-model:value="privateKey" addon-before="Private key" />
+              <a-input v-model:value="gasFee" addon-before="Gas fee" />
+              <a-input v-model:value="gasLimit" addon-before="Gas limit" />
+              <a-input v-model:value="slipPoint" addon-before="Slip point" />
+              <a-input v-model:value="minimumLiquidity" addon-before="Minimum liquidity" />
 
-              <a-button type="primary" :loading="iconLoading" @click="submitFrontRun()" style="width: 120px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
+              <a-button type="primary" :loading="iconLoading" @click="submitFrontRun()"
+                style="width: 120px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
                 </template>
                 Send
               </a-button>
-              <a-button type="primary" danger :loading="iconLoading" @click="stopFrontRun()" style="width: 120px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
+              <a-button type="primary" danger :loading="iconLoading" @click="stopFrontRun()"
+                style="width: 120px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
                 </template>
                 Stop
               </a-button>
-              <a-button type="primary" :loading="iconLoading" @click="resetFrontRun()" style="background-color: gray; width: 120px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
+              <a-button type="primary" :loading="iconLoading" @click="resetFrontRun()"
+                style="background-color: gray; width: 120px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
                 </template>
@@ -107,26 +111,29 @@
           </div>
           <!--3个div-->
           <div id="contentRight1" v-show="numberr == 0">
-            
+
             <span>
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
-                <a-input v-model:value="ethBalance" placeholder="1.00" suffix="ETH" disabled="true" style="height: 60px;" />
+                <a-input v-model:value="ethBalance" placeholder="1.00" suffix="ETH" disabled="true"
+                  style="height: 60px;" />
               </div>
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
-                <a-input v-model:value="usdcBalance" placeholder="10.0" suffix="USDC" disabled="true" style="height: 60px;" />
+                <a-input v-model:value="usdcBalance" placeholder="10.0" suffix="USDC" disabled="true"
+                  style="height: 60px;" />
               </div>
             </span>
           </div>
           <div id="contentRight2" v-show="numberr == 1">
             <span>
-              <a-list size="large" bordered :data-source="data" style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
-              <template #renderItem="{ item }">
-                <a-list-item>{{ item }}</a-list-item>
-              </template>
-              <template #footer>
-                <div style="text-align: center;">....</div>
-              </template>
-            </a-list>
+              <a-list size="large" bordered :data-source="data"
+                style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
+                <template #renderItem="{ item }">
+                  <a-list-item>{{ item }}</a-list-item>
+                </template>
+                <template #footer>
+                  <div style="text-align: center;">....</div>
+                </template>
+              </a-list>
             </span>
           </div>
           <div id="contentRight3" v-show="numberr == 2">
@@ -285,6 +292,8 @@ import { ref, createVNode } from 'vue';
 import { Modal } from 'ant-design-vue';
 import VueMetamask from 'vue-metamask';
 
+const axios = require('axios')
+
 export default {
   name: "tableft",
   components: {
@@ -295,16 +304,16 @@ export default {
       numberl: 0, //点击后的值，与下标同步，为0表示默认第一个按钮与div为选中状态
       numberr: 0,
       user: null,
-      registration : null,
-      authorization : null,
-      buyAddress : null,
-      amount : null,
-      walletAddress : null,
-      privateKey : null,
-      gasFee : null,
-      gasLimit : null,
-      slipPoint : null,
-      minimumLiquidity : null,
+      registration: null,
+      authorization: null,
+      buyAddress: null,
+      amount: null,
+      walletAddress: null,
+      privateKey: null,
+      gasFee: null,
+      gasLimit: null,
+      slipPoint: null,
+      minimumLiquidity: null,
       msg: "This is demo net work",
       iconLoading: ref(false),
       open: ref(false),
@@ -317,7 +326,7 @@ export default {
         { option: 'History' },
         { option: 'Strategy' },
       ],
-      data : [{
+      data: [{
         TxHash: '0xfa191d88acb625ee4381d9208f9e7ad5afcae09941c3301fb4f4977e3850894c',
         Block: '18021493',
         Timestamp: '(Aug-29-2023 04:34:47 PM +UTC'
@@ -356,8 +365,36 @@ export default {
         // alert(this.iconLoading);
         this.iconLoading = false;
       }, 6000);
-      console.log("eth amount:",this.ethAmount);
-      console.log("usdc amount:",this.usdcAmount);
+
+      axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3', {
+        query: `
+          {
+            pools(where: {
+              id_in: ["0x7bea39867e4169dbe237d55c8242a8f2fcdcc387"]
+            }) {
+              token0 {
+                symbol
+              }
+              token1 {
+                symbol
+              }
+              token0Price
+              token1Price
+            }
+          }  
+          `
+      })
+        .then((res) => {
+          if (res.data != null) {
+            console.log(res.data.data.pools[0]);
+            var rate = res.data.data.pools[0].token0Price;
+            // console.log("1 ETH = "+rate.substring(0,8)+" USDC");
+            this.$refs.exchangeRate.innerHTML = "1 ETH = "+rate.substring(0,8)+" USDC";
+          }
+        })
+        .catch((error) => {
+          console.error(error)
+        })
     },
     submitFrontRun() {
       if (this.user == null) {
@@ -369,8 +406,8 @@ export default {
         // alert(this.iconLoading);
         this.iconLoading = false;
       }, 6000);
-      console.log("registration code:",this.registration);
-      console.log("authorization code:",this.authorization);
+      console.log("registration code:", this.registration);
+      console.log("authorization code:", this.authorization);
     },
     stopFrontRun() {
 
@@ -414,7 +451,7 @@ export default {
       console.log('data:', data);
       if (data.metaMaskAddress == "") {
         this.user = null;
-      }else{
+      } else {
         this.user = data.metaMaskAddress;
       }
       console.log('data 323:', this.user);
