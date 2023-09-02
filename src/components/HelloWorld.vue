@@ -32,13 +32,13 @@
 
             <span>
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
-                <a-input v-model:value="ethAmount" placeholder="0" suffix="ETH" style="height: 60px;" />
+                <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()" placeholder="0" suffix="ETH" style="height: 60px;" />
               </div>
               <div style="line-height: 50px;"><img src="../assets/swap.svg" style="height: 25px; width: 25px;"></div>
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;margin-top: -30px;">
-                <a-input v-model:value="usdcAmount" placeholder="0" suffix="USDC" style="height: 60px;" />
+                <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="usdcAmount" @change="calculateRateU()" placeholder="0" suffix="USDC" style="height: 60px;" />
               </div>
-              <div style="line-height: 50px;" ref="exchangeRate">rate:1 ETH = XXX USDC</div>
+              <div style="line-height: 50px;" ref="exchangeRate">rate:1 ETH = ? USDC</div>
 
               <a-button type="primary" :loading="iconLoading" @click="submitSwap()"
                 style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
@@ -303,6 +303,8 @@ export default {
     return {
       numberl: 0, //点击后的值，与下标同步，为0表示默认第一个按钮与div为选中状态
       numberr: 0,
+      ethAmount: null,
+      usdcAmount: null,
       user: null,
       registration: null,
       authorization: null,
@@ -365,36 +367,6 @@ export default {
         // alert(this.iconLoading);
         this.iconLoading = false;
       }, 6000);
-
-      axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3', {
-        query: `
-          {
-            pools(where: {
-              id_in: ["0x7bea39867e4169dbe237d55c8242a8f2fcdcc387"]
-            }) {
-              token0 {
-                symbol
-              }
-              token1 {
-                symbol
-              }
-              token0Price
-              token1Price
-            }
-          }  
-          `
-      })
-        .then((res) => {
-          if (res.data != null) {
-            console.log(res.data.data.pools[0]);
-            var rate = res.data.data.pools[0].token0Price;
-            // console.log("1 ETH = "+rate.substring(0,8)+" USDC");
-            this.$refs.exchangeRate.innerHTML = "1 ETH = "+rate.substring(0,8)+" USDC";
-          }
-        })
-        .catch((error) => {
-          console.error(error)
-        })
     },
     submitFrontRun() {
       if (this.user == null) {
@@ -455,6 +427,70 @@ export default {
         this.user = data.metaMaskAddress;
       }
       console.log('data 323:', this.user);
+    },
+    calculateRateE() {
+      axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3', {
+        query: `
+          {
+            pools(where: {
+              id_in: ["0x7bea39867e4169dbe237d55c8242a8f2fcdcc387"]
+            }) {
+              token0 {
+                symbol
+              }
+              token1 {
+                symbol
+              }
+              token0Price
+              token1Price
+            }
+          }  
+          `
+      })
+        .then((res) => {
+          if (res.data != null) {
+            console.log(res.data.data.pools[0]);
+            var rate = res.data.data.pools[0].token0Price;
+            this.usdcAmount = this.ethAmount*rate.substring(0,8);
+            // console.log("1 ETH = "+rate.substring(0,8)+" USDC");
+            this.$refs.exchangeRate.innerHTML = "rate: 1 ETH = "+rate.substring(0,8)+" USDC";
+          }
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    },
+    calculateRateU() {
+      axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3', {
+        query: `
+          {
+            pools(where: {
+              id_in: ["0x7bea39867e4169dbe237d55c8242a8f2fcdcc387"]
+            }) {
+              token0 {
+                symbol
+              }
+              token1 {
+                symbol
+              }
+              token0Price
+              token1Price
+            }
+          }  
+          `
+      })
+        .then((res) => {
+          if (res.data != null) {
+            console.log(res.data.data.pools[0]);
+            var rate = res.data.data.pools[0].token1Price;
+            this.ethAmount = this.usdcAmount*rate.substring(0,8);
+            // console.log("1 ETH = "+rate.substring(0,8)+" USDC");
+            this.$refs.exchangeRate.innerHTML = "rate: 1 ETH = "+rate.substring(0,8)+" USDC";
+          }
+        })
+        .catch((error) => {
+          console.error(error)
+        })
     },
   },
 };
