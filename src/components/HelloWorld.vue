@@ -90,10 +90,22 @@
           <div>
             <!-- <a-button type="primary" @click="showModal()">Modal</a-button>
             <a-button @click="confirm()">Confirm</a-button> -->
-            <a-modal v-model:open="open" title="Setting" ok-text="确认" cancel-text="取消" @ok="hideModal()">
+            <a-modal v-model:open="open" title="Setting" ok-text="OK" cancel-text="CX" @ok="hideModal()">
               <p style="font-size: medium;">Maximum slip point<a-input v-model:value="slipPoint" placeholder="0"
                   suffix="%" style="height: 60px;" /></p>
               <p style="font-size: medium;">Trade deadline<a-input v-model:value="deadLine" placeholder="30" suffix="mins"
+                  style="height: 60px;" /></p>
+            </a-modal>
+            <a-modal v-model:open="depositOpen" title="Deposit" ok-text="OK" cancel-text="CX" @ok="hideDeposit()">
+              <p style="font-size: medium;">ETH<a-input v-model:value="depositAmount" placeholder="0"
+                  suffix="ETH" style="height: 60px;" /></p>
+              <p style="font-size: medium;">USDC<a-input v-model:value="deadLine" placeholder="0" suffix="USDC"
+                  style="height: 60px;" /></p>
+            </a-modal>
+            <a-modal v-model:open="withdrawOpen" title="Withdraw" ok-text="OK" cancel-text="CX" @ok="hideWithdraw()">
+              <p style="font-size: medium;">ETH<a-input v-model:value="depositAmount" placeholder="0"
+                  suffix="ETH" style="height: 60px;" /></p>
+              <p style="font-size: medium;">USDC<a-input v-model:value="deadLine" placeholder="0" suffix="USDC"
                   style="height: 60px;" /></p>
             </a-modal>
           </div>
@@ -121,6 +133,20 @@
                 <a-input v-model:value="usdcBalance" placeholder="10.0" suffix="USDC" disabled="true"
                   style="height: 60px;" />
               </div>
+              <a-button type="primary" :loading="iconLoading" @click="showDeposit()"
+                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                Deposit
+              </a-button>
+              <a-button type="primary" :loading="iconLoading" @click="showWithdraw()"
+                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                Withdraw
+              </a-button>
             </span>
           </div>
           <div id="contentRight2" v-show="numberr == 1">
@@ -319,6 +345,8 @@ export default {
       msg: "This is demo net work",
       iconLoading: ref(false),
       open: ref(false),
+      depositOpen: ref(false),
+      withdrawOpen: ref(false),
       dataListLeft: [
         { option: 'Swap' },
         { option: 'Front-running' },
@@ -402,16 +430,28 @@ export default {
     hideModal() {
       this.open = false;
     },
-    confirm() {
-      {
-        Modal.confirm({
-          title: 'Confirm',
-          icon: createVNode(ExclamationCircleOutlined),
-          content: 'Bla bla ...',
-          okText: '确认',
-          cancelText: '取消',
-        });
-      };
+    // confirm() {
+    //   {
+    //     Modal.confirm({
+    //       title: 'Confirm',
+    //       icon: createVNode(ExclamationCircleOutlined),
+    //       content: 'Bla bla ...',
+    //       okText: 'OK',
+    //       cancelText: 'CANCEL',
+    //     });
+    //   };
+    // },
+    showDeposit() {
+      this.depositOpen = true;
+    },
+    hideDeposit() {
+      this.depositOpen = false;
+    },
+    showWithdraw() {
+      this.withdrawOpen = true;
+    },
+    hideWithdraw() {
+      this.withdrawOpen = false;
     },
     connect() {
       this.$refs.metamask.init();
