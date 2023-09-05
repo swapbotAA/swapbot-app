@@ -64,21 +64,21 @@
               <a-input v-model:value="slipPoint" addon-before="Slip point" />
               <a-input v-model:value="minimumLiquidity" addon-before="Minimum liquidity" />
 
-              <a-button type="primary" :loading="iconLoading" @click="submitFrontRun()"
+              <a-button type="primary" :loading="iconLoadingSend" @click="submitFrontRun()"
                 style="width: 120px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
                 </template>
                 Send
               </a-button>
-              <a-button type="primary" danger :loading="iconLoading" @click="stopFrontRun()"
+              <a-button type="primary" danger @click="stopFrontRun()"
                 style="width: 120px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
                 </template>
                 Stop
               </a-button>
-              <a-button type="primary" :loading="iconLoading" @click="resetFrontRun()"
+              <a-button type="primary" @click="resetFrontRun()"
                 style="background-color: gray; width: 120px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
@@ -97,15 +97,15 @@
                   style="height: 60px;" /></p>
             </a-modal>
             <a-modal v-model:open="depositOpen" title="Deposit" ok-text="OK" cancel-text="CX" @ok="hideDeposit()">
-              <p style="font-size: medium;">ETH<a-input v-model:value="depositAmount" placeholder="0"
+              <p style="font-size: medium;">ETH<a-input v-model:value="depositEth" placeholder="0"
                   suffix="ETH" style="height: 60px;" /></p>
-              <p style="font-size: medium;">USDC<a-input v-model:value="deadLine" placeholder="0" suffix="USDC"
+              <p style="font-size: medium;">USDC<a-input v-model:value="depositUsdc" placeholder="0" suffix="USDC"
                   style="height: 60px;" /></p>
             </a-modal>
             <a-modal v-model:open="withdrawOpen" title="Withdraw" ok-text="OK" cancel-text="CX" @ok="hideWithdraw()">
-              <p style="font-size: medium;">ETH<a-input v-model:value="depositAmount" placeholder="0"
+              <p style="font-size: medium;">ETH<a-input v-model:value="withdrawEth" placeholder="0"
                   suffix="ETH" style="height: 60px;" /></p>
-              <p style="font-size: medium;">USDC<a-input v-model:value="deadLine" placeholder="0" suffix="USDC"
+              <p style="font-size: medium;">USDC<a-input v-model:value="withdrawUsdc" placeholder="0" suffix="USDC"
                   style="height: 60px;" /></p>
             </a-modal>
           </div>
@@ -133,14 +133,14 @@
                 <a-input v-model:value="usdcBalance" placeholder="10.0" suffix="USDC" disabled="true"
                   style="height: 60px;" />
               </div>
-              <a-button type="primary" :loading="iconLoading" @click="showDeposit()"
+              <a-button type="primary" @click="showDeposit()"
                 style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
                 </template>
                 Deposit
               </a-button>
-              <a-button type="primary" :loading="iconLoading" @click="showWithdraw()"
+              <a-button type="primary" @click="showWithdraw()"
                 style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
@@ -317,6 +317,20 @@ import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
 import { ref, createVNode } from 'vue';
 import { Modal } from 'ant-design-vue';
 import VueMetamask from 'vue-metamask';
+import { ethers, utils, BigNumber} from 'ethers';
+import  Wallet from '../api/abis/Wallet.json';
+import UniswapRouter from "../api/abis/UniswapRouter.json";
+import {
+  getWeb3Provider,
+  initInstances,
+  getBalance,
+  depositETH,
+  approve,
+  depositERC20,
+  withdrawETH,
+  withdrawERC20,
+  createTypedDataAndSign,
+} from "../api/contracts";
 
 const axios = require('axios')
 
@@ -344,6 +358,7 @@ export default {
       minimumLiquidity: null,
       msg: "This is demo net work",
       iconLoading: ref(false),
+      iconLoadingSend: ref(false),
       open: ref(false),
       depositOpen: ref(false),
       withdrawOpen: ref(false),
@@ -401,10 +416,10 @@ export default {
         alert("Please connect wallet.");
         return;
       }
-      this.iconLoading = true;
+      this.iconLoadingSend = true;
       setTimeout(() => {
         // alert(this.iconLoading);
-        this.iconLoading = false;
+        this.iconLoadingSend = false;
       }, 6000);
       console.log("registration code:", this.registration);
       console.log("authorization code:", this.authorization);
@@ -455,9 +470,44 @@ export default {
     },
     connect() {
       this.$refs.metamask.init();
-      console.log(this.$refs.metamask.MetaMaskAddress);
+      let provider = getWeb3Provider();
+      initInstances(provider).then((response) => {
+        if (response.status) {
+            console.log("Init success");
+          
+        } else {
+          console.log("Init failed");;
+        }
+      });
       this.user = this.$refs.metamask.MetaMaskAddress;
-      console.log('data 318:', this.user);
+      console.log('user address:', this.user);
+      let wethAddress = "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14";
+      let uniAddress = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984";
+      let fee = 3000;
+      let amountIn = 0;
+      let routerAddress = "";
+      let amountOutMinimum = 0;
+      let chainId = "11155111";
+      // getBalance(this.user,wethAddress).then((response)=>{
+      //   if(response.status) {
+      //     console.log("ETH balance:",response.balance.toNumber());
+      //   }else{
+      //     console.log("get ETH balance falied!");
+      //   }
+      // });//
+      // getBalance(this.user,uniAddress).then((response)=>{
+      //   if(response.status) {
+      //     console.log("UNI balance:",response.balance.toNumber());
+      //   }else{
+      //     console.log("get UNI balance falied!");
+      //   }
+      // });
+      // depositETH(this.user, 0);
+      // approve("0x5c0B9D48f40d46634d1AA383CB15987708Ac39E6",2);
+      // depositERC20(this.user,uniAddress,0);
+      // withdrawETH(this.user, 0);
+      // withdrawERC20(this.user,uniAddress,0);
+      createTypedDataAndSign(wethAddress, uniAddress, 3000, routerAddress, amountIn, amountOutMinimum, chainId);
     },
     onComplete(data) {
       console.log('data:', data);
@@ -466,7 +516,7 @@ export default {
       } else {
         this.user = data.metaMaskAddress;
       }
-      console.log('data 323:', this.user);
+      // console.log('data:', this.user);
     },
     calculateRateE() {
       axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3', {
