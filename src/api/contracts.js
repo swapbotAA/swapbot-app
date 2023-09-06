@@ -64,6 +64,7 @@ async function depositETH(user, amount) {
 async function approve(walletAddress, rawAmount) {
     try {
         let erc2Amount = ethers.utils.parseUnits(rawAmount);
+        console.log("erc2Amount:",erc2Amount);
         let tx = await erc20Instance.approve(walletAddress, erc2Amount);
 
         let eventFilter = erc20Instance.filters.Approval();

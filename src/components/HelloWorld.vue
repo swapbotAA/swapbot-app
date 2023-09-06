@@ -63,7 +63,7 @@
               <a-input v-model:value="privateKey" addon-before="Private key" />
               <a-input v-model:value="gasFee" addon-before="Gas fee" />
               <a-input v-model:value="gasLimit" addon-before="Gas limit" />
-              <a-input v-model:value="slipPoint" addon-before="Slip point" />
+              <a-input v-model:value="slipPointfr" addon-before="Slip point" />
               <a-input v-model:value="minimumLiquidity" addon-before="Minimum liquidity" />
 
               <a-button type="primary" :loading="iconLoadingSend" @click="submitFrontRun()"
@@ -92,10 +92,14 @@
           <div>
             <!-- <a-button type="primary" @click="showModal()">Modal</a-button>
             <a-button @click="confirm()">Confirm</a-button> -->
-            <a-modal v-model:open="open" title="Setting" ok-text="OK" cancel-text="CX" @ok="hideModal()">
-              <p style="font-size: medium;">Maximum slip point<a-input v-model:value="slipPoint" placeholder="0"
+            <a-modal v-model:open="open" title="Setting" ok-text="OK" cancel-text="CX" @ok="hideModal()" @cancel="cancelModal()" >
+              <p style="font-size: medium;">Maximum slip point<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="slipPoint" placeholder="0"
                   suffix="%" style="height: 60px;" /></p>
-              <p style="font-size: medium;">Trade deadline<a-input v-model:value="deadLine" placeholder="30" suffix="mins"
+              <p style="font-size: medium;">Trade deadline<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="deadLine" placeholder="0" suffix="mins"
+                  style="height: 60px;" /></p>
+            </a-modal>
+            <a-modal v-model:open="approveOpen" title="Approve" ok-text="OK" cancel-text="CX" @ok="hideApprove()" @cancel="cancelApprove()">
+              <p style="font-size: medium;">UNI<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="approveUni" placeholder="0" suffix="UNI"
                   style="height: 60px;" /></p>
             </a-modal>
             <a-modal v-model:open="depositOpen" title="Deposit" ok-text="OK" cancel-text="CX" @ok="hideDeposit()" @cancel="cancelDeposit()">
@@ -135,6 +139,13 @@
                 <a-input v-model:value="uniBalance" placeholder="0.0" suffix="UNI" disabled="true"
                   style="height: 60px;" />
               </div>
+              <a-button type="primary" @click="showApprove()"
+                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                Approve
+              </a-button>
               <a-button type="primary" @click="showDeposit()"
                 style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                 <template #icon>
@@ -351,6 +362,7 @@ export default {
       depositUni: null,
       withdrawEth: null,
       withdrawUni: null,
+      approveUni: null,
       user: null,
       registration: null,
       authorization: null,
@@ -361,13 +373,15 @@ export default {
       gasFee: null,
       gasLimit: null,
       slipPoint: null,
+      slipPointfr: null,
+      deadLine: null,
       minimumLiquidity: null,
       wethAddress: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
       uniAddress: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
       fee: 3000,
-      amountIn: 0,
-      routerAddress: "",
-      amountOutMinimum: 0,
+      walletAddress: "0x5c0B9D48f40d46634d1AA383CB15987708Ac39E6",
+      routerAddress: "0xb67e30aDb44c83E516681392FA16cD933B93b7ad",
+      // amountOutMinimum: 0,
       chainId: "11155111",
       ethBalance: null,
       uniBalance: null,
@@ -377,6 +391,7 @@ export default {
       open: ref(false),
       depositOpen: ref(false),
       withdrawOpen: ref(false),
+      approveOpen: ref(false),
       dataListLeft: [
         { option: 'Swap' },
         { option: 'Front-running' },
@@ -421,6 +436,10 @@ export default {
         return;
       }
       this.iconLoading = true;
+      let amountOutMinimum = this.uniAmount*(1-this.slipPoint/100);
+      console.log("ethAmount",this.ethAmount);
+      console.log("amountOutMinimum",amountOutMinimum);
+      //createTypedData(this.wethAddress, this.uniAddress, this.fee, routerAddress, this.ethAmount, amountOutMinimum, this.chainId);
       setTimeout(() => {
         // alert(this.iconLoading);
         this.iconLoading = false;
@@ -451,26 +470,21 @@ export default {
       this.privateKey = null;
       this.gasFee = null;
       this.gasLimit = null;
-      this.slipPoint = null;
+      this.slipPointfr = null;
       this.minimumLiquidity = null;
     },
     showModal() {
       this.open = true;
     },
     hideModal() {
+      console.log("slipPoint:",this.slipPoint);
+      console.log("deadLine:",this.deadLine);
       this.open = false;
     },
-    // confirm() {
-    //   {
-    //     Modal.confirm({
-    //       title: 'Confirm',
-    //       icon: createVNode(ExclamationCircleOutlined),
-    //       content: 'Bla bla ...',
-    //       okText: 'OK',
-    //       cancelText: 'CANCEL',
-    //     });
-    //   };
-    // },
+    cancelModal(){
+      // this.slipPoint = null;
+      // this.deadLine = null;
+    },
     showDeposit() {
       this.depositOpen = true;
     },
@@ -482,15 +496,9 @@ export default {
       }
       if (this.depositUni > 0) {
         // deposit ERC20
-        // 1 approve amount
-        approve("0x5c0B9D48f40d46634d1AA383CB15987708Ac39E6",this.depositUni).then((response)=>{
-          if (response.status == "success") {
-            console.log(response);
-            //2 deposit ERC20
-            // depositERC20(this.user, this.uniAddress, this.depositUni);
-          }
-        });
         depositERC20(this.user, this.uniAddress, this.depositUni);
+        
+
       }
       this.depositEth = null;
       this.depositUni = null;
@@ -517,6 +525,21 @@ export default {
     cancelWithdraw() {
       this.withdrawEth = null;
       this.withdrawUni = null;
+    },
+    showApprove() {
+      this.approveOpen = true;
+    },
+    hideApprove() {
+      if (this.approveUni > 0) {
+        approve(this.walletAddress,this.approveUni).then((response)=>{
+          console.log("response:",response);
+        });
+      }
+      this.approveUni = null;
+      this.approveOpen = false;
+    },
+    cancelApprove(){
+      this.approveUni = null;
     },
     connect() {
       this.$refs.metamask.init();
@@ -548,12 +571,6 @@ export default {
       //     console.log("get UNI balance falied!");
       //   }
       // });
-
-      // approve("0x5c0B9D48f40d46634d1AA383CB15987708Ac39E6",2);
-      // depositERC20(this.user,uniAddress,0);
-      // withdrawETH(this.user, 0);
-      // withdrawERC20(this.user,uniAddress,0);
-      // createTypedData(wethAddress, uniAddress, fee, routerAddress, amountIn, amountOutMinimum, chainId);
     },
     onComplete(data) {
       console.log('data:', data);
