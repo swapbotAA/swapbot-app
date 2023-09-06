@@ -402,21 +402,21 @@ export default {
         { option: 'Strategy' },
       ],
       data: [{
-        TxHash: '0xfa191d88acb625ee4381d9208f9e7ad5afcae09941c3301fb4f4977e3850894c',
-        Block: '18021493',
-        Timestamp: '(Aug-29-2023 04:34:47 PM +UTC'
+        blockHash: '0xfa191d88acb625ee4381d9208f9e7ad5afcae09941c3301fb4f4977e3850894c',
+        blockNumber: '18021493',
+        timeStamp: '(Aug-29-2023 04:34:47 PM +UTC'
       }, {
-        TxHash: '0x1a1bd104ec6756d8363dc08c9b735eaca2551da511152d04a484141a882afe10',
-        Block: '18021490',
-        Timestamp: 'Aug-29-2023 04:33:59 PM +UTC'
+        blockHash: '0x1a1bd104ec6756d8363dc08c9b735eaca2551da511152d04a484141a882afe10',
+        blockNumber: '18021490',
+        timeStamp: 'Aug-29-2023 04:33:59 PM +UTC'
       }, {
-        TxHash: '0xb2940bc99e7cedd6c0de907fa682cd0c6210c17b0655237354a08f2f87ce4fc0',
-        Block: '18021476',
-        Timestamp: 'Aug-29-2023 04:31:11 PM +UTC'
+        blockHash: '0xb2940bc99e7cedd6c0de907fa682cd0c6210c17b0655237354a08f2f87ce4fc0',
+        blockNumber: '18021476',
+        timeStamp: 'Aug-29-2023 04:31:11 PM +UTC'
       }, {
-        TxHash: '0xac3d03710a1d26aafbaf8ce35bbfec02376a85ec94963255eb8b85490174e917',
-        Block: '18021450',
-        Timestamp: 'Aug-29-2023 04:29:43 PM +UTC'
+        blockHash: '0xac3d03710a1d26aafbaf8ce35bbfec02376a85ec94963255eb8b85490174e917',
+        blockNumber: '18021450',
+        timeStamp: 'Aug-29-2023 04:29:43 PM +UTC'
       }],
     }
   },
@@ -580,6 +580,7 @@ export default {
         this.uniBalance = null;
       } else {
         this.user = data.metaMaskAddress;
+        this.getTxHistory();
         let provider = getWeb3Provider();
         initInstances(provider).then((response) => {
           if (response.status) {
@@ -693,6 +694,28 @@ export default {
         .catch((error) => {
           console.error(error)
         })
+    },
+    getTxHistory() {
+      axios.post("https://api-sepolia.etherscan.io/api?module=account&action=txlist&address="+this.user+"&startblock=0&endblock=99999999&page=1&offset=10&sort=asc&apikey=C8EH3QCAH18KHGDVTQIM3HWWVBV9FW3AQ9").then((res)=>{
+        if (res != null) {
+          console.log("Tx history:",res.data.result);
+          this.data[0].blockHash = res.data.result[9].blockHash;
+          this.data[0].blockNumber = res.data.result[9].blockNumber;
+          this.data[0].timeStamp = res.data.result[9].timeStamp;
+
+          this.data[1].blockHash = res.data.result[8].blockHash;
+          this.data[1].blockNumber = res.data.result[8].blockNumber;
+          this.data[1].timeStamp = res.data.result[8].timeStamp;
+
+          this.data[2].blockHash = res.data.result[7].blockHash;
+          this.data[2].blockNumber = res.data.result[7].blockNumber;
+          this.data[2].timeStamp = res.data.result[7].timeStamp;
+
+          this.data[3].blockHash = res.data.result[6].blockHash;
+          this.data[3].blockNumber = res.data.result[6].blockNumber;
+          this.data[3].timeStamp = res.data.result[6].timeStamp;
+        }
+      })
     },
   },
 };
