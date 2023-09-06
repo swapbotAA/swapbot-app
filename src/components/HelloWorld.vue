@@ -696,24 +696,24 @@ export default {
         })
     },
     getTxHistory() {
-      axios.post("https://api-sepolia.etherscan.io/api?module=account&action=txlist&address="+this.user+"&startblock=0&endblock=99999999&page=1&offset=10&sort=asc&apikey=C8EH3QCAH18KHGDVTQIM3HWWVBV9FW3AQ9").then((res)=>{
+      axios.post("https://api-sepolia.etherscan.io/api?module=account&action=txlist&address="+this.user+"&startblock=0&endblock=99999999&page=1&offset=4&sort=asc&apikey=C8EH3QCAH18KHGDVTQIM3HWWVBV9FW3AQ9").then((res)=>{
         if (res != null) {
           console.log("Tx history:",res.data.result);
-          this.data[0].blockHash = res.data.result[9].blockHash;
-          this.data[0].blockNumber = res.data.result[9].blockNumber;
-          this.data[0].timeStamp = res.data.result[9].timeStamp;
+          this.data[0].blockHash = res.data.result[3].blockHash;
+          this.data[0].blockNumber = res.data.result[3].blockNumber;
+          this.data[0].timeStamp = res.data.result[3].timeStamp;
 
-          this.data[1].blockHash = res.data.result[8].blockHash;
-          this.data[1].blockNumber = res.data.result[8].blockNumber;
-          this.data[1].timeStamp = res.data.result[8].timeStamp;
+          this.data[1].blockHash = res.data.result[2].blockHash;
+          this.data[1].blockNumber = res.data.result[2].blockNumber;
+          this.data[1].timeStamp = res.data.result[2].timeStamp;
 
-          this.data[2].blockHash = res.data.result[7].blockHash;
-          this.data[2].blockNumber = res.data.result[7].blockNumber;
-          this.data[2].timeStamp = res.data.result[7].timeStamp;
+          this.data[2].blockHash = res.data.result[1].blockHash;
+          this.data[2].blockNumber = res.data.result[1].blockNumber;
+          this.data[2].timeStamp = res.data.result[1].timeStamp;
 
-          this.data[3].blockHash = res.data.result[6].blockHash;
-          this.data[3].blockNumber = res.data.result[6].blockNumber;
-          this.data[3].timeStamp = res.data.result[6].timeStamp;
+          this.data[3].blockHash = res.data.result[0].blockHash;
+          this.data[3].blockNumber = res.data.result[0].blockNumber;
+          this.data[3].timeStamp = res.data.result[0].timeStamp;
         }
       })
     },
