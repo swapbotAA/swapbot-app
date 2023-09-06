@@ -2,6 +2,7 @@ import { ethers, utils, BigNumber} from 'ethers';
 import  Wallet from './abis/Wallet.json';
 import UniswapRouter from "./abis/UniswapRouter.json";
 import Erc20 from "./abis/Uni.json";
+// import createTypedDataAndSign from "../utils/signTypedData";
 
 const wallet_address = "0x5c0B9D48f40d46634d1AA383CB15987708Ac39E6";
 const uniswapRouter_address = "0xb67e30aDb44c83E516681392FA16cD933B93b7ad";
@@ -62,16 +63,17 @@ async function depositETH(user, amount) {
 //approve wallet
 async function approve(walletAddress, rawAmount) {
     try {
-        let isApproved = await erc20Instance.approve(walletAddress, rawAmount);
-        if (isApproved == true) {
-            return { status: "success", response: {operator: walletAddress, amount: rawAmount}};
-        }
+        let tx = await erc20Instance.approve(walletAddress, rawAmount);
 
-        // let eventFilter = erc20Instance.filters.Approval();
-        // let events = await contract.queryFilter(eventFilter, tx.blockNumber, "latest");
-        // console.log("events", events);
+        let eventFilter = erc20Instance.filters.Approval();
+        // console.log("tx.blockNumber: ",tx.blockNumber);
+        let events = await erc20Instance.queryFilter(eventFilter, tx.blockNumber, "latest");
+        let eventLen = events.length;
+        // console.log("event arg1", events[eventLen-1].args[0]);
+        // console.log("event arg2", events[eventLen-1].args[1]);
+        // console.log("event arg3", events[eventLen-1].args[2]);
 
-        // return { status: "success", response: {owner: events[0].args[0], operator: events[0].args[1], state: events[0].args[2]}};
+        return { status: "success", response: {owner: events[eventLen-1].args[0], operator: events[eventLen-1].args[1], amount: events[eventLen-1].args[2]}};
     } catch (e) {
         console.error(e);
         return { status: "failed", response: null }
@@ -106,11 +108,11 @@ async function withdrawERC20(user,contractAddress, amount) {
 
 
 //createTypedDataAndSign
-async function createTypedDataAndSign(tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId) {
+async function createTypedData(tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId) {
     try {
-        let salt = randomString(32);
+        let salt = await randomString(32);
         console.log("salt:",salt);
-        // let { value, r, s, v } = await uniswapRouterInstance.createTypedDataAndSign(tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, window.web3Provider.getSigner(), chainId, salt);
+        // let { value, r, s, v } = await createTypedDataAndSign(tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, window.web3Provider.getSigner(), chainId, salt);
         // console.log("sign finish");
         // console.log(value,r,s,v);
         // call exactInputSingle in relayer
@@ -119,7 +121,7 @@ async function createTypedDataAndSign(tokenIn, tokenOut, fee, routerAddress, amo
     }
 }
 
-function randomString(e) {    
+async function randomString(e) {    
     e = e || 32;
     var t = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678",
     a = t.length,
@@ -137,7 +139,7 @@ export {
   depositERC20,
   withdrawETH,
   withdrawERC20,
-  createTypedDataAndSign,
+  createTypedData,
   // removeMinter,
   // approveNFT,
   // registerNFTSale,

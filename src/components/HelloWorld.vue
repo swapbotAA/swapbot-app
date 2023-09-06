@@ -32,13 +32,15 @@
 
             <span>
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
-                <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()" placeholder="0" suffix="ETH" style="height: 60px;" />
+                <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()"
+                  placeholder="0" suffix="ETH" style="height: 60px;" />
               </div>
               <div style="line-height: 50px;"><img src="../assets/swap.svg" style="height: 25px; width: 25px;"></div>
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;margin-top: -30px;">
-                <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="usdcAmount" @change="calculateRateU()" placeholder="0" suffix="USDC" style="height: 60px;" />
+                <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="uniAmount"
+                  @change="calculateRateU()" placeholder="0" suffix="UNI" style="height: 60px;" />
               </div>
-              <div style="line-height: 50px;" ref="exchangeRate">rate:1 ETH = ? USDC</div>
+              <div style="line-height: 50px;" ref="exchangeRate">rate:1 ETH = ? UNI</div>
 
               <a-button type="primary" :loading="iconLoading" @click="submitSwap()"
                 style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
@@ -96,16 +98,16 @@
               <p style="font-size: medium;">Trade deadline<a-input v-model:value="deadLine" placeholder="30" suffix="mins"
                   style="height: 60px;" /></p>
             </a-modal>
-            <a-modal v-model:open="depositOpen" title="Deposit" ok-text="OK" cancel-text="CX" @ok="hideDeposit()">
-              <p style="font-size: medium;">ETH<a-input v-model:value="depositEth" placeholder="0"
-                  suffix="ETH" style="height: 60px;" /></p>
-              <p style="font-size: medium;">USDC<a-input v-model:value="depositUsdc" placeholder="0" suffix="USDC"
+            <a-modal v-model:open="depositOpen" title="Deposit" ok-text="OK" cancel-text="CX" @ok="hideDeposit()" @cancel="cancelDeposit()">
+              <p style="font-size: medium;">ETH<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="depositEth" placeholder="0" suffix="ETH"
+                  style="height: 60px;" /></p>
+              <p style="font-size: medium;">UNI<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="depositUni" placeholder="0" suffix="UNI"
                   style="height: 60px;" /></p>
             </a-modal>
-            <a-modal v-model:open="withdrawOpen" title="Withdraw" ok-text="OK" cancel-text="CX" @ok="hideWithdraw()">
-              <p style="font-size: medium;">ETH<a-input v-model:value="withdrawEth" placeholder="0"
-                  suffix="ETH" style="height: 60px;" /></p>
-              <p style="font-size: medium;">USDC<a-input v-model:value="withdrawUsdc" placeholder="0" suffix="USDC"
+            <a-modal v-model:open="withdrawOpen" title="Withdraw" ok-text="OK" cancel-text="CX" @ok="hideWithdraw()" @cancel="cancelWithdraw()">
+              <p style="font-size: medium;">ETH<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="withdrawEth" placeholder="0" suffix="ETH"
+                  style="height: 60px;" /></p>
+              <p style="font-size: medium;">UNI<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="withdrawUni" placeholder="0" suffix="UNI"
                   style="height: 60px;" /></p>
             </a-modal>
           </div>
@@ -126,11 +128,11 @@
 
             <span>
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
-                <a-input v-model:value="ethBalance" placeholder="1.00" suffix="ETH" disabled="true"
+                <a-input v-model:value="ethBalance" placeholder="0.0" suffix="ETH" disabled="true"
                   style="height: 60px;" />
               </div>
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
-                <a-input v-model:value="usdcBalance" placeholder="10.0" suffix="USDC" disabled="true"
+                <a-input v-model:value="uniBalance" placeholder="0.0" suffix="UNI" disabled="true"
                   style="height: 60px;" />
               </div>
               <a-button type="primary" @click="showDeposit()"
@@ -317,8 +319,8 @@ import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
 import { ref, createVNode } from 'vue';
 import { Modal } from 'ant-design-vue';
 import VueMetamask from 'vue-metamask';
-import { ethers, utils, BigNumber} from 'ethers';
-import  Wallet from '../api/abis/Wallet.json';
+import { ethers, utils, BigNumber } from 'ethers';
+import Wallet from '../api/abis/Wallet.json';
 import UniswapRouter from "../api/abis/UniswapRouter.json";
 import {
   getWeb3Provider,
@@ -329,7 +331,7 @@ import {
   depositERC20,
   withdrawETH,
   withdrawERC20,
-  createTypedDataAndSign,
+  createTypedData,
 } from "../api/contracts";
 
 const axios = require('axios')
@@ -344,7 +346,11 @@ export default {
       numberl: 0, //点击后的值，与下标同步，为0表示默认第一个按钮与div为选中状态
       numberr: 0,
       ethAmount: null,
-      usdcAmount: null,
+      uniAmount: null,
+      depositEth: null,
+      depositUni: null,
+      withdrawEth: null,
+      withdrawUni: null,
       user: null,
       registration: null,
       authorization: null,
@@ -356,6 +362,15 @@ export default {
       gasLimit: null,
       slipPoint: null,
       minimumLiquidity: null,
+      wethAddress: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+      uniAddress: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      fee: 3000,
+      amountIn: 0,
+      routerAddress: "",
+      amountOutMinimum: 0,
+      chainId: "11155111",
+      ethBalance: null,
+      uniBalance: null,
       msg: "This is demo net work",
       iconLoading: ref(false),
       iconLoadingSend: ref(false),
@@ -460,70 +475,145 @@ export default {
       this.depositOpen = true;
     },
     hideDeposit() {
+      // when user click OK button, call deposit function to deposit ETH or ERC20
+      if (this.depositEth > 0) {
+        // deposit ETH
+        depositETH(this.user, this.depositEth);
+      }
+      if (this.depositUni > 0) {
+        // deposit ERC20
+        // 1 approve amount
+        // approve("0x5c0B9D48f40d46634d1AA383CB15987708Ac39E6",this.depositUni).then((response)=>{
+        //   if (response.status == "success") {
+        //     console.log(response);
+        //     //2 deposit ERC20
+        //     depositERC20(this.user, this.uniAddress, this.depositUni);
+        //   }
+        // });
+        depositERC20(this.user, this.uniAddress, this.depositUni);
+      }
+      this.depositEth = null;
+      this.depositUni = null;
       this.depositOpen = false;
+    },
+    cancelDeposit() {
+      this.depositEth = null;
+      this.depositUni = null;
     },
     showWithdraw() {
       this.withdrawOpen = true;
     },
     hideWithdraw() {
+      // when user click OK button, call withdraw function to withdraw eth or ERC20
+      if (this.withdrawEth > 0) {
+        // withdraw ETH
+        withdrawETH(this.user, this.withdrawEth);
+      }
       this.withdrawOpen = false;
+    },
+    cancelWithdraw() {
+      this.withdrawEth = null;
+      this.withdrawUni = null;
     },
     connect() {
       this.$refs.metamask.init();
       let provider = getWeb3Provider();
       initInstances(provider).then((response) => {
         if (response.status) {
-            console.log("Init success");
-          
+          console.log("Init success");
+
         } else {
           console.log("Init failed");;
         }
       });
       this.user = this.$refs.metamask.MetaMaskAddress;
       console.log('user address:', this.user);
-      let wethAddress = "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14";
-      let uniAddress = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984";
-      let fee = 3000;
-      let amountIn = 0;
-      let routerAddress = "";
-      let amountOutMinimum = 0;
-      let chainId = "11155111";
-      // getBalance(this.user,wethAddress).then((response)=>{
-      //   if(response.status) {
-      //     console.log("ETH balance:",response.balance.toNumber());
-      //   }else{
+
+      // getBalance(this.user, this.wethAddress).then((response) => {
+      //   if (response.status) {
+      //     console.log("ETH balance:", response.balance.toNumber());
+      //     this.ethBalance = response.balance.toNumber()/1000000000000000000;
+      //   } else {
       //     console.log("get ETH balance falied!");
       //   }
-      // });//
-      // getBalance(this.user,uniAddress).then((response)=>{
-      //   if(response.status) {
-      //     console.log("UNI balance:",response.balance.toNumber());
-      //   }else{
+      // });
+      // getBalance(this.user, this.uniAddress).then((response) => {
+      //   if (response.status) {
+      //     console.log("UNI balance:", response.balance.toNumber());
+      //     this.uniBalance = response.balance.toNumber();
+      //   } else {
       //     console.log("get UNI balance falied!");
       //   }
       // });
-      // depositETH(this.user, 0);
+
       // approve("0x5c0B9D48f40d46634d1AA383CB15987708Ac39E6",2);
       // depositERC20(this.user,uniAddress,0);
       // withdrawETH(this.user, 0);
       // withdrawERC20(this.user,uniAddress,0);
-      createTypedDataAndSign(wethAddress, uniAddress, 3000, routerAddress, amountIn, amountOutMinimum, chainId);
+      // createTypedData(wethAddress, uniAddress, fee, routerAddress, amountIn, amountOutMinimum, chainId);
     },
     onComplete(data) {
       console.log('data:', data);
       if (data.metaMaskAddress == "") {
         this.user = null;
+        this.ethBalance = null;
+        this.uniBalance = null;
       } else {
         this.user = data.metaMaskAddress;
+        let provider = getWeb3Provider();
+        initInstances(provider).then((response) => {
+          if (response.status) {
+            console.log("Init success");
+
+          } else {
+            console.log("Init failed");;
+          }
+        });
+        getBalance(this.user, this.wethAddress).then((response) => {
+          if (response.status) {
+            console.log("ETH balance:", response.balance.toNumber());
+            this.ethBalance = this.formateNumber(response.balance.toNumber()/1000000000000000000);
+          } else {
+            console.log("get ETH balance falied!");
+          }
+        });
+        getBalance(this.user, this.uniAddress).then((response) => {
+          if (response.status) {
+            console.log("UNI balance:", response.balance.toNumber());
+            this.uniBalance = this.formateNumber(response.balance.toNumber()/1000000000000000000);
+          } else {
+            console.log("get UNI balance falied!");
+          }
+        });
       }
       // console.log('data:', this.user);
     },
+    formateNumber(num) {
+      var data = String(num).split(/[eE]/);
+      if (data.length == 1) return data[0];
+
+      var z = '',
+        sign = num < 0 ? '-' : '',
+        str = data[0].replace('.', ''),
+        mag = Number(data[1]) + 1;
+
+      if (mag < 0) {
+        z = sign + '0.';
+        while (mag++) z += '0';
+        return z + str.replace(/^\-/, '');
+      }
+      mag -= str.length;
+      while (mag--) z += '0';
+      return str + z;
+    },
+    // UNI pooladdress:0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801
+    //USDC pooladdress:0x7bea39867e4169dbe237d55c8242a8f2fcdcc387
     calculateRateE() {
       axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3', {
         query: `
           {
             pools(where: {
-              id_in: ["0x7bea39867e4169dbe237d55c8242a8f2fcdcc387"]
+              id_in: ["0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801"]
             }) {
               token0 {
                 symbol
@@ -541,21 +631,23 @@ export default {
           if (res.data != null) {
             console.log(res.data.data.pools[0]);
             var rate = res.data.data.pools[0].token0Price;
-            this.usdcAmount = this.ethAmount*rate.substring(0,8);
-            // console.log("1 ETH = "+rate.substring(0,8)+" USDC");
-            this.$refs.exchangeRate.innerHTML = "rate: 1 ETH = "+rate.substring(0,8)+" USDC";
+            this.uniAmount = this.ethAmount * rate.substring(0, 8);
+            // console.log("1 ETH = "+rate.substring(0,8)+" UNI");
+            this.$refs.exchangeRate.innerHTML = "rate: 1 ETH = " + rate.substring(0, 8) + " UNI";
           }
         })
         .catch((error) => {
           console.error(error)
         })
     },
+    // UNI pooladdress:0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801
+    //USDC pooladdress:0x7bea39867e4169dbe237d55c8242a8f2fcdcc387
     calculateRateU() {
       axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3', {
         query: `
           {
             pools(where: {
-              id_in: ["0x7bea39867e4169dbe237d55c8242a8f2fcdcc387"]
+              id_in: ["0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801"]
             }) {
               token0 {
                 symbol
@@ -573,9 +665,9 @@ export default {
           if (res.data != null) {
             console.log(res.data.data.pools[0]);
             var rate = res.data.data.pools[0].token1Price;
-            this.ethAmount = this.usdcAmount*rate.substring(0,8);
-            // console.log("1 ETH = "+rate.substring(0,8)+" USDC");
-            this.$refs.exchangeRate.innerHTML = "rate: 1 ETH = "+rate.substring(0,8)+" USDC";
+            this.ethAmount = this.uniAmount * rate.substring(0, 8);
+            // console.log("1 ETH = "+rate.substring(0,8)+" UNI");
+            this.$refs.exchangeRate.innerHTML = "rate: 1 ETH = " + rate.substring(0, 8) + " UNI";
           }
         })
         .catch((error) => {
