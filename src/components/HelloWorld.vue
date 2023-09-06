@@ -16,14 +16,14 @@
     <div class="leftbar">
       <div class="tableft">
         <div class="content">
-          <div style="margin: auto;width: 90%;margin-top: -40px;position: absolute;text-align: left;">
+          <div style="margin: auto;width: 90%;margin-top: -60px;position: absolute;text-align: left;">
             <!--2个按钮-->
             <button :class="indexl == numberl ? 'btnl1' : 'btnl'" @click="tableft(indexl)"
               v-for="(iteml, indexl) in dataListLeft" :key="indexl">{{ iteml.option }}
             </button>
 
             <img src="../assets/setting-fill.svg"
-              style="width: 50px; height: 50px; position: absolute;right: 10%;top: 25%;right: 10%;"
+              style="width: 40px; height: 40px; position: absolute;right: 10%;top: 25%;right: 10%;"
               @click="showModal()" />
 
           </div>
@@ -121,7 +121,7 @@
     <div class="rightbar">
       <div class="tabright">
         <div class="content">
-          <div style="margin: auto;width: 90%;margin-top: -40px;position: absolute;text-align: left;;">
+          <div style="margin: auto;width: 90%;margin-top: -60px;position: absolute;text-align: left;;">
             <!--3个按钮-->
             <button :class="indexr == numberr ? 'btnr1' : 'btnr'" @click="tabright(indexr)"
               v-for="(itemr, indexr) in dataListRight" :key="indexr">{{ itemr.option }}
@@ -162,7 +162,7 @@
               </a-button>
             </span>
           </div>
-          <div id="contentRight2" v-show="numberr == 1">
+          <div id="contentRight2" v-show="numberr == 1" style="overflow-y: auto;">
             <span>
               <a-list size="large" bordered :data-source="data"
                 style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
@@ -401,23 +401,33 @@ export default {
         { option: 'History' },
         { option: 'Strategy' },
       ],
-      data: [{
-        blockHash: '0xfa191d88acb625ee4381d9208f9e7ad5afcae09941c3301fb4f4977e3850894c',
-        blockNumber: '18021493',
-        timeStamp: '(Aug-29-2023 04:34:47 PM +UTC'
-      }, {
-        blockHash: '0x1a1bd104ec6756d8363dc08c9b735eaca2551da511152d04a484141a882afe10',
-        blockNumber: '18021490',
-        timeStamp: 'Aug-29-2023 04:33:59 PM +UTC'
-      }, {
-        blockHash: '0xb2940bc99e7cedd6c0de907fa682cd0c6210c17b0655237354a08f2f87ce4fc0',
-        blockNumber: '18021476',
-        timeStamp: 'Aug-29-2023 04:31:11 PM +UTC'
-      }, {
-        blockHash: '0xac3d03710a1d26aafbaf8ce35bbfec02376a85ec94963255eb8b85490174e917',
-        blockNumber: '18021450',
-        timeStamp: 'Aug-29-2023 04:29:43 PM +UTC'
-      }],
+      data: [
+      //   {
+      //   blockHash: '0xfa191d88acb625ee4381d9208f9e7ad5afcae09941c3301fb4f4977e3850894c',
+      //   blockNumber: '18021493',
+      //   timeStamp: '(Aug-29-2023 04:34:47 PM +UTC'
+      // }, {
+      //   blockHash: '0x1a1bd104ec6756d8363dc08c9b735eaca2551da511152d04a484141a882afe10',
+      //   blockNumber: '18021490',
+      //   timeStamp: 'Aug-29-2023 04:33:59 PM +UTC'
+      // }, {
+      //   blockHash: '0xb2940bc99e7cedd6c0de907fa682cd0c6210c17b0655237354a08f2f87ce4fc0',
+      //   blockNumber: '18021476',
+      //   timeStamp: 'Aug-29-2023 04:31:11 PM +UTC'
+      // }, {
+      //   blockHash: '0xac3d03710a1d26aafbaf8ce35bbfec02376a85ec94963255eb8b85490174e917',
+      //   blockNumber: '18021450',
+      //   timeStamp: 'Aug-29-2023 04:29:43 PM +UTC'
+      // }, {
+      //   blockHash: '0xac3d03710a1d26aafbaf8ce35bbfec02376a85ec94963255eb8b85490174e917',
+      //   blockNumber: '18021450',
+      //   timeStamp: 'Aug-29-2023 04:29:43 PM +UTC'
+      // }, {
+      //   blockHash: '0xac3d03710a1d26aafbaf8ce35bbfec02376a85ec94963255eb8b85490174e917',
+      //   blockNumber: '18021450',
+      //   timeStamp: 'Aug-29-2023 04:29:43 PM +UTC'
+      // }
+    ],
     }
   },
   methods: {
@@ -696,24 +706,32 @@ export default {
         })
     },
     getTxHistory() {
-      axios.post("https://api-sepolia.etherscan.io/api?module=account&action=txlist&address="+this.user+"&startblock=0&endblock=99999999&page=1&offset=4&sort=asc&apikey=C8EH3QCAH18KHGDVTQIM3HWWVBV9FW3AQ9").then((res)=>{
+      axios.post("https://api-sepolia.etherscan.io/api?module=account&action=txlist&address="+this.user+"&startblock=0&endblock=99999999&page=1&offset=10000&sort=asc&apikey=C8EH3QCAH18KHGDVTQIM3HWWVBV9FW3AQ9").then((res)=>{
         if (res != null) {
           console.log("Tx history:",res.data.result);
-          this.data[0].blockHash = res.data.result[3].blockHash;
-          this.data[0].blockNumber = res.data.result[3].blockNumber;
-          this.data[0].timeStamp = res.data.result[3].timeStamp;
+          res.data.result.forEach(element => {
+            let tmpObj = {
+              blockHash: element.blockHash,
+              blockNumber: element.blockNumber,
+              timeStamp: element.timeStamp
+            };
+            this.data.push(tmpObj);
+          });
+          // this.data[0].blockHash = res.data.result[3].blockHash;
+          // this.data[0].blockNumber = res.data.result[3].blockNumber;
+          // this.data[0].timeStamp = res.data.result[3].timeStamp;
 
-          this.data[1].blockHash = res.data.result[2].blockHash;
-          this.data[1].blockNumber = res.data.result[2].blockNumber;
-          this.data[1].timeStamp = res.data.result[2].timeStamp;
+          // this.data[1].blockHash = res.data.result[2].blockHash;
+          // this.data[1].blockNumber = res.data.result[2].blockNumber;
+          // this.data[1].timeStamp = res.data.result[2].timeStamp;
 
-          this.data[2].blockHash = res.data.result[1].blockHash;
-          this.data[2].blockNumber = res.data.result[1].blockNumber;
-          this.data[2].timeStamp = res.data.result[1].timeStamp;
+          // this.data[2].blockHash = res.data.result[1].blockHash;
+          // this.data[2].blockNumber = res.data.result[1].blockNumber;
+          // this.data[2].timeStamp = res.data.result[1].timeStamp;
 
-          this.data[3].blockHash = res.data.result[0].blockHash;
-          this.data[3].blockNumber = res.data.result[0].blockNumber;
-          this.data[3].timeStamp = res.data.result[0].timeStamp;
+          // this.data[3].blockHash = res.data.result[0].blockHash;
+          // this.data[3].blockNumber = res.data.result[0].blockNumber;
+          // this.data[3].timeStamp = res.data.result[0].timeStamp;
         }
       })
     },
