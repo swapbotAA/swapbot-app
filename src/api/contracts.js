@@ -63,7 +63,8 @@ async function depositETH(user, amount) {
 //approve wallet
 async function approve(walletAddress, rawAmount) {
     try {
-        let tx = await erc20Instance.approve(walletAddress, rawAmount);
+        let erc2Amount = ethers.utils.parseUnits(rawAmount);
+        let tx = await erc20Instance.approve(walletAddress, erc2Amount);
 
         let eventFilter = erc20Instance.filters.Approval();
         // console.log("tx.blockNumber: ",tx.blockNumber);
@@ -81,15 +82,17 @@ async function approve(walletAddress, rawAmount) {
 }
 
 //deposit ERC20
-async function depositERC20(user, erc20Address, aomunt) {
-    await walletInstance.depositERC20(user, erc20Address, aomunt);
+async function depositERC20(user, erc20Address, rawAmount) {
+    let erc2Amount = ethers.utils.parseUnits(rawAmount);
+    await walletInstance.depositERC20(user, erc20Address, erc2Amount);
     console.log("deposit erc20 finish!");
 }
 
 //withdraw ETH
 async function withdrawETH(user, amount) {
     try {
-        await walletInstance.withdrawETH(user, amount);
+        let someEther = ethers.utils.parseEther(amount);
+        await walletInstance.withdrawETH(user, someEther);
         console.log("withdrawETH finish");
     } catch (e) {
         console.error(e);
@@ -97,9 +100,10 @@ async function withdrawETH(user, amount) {
 }
 
 //withdrawERC20
-async function withdrawERC20(user,contractAddress, amount) {
+async function withdrawERC20(user,contractAddress, rawAmount) {
     try {
-        await walletInstance.withdrawERC20(user,contractAddress,amount);
+        let erc2Amount = ethers.utils.parseUnits(rawAmount);
+        await walletInstance.withdrawERC20(user, contractAddress, erc2Amount);
         console.log("withdrawERC20 finish");
     } catch (e) {
         console.error(e);

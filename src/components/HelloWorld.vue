@@ -483,13 +483,13 @@ export default {
       if (this.depositUni > 0) {
         // deposit ERC20
         // 1 approve amount
-        // approve("0x5c0B9D48f40d46634d1AA383CB15987708Ac39E6",this.depositUni).then((response)=>{
-        //   if (response.status == "success") {
-        //     console.log(response);
-        //     //2 deposit ERC20
-        //     depositERC20(this.user, this.uniAddress, this.depositUni);
-        //   }
-        // });
+        approve("0x5c0B9D48f40d46634d1AA383CB15987708Ac39E6",this.depositUni).then((response)=>{
+          if (response.status == "success") {
+            console.log(response);
+            //2 deposit ERC20
+            // depositERC20(this.user, this.uniAddress, this.depositUni);
+          }
+        });
         depositERC20(this.user, this.uniAddress, this.depositUni);
       }
       this.depositEth = null;
@@ -508,6 +508,9 @@ export default {
       if (this.withdrawEth > 0) {
         // withdraw ETH
         withdrawETH(this.user, this.withdrawEth);
+      }
+      if (this.withdrawUni > 0) {
+        withdrawERC20(this.user, this.uniAddress, this.withdrawUni);
       }
       this.withdrawOpen = false;
     },
