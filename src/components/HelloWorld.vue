@@ -176,7 +176,7 @@
             </span>
           </div>
           <div id="contentRight3" v-show="numberr == 2">
-            <span>Comming soon!</span>
+            <span>Coming soon!</span>
           </div>
         </div>
       </div>
@@ -446,10 +446,10 @@ export default {
         return;
       }
       this.iconLoading = true;
-      let amountOutMinimum = this.uniAmount*(1-this.slipPoint/100);
+      let amountOutMinimum = String(this.uniAmount*(1-this.slipPoint/100));
       console.log("ethAmount",this.ethAmount);
       console.log("amountOutMinimum",amountOutMinimum);
-      //createTypedData(this.wethAddress, this.uniAddress, this.fee, routerAddress, this.ethAmount, amountOutMinimum, this.chainId);
+      createTypedData(this.wethAddress, this.uniAddress, this.fee, this.routerAddress, this.ethAmount, amountOutMinimum, this.chainId);
       setTimeout(() => {
         // alert(this.iconLoading);
         this.iconLoading = false;
@@ -662,8 +662,8 @@ export default {
           if (res.data != null) {
             console.log(res.data.data.pools[0]);
             var rate = res.data.data.pools[0].token0Price;
-            this.uniAmount = this.ethAmount * rate.substring(0, 8);
-            // console.log("1 ETH = "+rate.substring(0,8)+" UNI");
+            this.uniAmount = String(this.ethAmount * Number(rate.substring(0, 8))).substring(0,8);
+            // console.log("uniAmount: ",String(this.uniAmount).substring(0,8));
             this.$refs.exchangeRate.innerHTML = "rate: 1 ETH = " + rate.substring(0, 8) + " UNI";
           }
         })

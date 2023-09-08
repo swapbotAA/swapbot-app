@@ -115,11 +115,14 @@ async function withdrawERC20(user,contractAddress, rawAmount) {
 //createTypedDataAndSign
 async function createTypedData(tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId) {
     try {
+        let amountInBig = ethers.utils.parseUnits(amountIn);
+        let amountOutMinimumBig = ethers.utils.parseUnits(amountOutMinimum);
         let salt = await randomString(32);
-        console.log("salt:",salt);
-        // let { value, r, s, v } = await createTypedDataAndSign(tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, window.web3Provider.getSigner(), chainId, salt);
-        // console.log("sign finish");
-        // console.log(value,r,s,v);
+        let saltByte32 = web3.utils.asciiToHex(salt);
+        console.log("salt:",saltByte32);
+        let { value, r, s, v } = await createTypedDataAndSign(tokenIn, tokenOut, fee, routerAddress, amountInBig, amountOutMinimumBig, window.web3Provider.getSigner(), chainId, saltByte32);
+        console.log("sign finish");
+        console.log(value,r,s,v);
         // call exactInputSingle in relayer
     } catch (e) {
         console.error(e);
@@ -133,6 +136,50 @@ async function randomString(e) {
     n = "";
     for (var i = 0; i < e; i++) n += t.charAt(Math.floor(Math.random() * a));
     return n;
+}
+
+
+async function createTypedDataAndSign(tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, signer, chainId, salt) {
+    const domain = {
+        name: 'UniswapRouter',
+        version: '1',
+        chainId: chainId,
+        verifyingContract: routerAddress
+    };
+    const types = {
+        ExactInputSingleParams: [
+            { name: 'tokenIn', type: 'address' },
+            { name: 'tokenOut', type: 'address' },
+            { name: 'fee', type: 'uint24' },
+            { name: 'recipient', type: 'address' },
+            { name: 'amountIn', type: 'uint256' },
+            { name: 'amountOutMinimum', type: 'uint256' },
+            { name: 'sqrtPriceLimitX96', type: 'uint160' },
+            { name: 'salt', type: 'bytes32' }
+        ],
+    };
+    let value = {
+        tokenIn: tokenIn,
+        tokenOut: tokenOut,
+        fee: fee,
+        recipient: routerAddress,
+        amountIn: amountIn,
+        amountOutMinimum: amountOutMinimum,
+        sqrtPriceLimitX96: 0,
+        salt: salt
+    }
+
+    let signature = await signer._signTypedData(domain, types, value);
+    let r = "0x" + signature.slice(2, 66)
+    let s = "0x" + signature.slice(66, 130)
+    let v = "0x" + signature.slice(130, 132)
+    let res = {
+        value: value,
+        r: r,
+        s: s,
+        v: v
+    }
+    return res
 }
 
 export {
