@@ -122,8 +122,7 @@ async function createTypedData(tokenIn, tokenOut, fee, routerAddress, amountIn, 
         console.log("salt:",saltByte32);
         let { value, r, s, v } = await createTypedDataAndSign(tokenIn, tokenOut, fee, routerAddress, amountInBig, amountOutMinimumBig, window.web3Provider.getSigner(), chainId, saltByte32);
         console.log("sign finish");
-        console.log(value,r,s,v);
-        // call exactInputSingle in relayer
+        return { value, r, s, v };
     } catch (e) {
         console.error(e);
     }
