@@ -4,8 +4,8 @@ import UniswapRouter from "./abis/UniswapRouter.json";
 import Erc20 from "./abis/Uni.json";
 // import createTypedDataAndSign from "../utils/signTypedData";
 
-const wallet_address = "0x5c0B9D48f40d46634d1AA383CB15987708Ac39E6";
-const uniswapRouter_address = "0xb67e30aDb44c83E516681392FA16cD933B93b7ad";
+const wallet_address = "0x90CaF385c36b19d9f2BB9B5098398b6844eff8eB";
+const uniswapRouter_address = "0x63A62CBFeBaADFE58CA7E876b6b72868C4aA7CB6";
 const erc20_address = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984";
 
 

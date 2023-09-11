@@ -379,8 +379,8 @@ export default {
       wethAddress: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
       uniAddress: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
       fee: 3000,
-      walletAddress: "0x5c0B9D48f40d46634d1AA383CB15987708Ac39E6",
-      routerAddress: "0xb67e30aDb44c83E516681392FA16cD933B93b7ad",
+      walletAddress: "0x90CaF385c36b19d9f2BB9B5098398b6844eff8eB",
+      routerAddress: "0x63A62CBFeBaADFE58CA7E876b6b72868C4aA7CB6",
       // amountOutMinimum: 0,
       chainId: "11155111",
       ethBalance: null,
@@ -446,7 +446,7 @@ export default {
         return;
       }
       this.iconLoading = true;
-      let amountOutMinimum = String(this.uniAmount*(1-this.slipPoint/100));
+      let amountOutMinimum = String(this.uniAmount*(1-this.slipPoint/100)).substring(0,8);
       console.log("ethAmount",this.ethAmount);
       console.log("amountOutMinimum",amountOutMinimum);
       createTypedData(this.wethAddress, this.uniAddress, this.fee, this.routerAddress, this.ethAmount, amountOutMinimum, this.chainId).then((res)=>{
