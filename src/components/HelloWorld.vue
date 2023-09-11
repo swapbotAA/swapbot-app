@@ -452,16 +452,35 @@ export default {
       createTypedData(this.wethAddress, this.uniAddress, this.fee, this.routerAddress, this.ethAmount, amountOutMinimum, this.chainId).then((res)=>{
         console.log("response:",res);
         // call exactInputSingle in relayer
-        axios.post('/api/v1/instant_swap', {
+        let obj = {
           r: res.r,
           s: res.s,
+          salt: res.value.salt,
           tx_value: {
             amount_in: String(res.value.amountIn),
             amount_out_minimum: String(res.value.amountOutMinimum),
             fee: res.value.fee,
             recipient: res.value.recipient,
             token_in: res.value.tokenIn,
-            token_out: res.value.tokenOut
+            token_out: res.value.tokenOut,
+            sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
+          },
+          user: this.user,
+          v:res.v
+        };
+        console.log("obj string:", JSON.stringify(obj));
+        axios.post('/api/v1/instant_swap', {
+          r: res.r,
+          s: res.s,
+          salt: res.value.salt,
+          tx_value: {
+            amount_in: String(res.value.amountIn),
+            amount_out_minimum: String(res.value.amountOutMinimum),
+            fee: res.value.fee,
+            recipient: res.value.recipient,
+            token_in: res.value.tokenIn,
+            token_out: res.value.tokenOut,
+            sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
           },
           user: this.user,
           v:res.v
