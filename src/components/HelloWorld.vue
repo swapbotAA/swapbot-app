@@ -32,16 +32,47 @@
 
             <span>
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
-                <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()"
-                  placeholder="0" suffix="ETH" style="height: 60px;" />
+                <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()"
+                  placeholder="0" suffix="ETH" style="height: 60px;" /> -->
+                  <span>
+                <label>
+                  <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount"
+                  @change="calculateRateE()" placeholder="0" style="width: 70%; height: 40px;"/>
+                </label>
+                <label>
+                    <a-select :size="size" default-value="eth" style="width: 30%;" @select="handleChangeSrc">
+                    <a-select-option style="text-align: center;"
+                      :value="item.value"
+                      :disabled="item.disabled"
+                      v-for="item in optionSrc"
+                      :key="item.value"
+                    >{{item.label}}</a-select-option>
+                  </a-select>
+                </label>
+              </span>
               </div>
-              <div style="line-height: 50px;"><img src="../assets/swap.svg" style="height: 25px; width: 25px;"></div>
-              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;margin-top: -30px;">
-                <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="uniAmount"
-                  @change="calculateRateU()" placeholder="0" suffix="UNI" style="height: 60px;" />
+              <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px;"></div>
+              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
+                <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="uniAmount"
+                  @change="calculateRateU()" placeholder="0" suffix="UNI" style="height: 60px;"/> -->
+                  <span>
+                <label>
+                  <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="erc20Amount"
+                  @change="calculateRateU()" placeholder="0" style="width: 70%; height: 40px; "/>
+                </label>
+                <label>
+                    <a-select :size="size" default-value="uni" style="width: 30%;" @select="handleChangeDes">
+                    <a-select-option style="text-align: center;"
+                      :value="item.value"
+                      :disabled="item.disabled"
+                      v-for="item in optionDes"
+                      :key="item.value"
+                    >{{item.label}}</a-select-option>
+                  </a-select>
+                </label>
+              </span>
               </div>
-              <div style="line-height: 50px;" ref="exchangeRate">rate:1 ETH = ? UNI</div>
-
+              <div style="line-height: 50px;" ref="exchangeRate">rate:?</div>
               <a-button type="primary" :loading="iconLoading" @click="submitSwap()"
                 style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                 <template #icon>
@@ -186,6 +217,11 @@
 </template>
 
 <style scoped lang="less">
+// .ant-select-selector {
+//   width: 15% !important; 
+//   height: 60px !important; 
+//   padding-top: 14px !important;
+// }
 /* head */
 .header {
   position: absolute;
@@ -197,7 +233,6 @@
   font-size: larger;
   // background-color: #2d3a4b;
 }
-
 /* left */
 .leftbar {
   position: absolute;
@@ -346,6 +381,26 @@ import {
 } from "../api/contracts";
 
 const axios = require('axios')
+//define select data sets
+var optionDes = [
+  { label: "UNI", value: "uni", disabled: false },
+  { label: "WBTC", value: "wbtc", disabled: true },
+  { label: "USDC", value: "usdc", disabled: true },
+  { label: "USDT", value: "usdt", disabled: true }
+];
+var optionSrc = [
+  { label: "ETH", value: "eth", disabled: false },
+  // { label: "WBTC", value: "erc20-wbtc", disabled: true },
+  // { label: "USDC", value: "erc20-usdc", disabled: false },
+  // { label: "USDT", value: "erc20-usdt", disabled: false }
+];
+//wrap map data set to store pool addresses
+let rateMap = new Map();
+rateMap.set("ethuni","0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801");
+//wrap map data set to store contract addresses
+let contractAddrMap = new Map();
+contractAddrMap.set("eth","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14");
+contractAddrMap.set("uni","0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984");
 
 export default {
   name: "tableft",
@@ -354,10 +409,15 @@ export default {
   },
   data() {
     return {
+      rateMap: rateMap,
+      contractAddrMap: contractAddrMap,
+      subKeySrc: "eth",
+      subKeyDes: "uni",
+      size: ref('large'),
       numberl: 0, //点击后的值，与下标同步，为0表示默认第一个按钮与div为选中状态
       numberr: 0,
       ethAmount: null,
-      uniAmount: null,
+      erc20Amount: null,
       depositEth: null,
       depositUni: null,
       withdrawEth: null,
@@ -401,36 +461,21 @@ export default {
         { option: 'History' },
         { option: 'Strategy' },
       ],
-      data: [
-      //   {
-      //   blockHash: '0xfa191d88acb625ee4381d9208f9e7ad5afcae09941c3301fb4f4977e3850894c',
-      //   blockNumber: '18021493',
-      //   timeStamp: '(Aug-29-2023 04:34:47 PM +UTC'
-      // }, {
-      //   blockHash: '0x1a1bd104ec6756d8363dc08c9b735eaca2551da511152d04a484141a882afe10',
-      //   blockNumber: '18021490',
-      //   timeStamp: 'Aug-29-2023 04:33:59 PM +UTC'
-      // }, {
-      //   blockHash: '0xb2940bc99e7cedd6c0de907fa682cd0c6210c17b0655237354a08f2f87ce4fc0',
-      //   blockNumber: '18021476',
-      //   timeStamp: 'Aug-29-2023 04:31:11 PM +UTC'
-      // }, {
-      //   blockHash: '0xac3d03710a1d26aafbaf8ce35bbfec02376a85ec94963255eb8b85490174e917',
-      //   blockNumber: '18021450',
-      //   timeStamp: 'Aug-29-2023 04:29:43 PM +UTC'
-      // }, {
-      //   blockHash: '0xac3d03710a1d26aafbaf8ce35bbfec02376a85ec94963255eb8b85490174e917',
-      //   blockNumber: '18021450',
-      //   timeStamp: 'Aug-29-2023 04:29:43 PM +UTC'
-      // }, {
-      //   blockHash: '0xac3d03710a1d26aafbaf8ce35bbfec02376a85ec94963255eb8b85490174e917',
-      //   blockNumber: '18021450',
-      //   timeStamp: 'Aug-29-2023 04:29:43 PM +UTC'
-      // }
-    ],
+      data: [],
+      optionSrc: optionSrc,
+      optionDes: optionDes,
     }
   },
   methods: {
+    //get select src value
+    handleChangeSrc(value) {
+      this.subKeySrc = value;
+    },
+    //get select des value
+    handleChangeDes(value) {
+      this.subKeyDes = value;
+      // alert(this.subKeyDes);
+    },
     //定义切换方法
     tableft(index) {
       this.numberl = index;
@@ -446,10 +491,18 @@ export default {
         return;
       }
       this.iconLoading = true;
-      let amountOutMinimum = String(this.uniAmount*(1-this.slipPoint/100)).substring(0,8);
+      let amountOutMinimum = String(this.erc20Amount*(1-this.slipPoint/100)).substring(0,8);
       console.log("ethAmount",this.ethAmount);
       console.log("amountOutMinimum",amountOutMinimum);
-      createTypedData(this.wethAddress, this.uniAddress, this.fee, this.routerAddress, this.ethAmount, amountOutMinimum, this.chainId).then((res)=>{
+      if (!this.contractAddrMap.has(this.subKeySrc)) {
+        console.log("Invaild src contract address");
+        return;
+      }
+      if (!this.contractAddrMap.has(this.subKeyDes)) {
+        console.log("Invaild src contract address");
+        return;
+      }
+      createTypedData(this.contractAddrMap.get(this.subKeySrc), this.contractAddrMap.get(this.subKeyDes), this.fee, this.routerAddress, this.ethAmount, amountOutMinimum, this.chainId).then((res)=>{
         console.log("response:",res);
         // call exactInputSingle in relayer
         let obj = {
@@ -685,11 +738,19 @@ export default {
     // UNI pooladdress:0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801
     //USDC pooladdress:0x7bea39867e4169dbe237d55c8242a8f2fcdcc387
     calculateRateE() {
+      let pooladdr = "";
+      if (this.rateMap.has(this.subKeySrc+this.subKeyDes)) {
+        pooladdr = this.rateMap.get(this.subKeySrc+this.subKeyDes);
+      }else{
+        console.log("Invalid pool address!");
+        return;
+      };
+      console.log("pool addr:", pooladdr);
       axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3', {
         query: `
           {
             pools(where: {
-              id_in: ["0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801"]
+              id_in: ["`+pooladdr+`"]
             }) {
               token0 {
                 symbol
@@ -707,9 +768,9 @@ export default {
           if (res.data != null) {
             console.log(res.data.data.pools[0]);
             var rate = res.data.data.pools[0].token0Price;
-            this.uniAmount = String(this.ethAmount * Number(rate.substring(0, 8))).substring(0,8);
+            this.erc20Amount = String(this.ethAmount * Number(rate.substring(0, 8))).substring(0,8);
             // console.log("uniAmount: ",String(this.uniAmount).substring(0,8));
-            this.$refs.exchangeRate.innerHTML = "rate: 1 ETH = " + rate.substring(0, 8) + " UNI";
+            this.$refs.exchangeRate.innerHTML = "rate: 1 "+this.subKeySrc+" = " + rate.substring(0, 8) + " "+this.subKeyDes;
           }
         })
         .catch((error) => {
@@ -719,11 +780,18 @@ export default {
     // UNI pooladdress:0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801
     //USDC pooladdress:0x7bea39867e4169dbe237d55c8242a8f2fcdcc387
     calculateRateU() {
+      let pooladdr = "";
+      if (this.rateMap.has(this.subKeySrc+this.subKeyDes)) {
+        pooladdr = this.rateMap.get(this.subKeySrc+this.subKeyDes);
+      }else{
+        console.log("Invalid pool address!");
+        return;
+      };
       axios.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3', {
         query: `
           {
             pools(where: {
-              id_in: ["0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801"]
+              id_in: ["`+pooladdr+`"]
             }) {
               token0 {
                 symbol
@@ -741,9 +809,9 @@ export default {
           if (res.data != null) {
             console.log(res.data.data.pools[0]);
             var rate = res.data.data.pools[0].token1Price;
-            this.ethAmount = this.uniAmount * rate.substring(0, 8);
+            this.ethAmount = String(this.erc20Amount * Number(rate.substring(0, 8))).substring(0,8);
             // console.log("1 ETH = "+rate.substring(0,8)+" UNI");
-            this.$refs.exchangeRate.innerHTML = "rate: 1 ETH = " + rate.substring(0, 8) + " UNI";
+            this.$refs.exchangeRate.innerHTML = "rate: 1 "+this.subKeyDes+" = " + rate.substring(0, 8) + " "+this.subKeySrc;
           }
         })
         .catch((error) => {
