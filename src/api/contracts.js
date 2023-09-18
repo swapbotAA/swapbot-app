@@ -1,17 +1,17 @@
 import { ethers, utils, BigNumber} from 'ethers';
 import  Wallet from './abis/Wallet.json';
 import UniswapRouter from "./abis/UniswapRouter.json";
-import Erc20 from "./abis/Uni.json";
+import Uni from "./abis/Uni.json";
 // import createTypedDataAndSign from "../utils/signTypedData";
 
 const wallet_address = "0x90CaF385c36b19d9f2BB9B5098398b6844eff8eB";
 const uniswapRouter_address = "0x63A62CBFeBaADFE58CA7E876b6b72868C4aA7CB6";
-const erc20_address = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984";
+const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"];// [0:Uni]
 
 
 let walletInstance = null;
 let uniswapRouterInstance = null;
-let erc20Instance = null;
+let erc20InstanceList = [];
 
 //获取 metamask provider
 function getWeb3Provider() {
@@ -33,10 +33,18 @@ async function initInstances(provider) {
         
         walletInstance = new ethers.Contract(wallet_address, Wallet.abi, window.web3Provider.getSigner());
         uniswapRouterInstance = new ethers.Contract(uniswapRouter_address, UniswapRouter.abi, window.web3Provider.getSigner());
-        erc20Instance = new ethers.Contract(erc20_address, Erc20.abi, window.web3Provider.getSigner());
-        console.log("walletInstance: ",walletInstance);
-        console.log("uniswapRouterInstance:",uniswapRouterInstance);
-        console.log("uniInstance:",erc20Instance);
+        for (let index = 0; index < erc20_address_list.length; index++) {
+            const element = erc20_address_list[index];
+            console.log("erc20_address_list "+index+": ",element);
+            let erc20Instance = new ethers.Contract(element, Uni.abi, window.web3Provider.getSigner());
+            erc20InstanceList.push(erc20Instance);
+        }
+        
+        console.log("wallet Instance: ",walletInstance);
+        console.log("uniswapRouter Instance:",uniswapRouterInstance);
+        erc20InstanceList.forEach(element => {
+            console.log("erc20 Instance:",element);
+        });
         return {status: true };
     } catch (e) {
         console.error('could not init contract instances.', e);
@@ -61,7 +69,7 @@ async function depositETH(user, amount) {
 }
 
 //approve wallet
-async function approve(walletAddress, rawAmount) {
+async function approve(walletAddress, erc20Address, rawAmount) {
     try {
         let erc2Amount = ethers.utils.parseUnits(rawAmount);
         console.log("erc2Amount:",erc2Amount);

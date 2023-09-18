@@ -6,7 +6,7 @@
         >
         </vue-metamask> -->
     <div class="header"><img src="../assets/robot.svg" style="height: 45px;width: 45px; padding-right: 10px;">
-      SwapBotAA
+      Sparky
       <vue-metamask ref="metamask" @onComplete="onComplete"></vue-metamask>
       <a-button type="primary" danger style="position: absolute; right: 10px; top: 10px;" @click="connect">
         <span v-if="this.user == null">Connect Wallet</span>
@@ -123,28 +123,121 @@
           <div>
             <!-- <a-button type="primary" @click="showModal()">Modal</a-button>
             <a-button @click="confirm()">Confirm</a-button> -->
+            <!--setting modal windows -->
             <a-modal v-model:open="open" title="Setting" ok-text="OK" cancel-text="CX" @ok="hideModal()" @cancel="cancelModal()" >
               <p style="font-size: medium;">Maximum slip point<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="slipPoint" placeholder="0"
                   suffix="%" style="height: 60px;" /></p>
               <p style="font-size: medium;">Trade deadline<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="deadLine" placeholder="0" suffix="mins"
                   style="height: 60px;" /></p>
             </a-modal>
-            <a-modal v-model:open="approveOpen" title="Approve" ok-text="OK" cancel-text="CX" @ok="hideApprove()" @cancel="cancelApprove()">
-              <p style="font-size: medium;">UNI<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="approveUni" placeholder="0" suffix="UNI"
+            <!--deposit eth modal windows -->
+            <a-modal v-model:open="depositEthOpen" title="Deposit" ok-text="OK" cancel-text="CX" @ok="hideEthDeposit()" @cancel="cancelEthDeposit()">
+              <p style="font-size: medium;">ETH<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="depositEth" placeholder="0" suffix=""
                   style="height: 60px;" /></p>
             </a-modal>
-            <a-modal v-model:open="depositOpen" title="Deposit" ok-text="OK" cancel-text="CX" @ok="hideDeposit()" @cancel="cancelDeposit()">
-              <p style="font-size: medium;">ETH<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="depositEth" placeholder="0" suffix="ETH"
-                  style="height: 60px;" /></p>
-              <p style="font-size: medium;">UNI<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="depositUni" placeholder="0" suffix="UNI"
-                  style="height: 60px;" /></p>
-            </a-modal>
-            <a-modal v-model:open="withdrawOpen" title="Withdraw" ok-text="OK" cancel-text="CX" @ok="hideWithdraw()" @cancel="cancelWithdraw()">
-              <p style="font-size: medium;">ETH<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="withdrawEth" placeholder="0" suffix="ETH"
-                  style="height: 60px;" /></p>
-              <p style="font-size: medium;">UNI<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="withdrawUni" placeholder="0" suffix="UNI"
+            <!--withdraw eth modal windows -->
+            <a-modal v-model:open="withdrawEthOpen" title="Withdraw" ok-text="OK" cancel-text="CX" @ok="hideEthWithdraw()" @cancel="cancelEthWithdraw()">
+              <p style="font-size: medium;">ETH<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="withdrawEth" placeholder="0" suffix=""
                   style="height: 60px;" /></p>
             </a-modal>
+            <!--approve erc20 modal windows -->
+            <a-modal v-model:open="approveErc20Open" title="Approve" ok-text="OK" cancel-text="CX" @ok="hideErc20Approve()" @cancel="cancelErc20Approve()">
+              <p style="font-size: medium;">{{ this.tokenName }}<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="approveErc20" placeholder="0" suffix= ""
+                  style="height: 60px;" /></p>
+            </a-modal>
+            <!--deposit erc20 modal windows -->
+            <a-modal v-model:open="depositErc20Open" title="Deposit" ok-text="OK" cancel-text="CX" @ok="hideErc20Deposit()" @cancel="cancelErc20Deposit()">
+              <p style="font-size: medium;">{{ this.tokenName }}<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="depositErc20" placeholder="0" suffix=""
+                  style="height: 60px;" /></p>
+            </a-modal>
+            <!--withdraw erc20 modal windows -->
+            <a-modal v-model:open="withdrawErc20Open" title="Withdraw" ok-text="OK" cancel-text="CX" @ok="hideErc20Withdraw()" @cancel="cancelErc20Withdraw()">
+              <p style="font-size: medium;">{{ this.tokenName }}<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="withdrawErc20" placeholder="0" suffix=""
+                  style="height: 60px;" /></p>
+            </a-modal>
+            <!--drawer of ETH operating-->
+            <a-drawer
+              v-model:open="operateEthOpen"
+              class="custom-class"
+              root-class-name="root-class-name"
+              :root-style="{ color: 'blue' }"
+              style="color: rgb(24, 18, 18)"
+              title="ETH"
+              placement="right"
+              @after-open-change="afterOpenChange"
+            >
+              <a-button type="primary" @click="showEthDeposit()"
+                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                Deposit
+              </a-button>
+              <a-button type="primary" @click="showEthWithdraw()"
+                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                Withdraw
+              </a-button>
+            </a-drawer>
+            <!--drawer of ERC20 operating-->
+            <a-drawer
+              v-model:open="operateErc20Open"
+              class="custom-class"
+              root-class-name="root-class-name"
+              :root-style="{ color: 'blue' }"
+              style="color: rgb(24, 18, 18)"
+              :title="tokenName"
+              placement="right"
+              @after-open-change="afterOpenChange"
+            >
+              <a-button type="primary" @click="showErc20Approve()"
+                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                Approve
+              </a-button>
+              <a-button type="primary" @click="showErc20Deposit()"
+                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                Deposit
+              </a-button>
+              <a-button type="primary" @click="showErc20Withdraw()"
+                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                Withdraw
+              </a-button>
+            </a-drawer>
+            <!--drawer of ERC20 adding-->
+            <a-drawer
+              v-model:open="addErc20Open"
+              class="custom-class"
+              root-class-name="root-class-name"
+              :root-style="{ color: 'blue' }"
+              style="color: rgb(24, 18, 18)"
+              title="Add ERC20"
+              placement="bottom"
+              @after-open-change="afterOpenChange"
+            >
+            <span style="position: absolute; width: 80%; left: 10%;line-height: 40px;">
+              <a-input v-model:value="erc20Address" addon-before="erc20 token address" />
+              <a-input v-model:value="erc20Symbol" addon-before="erc20 token symbol" />
+
+              <a-button type="primary" :loading="iconLoadingSend" @click="addCustomToken()"
+                style="width: 200px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                Add Custom Token
+              </a-button>
+            </span>
+            </a-drawer>
           </div>
         </div>
       </div>
@@ -161,37 +254,25 @@
           <!--3个div-->
           <div id="contentRight1" v-show="numberr == 0">
 
-            <span>
-              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
-                <a-input v-model:value="ethBalance" placeholder="0.0" suffix="ETH" disabled="true"
-                  style="height: 60px;" />
+            <span ref="tokenList">
+              <span v-for="value in object">
+                <a-button type="text" style="width: 100%; height: 100px; border-radius: 15px;" @click="showOperateDrawer(value)">
+                  <span>{{ value.token }}</span><span>:&nbsp</span><span>{{ value.balance }}</span>
+                </a-button>
+              </span>
+              <!-- <div>
+                <a-button type="text" style="width: 100%; height: 100px; border-radius: 15px;" @click="showOperateEthDrawer()">
+                  <span><img src="../assets/ETH.svg" style="height: 50px; width: 50px;">{{ getEthBalance() }}</span>
+                </a-button>
               </div>
-              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
-                <a-input v-model:value="uniBalance" placeholder="0.0" suffix="UNI" disabled="true"
-                  style="height: 60px;" />
-              </div>
-              <a-button type="primary" @click="showApprove()"
-                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
-                <template #icon>
-                  <PoweroffOutlined />
-                </template>
-                Approve
-              </a-button>
-              <a-button type="primary" @click="showDeposit()"
-                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
-                <template #icon>
-                  <PoweroffOutlined />
-                </template>
-                Deposit
-              </a-button>
-              <a-button type="primary" @click="showWithdraw()"
-                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
-                <template #icon>
-                  <PoweroffOutlined />
-                </template>
-                Withdraw
-              </a-button>
+              <div>
+                <a-button type="text" style="width: 100%; height: 100px; border-radius: 15px;" @click=showOperateErc20Drawer()>
+                  <span><img src="../assets/usdc.svg" style="height: 30px; width: 30px;">{{ getUniBalance() }}</span>
+                </a-button>
+              </div> -->
+              
             </span>
+            <a-button type="primary" shape="circle" @click="showAddErc20Drawer()">+</a-button>
           </div>
           <div id="contentRight2" v-show="numberr == 1" style="overflow-y: auto;">
             <span>
@@ -217,11 +298,6 @@
 </template>
 
 <style scoped lang="less">
-// .ant-select-selector {
-//   width: 15% !important; 
-//   height: 60px !important; 
-//   padding-top: 14px !important;
-// }
 /* head */
 .header {
   position: absolute;
@@ -366,6 +442,7 @@ import { ref, createVNode } from 'vue';
 import { Modal } from 'ant-design-vue';
 import VueMetamask from 'vue-metamask';
 import { ethers, utils, BigNumber } from 'ethers';
+
 import Wallet from '../api/abis/Wallet.json';
 import UniswapRouter from "../api/abis/UniswapRouter.json";
 import {
@@ -380,7 +457,7 @@ import {
   createTypedData,
 } from "../api/contracts";
 
-const axios = require('axios')
+const axios = require('axios');
 //define select data sets
 var optionDes = [
   { label: "UNI", value: "uni", disabled: false },
@@ -402,6 +479,14 @@ let contractAddrMap = new Map();
 contractAddrMap.set("eth","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14");
 contractAddrMap.set("uni","0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984");
 
+
+let wrapObj = [{token:"ETH",address:"0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",balance:null},
+               {token:"UNI",address:"0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",balance:null},
+               {token:"USDC",address:"0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",balance:null},
+              ];
+
+let tokenName = "ERC20";
+
 export default {
   name: "tableft",
   components: {
@@ -409,6 +494,8 @@ export default {
   },
   data() {
     return {
+      tokenName: tokenName,
+      object: wrapObj,
       rateMap: rateMap,
       contractAddrMap: contractAddrMap,
       subKeySrc: "eth",
@@ -419,10 +506,10 @@ export default {
       ethAmount: null,
       erc20Amount: null,
       depositEth: null,
-      depositUni: null,
+      depositErc20: null,
       withdrawEth: null,
-      withdrawUni: null,
-      approveUni: null,
+      withdrawErc20: null,
+      approveErc20: null,
       user: null,
       registration: null,
       authorization: null,
@@ -436,8 +523,8 @@ export default {
       slipPointfr: null,
       deadLine: null,
       minimumLiquidity: null,
-      wethAddress: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
-      uniAddress: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      // wethAddress: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
+      // uniAddress: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
       fee: 3000,
       walletAddress: "0x90CaF385c36b19d9f2BB9B5098398b6844eff8eB",
       routerAddress: "0x63A62CBFeBaADFE58CA7E876b6b72868C4aA7CB6",
@@ -449,9 +536,14 @@ export default {
       iconLoading: ref(false),
       iconLoadingSend: ref(false),
       open: ref(false),
-      depositOpen: ref(false),
-      withdrawOpen: ref(false),
-      approveOpen: ref(false),
+      depositErc20Open: ref(false),
+      depositEthOpen: ref(false),
+      withdrawErc20Open: ref(false),
+      withdrawEthOpen: ref(false),
+      approveErc20Open: ref(false),
+      operateEthOpen: ref(false),
+      operateErc20Open: ref(false),
+      addErc20Open: ref(false),
       dataListLeft: [
         { option: 'Swap' },
         { option: 'Front-running' },
@@ -467,6 +559,41 @@ export default {
     }
   },
   methods: {
+    // getBalance(value) {
+    //   if (value.token == "ETH") {
+    //     return ": "+this.ethBalance + " "+value.token;
+    //   }else {
+    //     return ": "+this.uniBalance + " "+value.token;
+    //   }
+    // },
+    showOperateDrawer(value) {
+      console.log("token name:",value.token);
+      if (value.token == "ETH") {
+        this.showOperateEthDrawer();
+      }else {
+        this.showOperateErc20Drawer(value);
+      }
+    },
+    addCustomToken() {
+      // alert(this.$refs.exchangeRate.innerHTML());
+    },
+    showAddErc20Drawer() {
+      this.addErc20Open = true;
+    },
+    showOperateEthDrawer() {
+      this.operateEthOpen = true;
+    },
+    showOperateErc20Drawer(value) {
+      console.log("get token name:",value.token);
+      this.operateErc20Open = true;
+      this.tokenName = value.token;
+    },
+    // getEthBalance() {
+    //   return this.ethBalance + " ETH";
+    // },
+    // getUniBalance() {
+    //   return this.uniBalance + " UNI";
+    // },
     //get select src value
     handleChangeSrc(value) {
       this.subKeySrc = value;
@@ -593,61 +720,105 @@ export default {
       // this.slipPoint = null;
       // this.deadLine = null;
     },
-    showDeposit() {
-      this.depositOpen = true;
+    showEthDeposit() {
+      this.depositEthOpen = true;
     },
-    hideDeposit() {
-      // when user click OK button, call deposit function to deposit ETH or ERC20
+    hideEthDeposit() {
       if (this.depositEth > 0) {
         // deposit ETH
         depositETH(this.user, this.depositEth);
       }
-      if (this.depositUni > 0) {
+      this.depositEth = null;
+      this.depositEthOpen = false;
+    },
+    cancelEthDeposit() {
+      this.depositEth = null;
+    },
+    showErc20Deposit() {
+      this.depositErc20Open = true;
+    },
+    hideErc20Deposit() {
+      if (this.depositErc20 > 0) {
         // deposit ERC20
-        depositERC20(this.user, this.uniAddress, this.depositUni);
-        
-
+        let flag = 0;
+        for (let index = 0; index < this.object.length; index++) {
+          const element = this.object[index];
+          if (this.tokenName == element.token) {
+            flag = index;
+          }
+          
+        }
+        console.log("match success! index is:",flag);
+        console.log("token address: ",this.object[flag].address);
+        depositERC20(this.user, this.object[flag].address, this.depositErc20);
       }
-      this.depositEth = null;
-      this.depositUni = null;
-      this.depositOpen = false;
+      this.depositErc20 = null;
+      this.depositErc20Open = false;
     },
-    cancelDeposit() {
-      this.depositEth = null;
-      this.depositUni = null;
+    cancelErc20Deposit() {
+      this.depositErc20 = null;
     },
-    showWithdraw() {
-      this.withdrawOpen = true;
+    showEthWithdraw() {
+      this.withdrawEthOpen = true;
     },
-    hideWithdraw() {
-      // when user click OK button, call withdraw function to withdraw eth or ERC20
+    hideEthWithdraw() {
       if (this.withdrawEth > 0) {
         // withdraw ETH
         withdrawETH(this.user, this.withdrawEth);
       }
-      if (this.withdrawUni > 0) {
-        withdrawERC20(this.user, this.uniAddress, this.withdrawUni);
-      }
-      this.withdrawOpen = false;
-    },
-    cancelWithdraw() {
       this.withdrawEth = null;
-      this.withdrawUni = null;
+      this.withdrawEthOpen = false;
     },
-    showApprove() {
-      this.approveOpen = true;
+    cancelEthWithdraw() {
+      this.withdrawEth = null;
     },
-    hideApprove() {
-      if (this.approveUni > 0) {
-        approve(this.walletAddress,this.approveUni).then((response)=>{
+    showErc20Withdraw() {
+      this.withdrawErc20Open = true;
+    },
+    hideErc20Withdraw() {
+      if (this.withdrawErc20 > 0) {
+        let flag = 0;
+        for (let index = 0; index < this.object.length; index++) {
+          const element = this.object[index];
+          if (this.tokenName == element.token) {
+            flag = index;
+          }
+          
+        }
+        console.log("match success! index is:",flag);
+        console.log("token address: ",this.object[flag].address);
+        withdrawERC20(this.user, this.object[flag].address, this.withdrawErc20);
+      }
+      this.withdrawErc20 = null;
+      this.withdrawErc20Open = false;
+    },
+    cancelErc20Withdraw() {
+      this.withdrawErc20 = null;
+    },
+    showErc20Approve() {
+      this.approveErc20Open = true;
+    },
+    hideErc20Approve() {
+      if (this.approveErc20 > 0) {
+        let flag = 0;
+        for (let index = 0; index < this.object.length; index++) {
+          const element = this.object[index];
+          if (this.tokenName == element.token) {
+            flag = index;
+          }
+          
+        }
+        console.log("match success! index is:",flag);
+        console.log("token address: ",this.object[flag].address);
+        approve(this.walletAddress,this.object[flag].address,this.approveErc20).then((response)=>{
           console.log("response:",response);
         });
       }
-      this.approveUni = null;
-      this.approveOpen = false;
+      this.approveErc20 = null;
+      this.approveErc20Open = false;
     },
-    cancelApprove(){
-      this.approveUni = null;
+    cancelErc20Approve(){
+      this.approveErc20 = null;
     },
     connect() {
       this.$refs.metamask.init();
@@ -662,30 +833,13 @@ export default {
       });
       this.user = this.$refs.metamask.MetaMaskAddress;
       console.log('user address:', this.user);
-
-      // getBalance(this.user, this.wethAddress).then((response) => {
-      //   if (response.status) {
-      //     console.log("ETH balance:", response.balance.toNumber());
-      //     this.ethBalance = response.balance.toNumber()/1000000000000000000;
-      //   } else {
-      //     console.log("get ETH balance falied!");
-      //   }
-      // });
-      // getBalance(this.user, this.uniAddress).then((response) => {
-      //   if (response.status) {
-      //     console.log("UNI balance:", response.balance.toNumber());
-      //     this.uniBalance = response.balance.toNumber();
-      //   } else {
-      //     console.log("get UNI balance falied!");
-      //   }
-      // });
     },
     onComplete(data) {
       console.log('data:', data);
       if (data.metaMaskAddress == "") {
         this.user = null;
-        this.ethBalance = null;
-        this.uniBalance = null;
+        // this.ethBalance = null;
+        // this.uniBalance = null;
       } else {
         this.user = data.metaMaskAddress;
         this.getTxHistory();
@@ -698,22 +852,17 @@ export default {
             console.log("Init failed");;
           }
         });
-        getBalance(this.user, this.wethAddress).then((response) => {
-          if (response.status) {
-            console.log("ETH balance:", response.balance.toNumber());
-            this.ethBalance = this.formateNumber(response.balance.toNumber()/1000000000000000000);
-          } else {
-            console.log("get ETH balance falied!");
-          }
-        });
-        getBalance(this.user, this.uniAddress).then((response) => {
-          if (response.status) {
-            console.log("UNI balance:", response.balance.toNumber());
-            this.uniBalance = this.formateNumber(response.balance.toNumber()/1000000000000000000);
-          } else {
-            console.log("get UNI balance falied!");
-          }
-        });
+        for (let index = 0; index < this.object.length; index++) {
+          const element = this.object[index];
+          getBalance(this.user, element.address).then((response) => {
+            if (response.status) {
+              console.log(element.token + " balance:" + response.balance.toNumber());
+              this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+            } else {
+              console.log("get "+element.token+" balance falied!");
+            }
+          });
+        }
       }
       // console.log('data:', this.user);
     },
