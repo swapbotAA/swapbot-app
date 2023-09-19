@@ -62,60 +62,105 @@ async function getBalance(user, contractAddress) {
     }
 }
 //deposit ETH
-async function depositETH(user, amount) {
-    let someEther = ethers.utils.parseEther(amount);
-    await walletInstance.depositETH(user,{ value: someEther });
-    console.log("deposit finish!");
+async function depositETH(user, amount, callback) {
+    try {
+        let someEther = ethers.utils.parseEther(amount);
+        await walletInstance.depositETH(user, { value: someEther }).then(transactionResponse => {
+            transactionResponse.wait().then(receipt => {
+                console.log("deposit receipt status: ", receipt);
+                callback(receipt.status);
+                // console.log("deposit finish!");
+            })
+        });
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 //approve wallet
-async function approve(walletAddress, erc20Address, rawAmount) {
+async function approve(walletAddress, erc20Address, rawAmount, callback) {
     try {
+        let flag = null;
+        for (let index = 0; index < erc20_address_list.length; index++) {
+            if(erc20_address_list[index] == erc20Address) {
+                flag = index;
+            }
+        }
+        if (flag == null) {
+            console.log("Invalid erc20Address!");
+            callback(0);
+            return;
+        }
         let erc2Amount = ethers.utils.parseUnits(rawAmount);
         console.log("erc2Amount:",erc2Amount);
-        let tx = await erc20Instance.approve(walletAddress, erc2Amount);
+        await erc20InstanceList[flag].approve(walletAddress, erc2Amount).then(transactionResponse => {
+            transactionResponse.wait().then(receipt => {
+                console.log("approve erc20 receipt status: ", receipt);
+                callback(receipt.status);
+                // console.log("approve finish!");
+            })
+        });
 
-        let eventFilter = erc20Instance.filters.Approval();
+        // let eventFilter = erc20Instance.filters.Approval();
         // console.log("tx.blockNumber: ",tx.blockNumber);
-        let events = await erc20Instance.queryFilter(eventFilter, tx.blockNumber, "latest");
-        let eventLen = events.length;
+        // let events = await erc20Instance.queryFilter(eventFilter, tx.blockNumber, "latest");
+        // let eventLen = events.length;
         // console.log("event arg1", events[eventLen-1].args[0]);
         // console.log("event arg2", events[eventLen-1].args[1]);
         // console.log("event arg3", events[eventLen-1].args[2]);
 
-        return { status: "success", response: {owner: events[eventLen-1].args[0], operator: events[eventLen-1].args[1], amount: events[eventLen-1].args[2]}};
+        // return { status: "success", response: {owner: events[eventLen-1].args[0], operator: events[eventLen-1].args[1], amount: events[eventLen-1].args[2]}};
     } catch (e) {
         console.error(e);
-        return { status: "failed", response: null }
+        callback(0);
     }
 }
 
 //deposit ERC20
-async function depositERC20(user, erc20Address, rawAmount) {
-    let erc2Amount = ethers.utils.parseUnits(rawAmount);
-    await walletInstance.depositERC20(user, erc20Address, erc2Amount);
-    console.log("deposit erc20 finish!");
+async function depositERC20(user, erc20Address, rawAmount, callback) {
+    try {
+        let erc2Amount = ethers.utils.parseUnits(rawAmount);
+        await walletInstance.depositERC20(user, erc20Address, erc2Amount).then(transactionResponse => {
+            transactionResponse.wait().then(receipt => {
+                console.log("deposit erc20 receipt status: ", receipt);
+                callback(receipt.status);
+            })
+        });
+    } catch (e) {
+        console.error(e);
+        callback(0);
+    }
 }
 
 //withdraw ETH
-async function withdrawETH(user, amount) {
+async function withdrawETH(user, amount, callback) {
     try {
         let someEther = ethers.utils.parseEther(amount);
-        await walletInstance.withdrawETH(user, someEther);
-        console.log("withdrawETH finish");
+        await walletInstance.withdrawETH(user, someEther).then(transactionResponse => {
+            transactionResponse.wait().then(receipt => {
+                console.log("withdraw receipt status: ",receipt);
+                callback(receipt.status);
+            })
+        });
     } catch (e) {
         console.error(e);
+        callback(0);
     }
 }
 
 //withdrawERC20
-async function withdrawERC20(user,contractAddress, rawAmount) {
+async function withdrawERC20(user,contractAddress, rawAmount, callback) {
     try {
         let erc2Amount = ethers.utils.parseUnits(rawAmount);
-        await walletInstance.withdrawERC20(user, contractAddress, erc2Amount);
-        console.log("withdrawERC20 finish");
+        await walletInstance.withdrawERC20(user, contractAddress, erc2Amount).then(transactionResponse => {
+            transactionResponse.wait().then(receipt => {
+                console.log("withdraw erc20 receipt status: ",receipt);
+                callback(receipt.status);
+            })
+        });
     } catch (e) {
         console.error(e);
+        callback(0);
     }
 }
 
