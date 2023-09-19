@@ -68,12 +68,14 @@ async function depositETH(user, amount, callback) {
         await walletInstance.depositETH(user, { value: someEther }).then(transactionResponse => {
             transactionResponse.wait().then(receipt => {
                 console.log("deposit receipt status: ", receipt);
-                callback(receipt.status);
+                let tmpObj = receipt;
+                callback(tmpObj);
                 // console.log("deposit finish!");
             })
         });
     } catch (e) {
         console.error(e);
+        callback(0);
     }
 }
 
@@ -96,7 +98,8 @@ async function approve(walletAddress, erc20Address, rawAmount, callback) {
         await erc20InstanceList[flag].approve(walletAddress, erc2Amount).then(transactionResponse => {
             transactionResponse.wait().then(receipt => {
                 console.log("approve erc20 receipt status: ", receipt);
-                callback(receipt.status);
+                let tmpObj = receipt;
+                callback(tmpObj);
                 // console.log("approve finish!");
             })
         });
@@ -123,7 +126,8 @@ async function depositERC20(user, erc20Address, rawAmount, callback) {
         await walletInstance.depositERC20(user, erc20Address, erc2Amount).then(transactionResponse => {
             transactionResponse.wait().then(receipt => {
                 console.log("deposit erc20 receipt status: ", receipt);
-                callback(receipt.status);
+                let tmpObj = receipt;
+                callback(tmpObj);
             })
         });
     } catch (e) {
@@ -139,7 +143,8 @@ async function withdrawETH(user, amount, callback) {
         await walletInstance.withdrawETH(user, someEther).then(transactionResponse => {
             transactionResponse.wait().then(receipt => {
                 console.log("withdraw receipt status: ",receipt);
-                callback(receipt.status);
+                let tmpObj = receipt;
+                callback(tmpObj);
             })
         });
     } catch (e) {
@@ -155,7 +160,8 @@ async function withdrawERC20(user,contractAddress, rawAmount, callback) {
         await walletInstance.withdrawERC20(user, contractAddress, erc2Amount).then(transactionResponse => {
             transactionResponse.wait().then(receipt => {
                 console.log("withdraw erc20 receipt status: ",receipt);
-                callback(receipt.status);
+                let tmpObj = receipt;
+                callback(tmpObj);
             })
         });
     } catch (e) {

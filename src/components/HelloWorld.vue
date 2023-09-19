@@ -848,7 +848,7 @@ export default {
       console.log("receipt status:",value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Deposit Succeed!");
+        this.openNotifaction("success", "Deposit Succeed! Transaction hash: "+value.transactionHash);
         // update  eth balance
         for (let index = 0; index < this.object.length; index++) {
           const element = this.object[index];
@@ -900,7 +900,7 @@ export default {
       console.log("receipt status:",value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Deposit Succeed!");
+        this.openNotifaction("success", "Deposit Succeed! Transaction hash: "+value.transactionHash);
         // update  erc20 balance
         for (let index = 0; index < this.object.length; index++) {
           const element = this.object[index];
@@ -938,7 +938,7 @@ export default {
       console.log("receipt status:",value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Withdraw Succeed!");
+        this.openNotifaction("success", "Withdraw Succeed! Transaction hash: "+value.transactionHash);
         // update  eth balance
         for (let index = 0; index < this.object.length; index++) {
           const element = this.object[index];
@@ -989,7 +989,7 @@ export default {
       console.log("receipt status:",value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Withdraw erc20 Succeed!");
+        this.openNotifaction("success", "Withdraw erc20 Succeed! Transaction hash: "+value.transactionHash);
         // update  erc20 balance
         for (let index = 0; index < this.object.length; index++) {
           const element = this.object[index];
@@ -1040,7 +1040,7 @@ export default {
       console.log("receipt status:",value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Approve Succeed!");
+        this.openNotifaction("success", "Approve Succeed! Transaction hash: "+value.transactionHash);
       }else{
         this.openNotifaction("error", "Approve Failed!");
       }
