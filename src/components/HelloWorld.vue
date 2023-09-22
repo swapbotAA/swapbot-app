@@ -34,43 +34,35 @@
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
                 <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()"
                   placeholder="0" suffix="ETH" style="height: 60px;" /> -->
-                  <span>
-                <label>
-                  <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount"
-                  @change="calculateRateE()" placeholder="0" style="width: 70%; height: 40px;"/>
-                </label>
-                <label>
+                <span>
+                  <label>
+                    <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount"
+                      @change="calculateRateE()" placeholder="0" style="width: 70%; height: 40px;" />
+                  </label>
+                  <label>
                     <a-select :size="size" default-value="eth" style="width: 30%;" @select="handleChangeSrc">
-                    <a-select-option style="text-align: center;"
-                      :value="item.value"
-                      :disabled="item.disabled"
-                      v-for="item in optionSrc"
-                      :key="item.value"
-                    >{{item.label}}</a-select-option>
-                  </a-select>
-                </label>
-              </span>
+                      <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
+                        v-for="item in optionSrc" :key="item.value">{{ item.label }}</a-select-option>
+                    </a-select>
+                  </label>
+                </span>
               </div>
               <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px;"></div>
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
                 <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="uniAmount"
                   @change="calculateRateU()" placeholder="0" suffix="UNI" style="height: 60px;"/> -->
-                  <span>
-                <label>
-                  <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="erc20Amount"
-                  @change="calculateRateU()" placeholder="0" style="width: 70%; height: 40px; "/>
-                </label>
-                <label>
+                <span>
+                  <label>
+                    <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="erc20Amount"
+                      @change="calculateRateU()" placeholder="0" style="width: 70%; height: 40px; " />
+                  </label>
+                  <label>
                     <a-select :size="size" default-value="uni" style="width: 30%;" @select="handleChangeDes">
-                    <a-select-option style="text-align: center;"
-                      :value="item.value"
-                      :disabled="item.disabled"
-                      v-for="item in optionDes"
-                      :key="item.value"
-                    >{{item.label}}</a-select-option>
-                  </a-select>
-                </label>
-              </span>
+                      <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
+                        v-for="item in optionDes" :key="item.value">{{ item.label }}</a-select-option>
+                    </a-select>
+                  </label>
+                </span>
               </div>
               <div style="line-height: 50px;" ref="exchangeRate">rate:?</div>
               <a-button type="primary" :loading="iconLoading" @click="submitSwap()"
@@ -88,43 +80,35 @@
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
                 <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()"
                   placeholder="0" suffix="ETH" style="height: 60px;" /> -->
-                  <span>
-                <label>
-                  <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethLimitedAmount"
-                   placeholder="0" style="width: 70%; height: 40px;"/>
-                </label>
-                <label>
-                    <a-select :size="size" default-value="eth" style="width: 30%;" @select="handleChangeSrc">
-                    <a-select-option style="text-align: center;"
-                      :value="item.value"
-                      :disabled="item.disabled"
-                      v-for="item in optionSrc"
-                      :key="item.value"
-                    >{{item.label}}</a-select-option>
-                  </a-select>
-                </label>
-              </span>
+                <span>
+                  <label>
+                    <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethLimitedAmount"
+                      placeholder="0" style="width: 70%; height: 40px;" />
+                  </label>
+                  <label>
+                    <a-select :size="size" default-value="eth" style="width: 30%;" @select="handleChangeLimitedSrc">
+                      <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
+                        v-for="item in optionSrc" :key="item.value">{{ item.label }}</a-select-option>
+                    </a-select>
+                  </label>
+                </span>
               </div>
               <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px;"></div>
               <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
                 <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="uniAmount"
                   @change="calculateRateU()" placeholder="0" suffix="UNI" style="height: 60px;"/> -->
-                  <span>
-                <label>
-                  <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="erc20LimitedAmount"
-                   placeholder="0" style="width: 70%; height: 40px; "/>
-                </label>
-                <label>
-                    <a-select :size="size" default-value="uni" style="width: 30%;" @select="handleChangeDes">
-                    <a-select-option style="text-align: center;"
-                      :value="item.value"
-                      :disabled="item.disabled"
-                      v-for="item in optionDes"
-                      :key="item.value"
-                    >{{item.label}}</a-select-option>
-                  </a-select>
-                </label>
-              </span>
+                <span>
+                  <label>
+                    <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="erc20LimitedAmount"
+                      placeholder="0" style="width: 70%; height: 40px; " />
+                  </label>
+                  <label>
+                    <a-select :size="size" default-value="uni" style="width: 30%;" @select="handleChangelimitedDes">
+                      <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
+                        v-for="item in optionDes" :key="item.value">{{ item.label }}</a-select-option>
+                    </a-select>
+                  </label>
+                </span>
               </div>
               <!-- <div style="line-height: 50px;" ref="exchangeRate">rate:?</div> -->
               <a-button type="primary" :loading="iconLoadingLimited" @click="submitLimitedSwap()"
@@ -135,7 +119,7 @@
                 Submit Order
               </a-button>
             </span>
-            </div>
+          </div>
 
           <div id="contentLeft3" v-show="numberl == 2">
             <!-- <img src="../assets/setting-fill.svg"
@@ -179,49 +163,48 @@
             <!-- <a-button type="primary" @click="showModal()">Modal</a-button>
             <a-button @click="confirm()">Confirm</a-button> -->
             <!--setting modal windows -->
-            <a-modal v-model:open="openSetting" title="Setting" ok-text="OK" cancel-text="CX" @ok="hideModal()" @cancel="cancelModal()" >
-              <p style="font-size: medium;">Maximum slip point<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="slipPoint" placeholder="0"
-                  suffix="%" style="height: 60px;" /></p>
-              <p style="font-size: medium;">Trade deadline<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="deadLine" placeholder="0" suffix="mins"
-                  style="height: 60px;" /></p>
+            <a-modal v-model:open="openSetting" title="Setting" ok-text="OK" cancel-text="CX" @ok="hideModal()"
+              @cancel="cancelModal()">
+              <p style="font-size: medium;">Maximum slip point<a-input oninput="value=value.replace(/[^0-9.]/g,'')"
+                  v-model:value="slipPoint" placeholder="0" suffix="%" style="height: 60px;" /></p>
+              <p style="font-size: medium;">Trade deadline<a-input oninput="value=value.replace(/[^0-9.]/g,'')"
+                  v-model:value="deadLine" placeholder="0" suffix="mins" style="height: 60px;" /></p>
               <p style="font-size: medium;">Private Transaction &nbsp<a-switch v-model:checked="PriTxChecked" /></p>
             </a-modal>
             <!--deposit eth modal windows -->
-            <a-modal v-model:open="depositEthOpen" title="Deposit" ok-text="OK" cancel-text="CX" @ok="hideEthDeposit()" @cancel="cancelEthDeposit()">
-              <p style="font-size: medium;">ETH<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="depositEth" placeholder="0" suffix=""
-                  style="height: 60px;" /></p>
+            <a-modal v-model:open="depositEthOpen" title="Deposit" ok-text="OK" cancel-text="CX" @ok="hideEthDeposit()"
+              @cancel="cancelEthDeposit()">
+              <p style="font-size: medium;">ETH<a-input oninput="value=value.replace(/[^0-9.]/g,'')"
+                  v-model:value="depositEth" placeholder="0" suffix="" style="height: 60px;" /></p>
             </a-modal>
             <!--withdraw eth modal windows -->
-            <a-modal v-model:open="withdrawEthOpen" title="Withdraw" ok-text="OK" cancel-text="CX" @ok="hideEthWithdraw()" @cancel="cancelEthWithdraw()">
-              <p style="font-size: medium;">ETH<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="withdrawEth" placeholder="0" suffix=""
-                  style="height: 60px;" /></p>
+            <a-modal v-model:open="withdrawEthOpen" title="Withdraw" ok-text="OK" cancel-text="CX" @ok="hideEthWithdraw()"
+              @cancel="cancelEthWithdraw()">
+              <p style="font-size: medium;">ETH<a-input oninput="value=value.replace(/[^0-9.]/g,'')"
+                  v-model:value="withdrawEth" placeholder="0" suffix="" style="height: 60px;" /></p>
             </a-modal>
             <!--approve erc20 modal windows -->
-            <a-modal v-model:open="approveErc20Open" title="Approve" ok-text="OK" cancel-text="CX" @ok="hideErc20Approve()" @cancel="cancelErc20Approve()">
-              <p style="font-size: medium;">{{ this.tokenName }}<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="approveErc20" placeholder="0" suffix= ""
-                  style="height: 60px;" /></p>
+            <a-modal v-model:open="approveErc20Open" title="Approve" ok-text="OK" cancel-text="CX"
+              @ok="hideErc20Approve()" @cancel="cancelErc20Approve()">
+              <p style="font-size: medium;">{{ this.tokenName }}<a-input oninput="value=value.replace(/[^0-9.]/g,'')"
+                  v-model:value="approveErc20" placeholder="0" suffix="" style="height: 60px;" /></p>
             </a-modal>
             <!--deposit erc20 modal windows -->
-            <a-modal v-model:open="depositErc20Open" title="Deposit" ok-text="OK" cancel-text="CX" @ok="hideErc20Deposit()" @cancel="cancelErc20Deposit()">
-              <p style="font-size: medium;">{{ this.tokenName }}<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="depositErc20" placeholder="0" suffix=""
-                  style="height: 60px;" /></p>
+            <a-modal v-model:open="depositErc20Open" title="Deposit" ok-text="OK" cancel-text="CX"
+              @ok="hideErc20Deposit()" @cancel="cancelErc20Deposit()">
+              <p style="font-size: medium;">{{ this.tokenName }}<a-input oninput="value=value.replace(/[^0-9.]/g,'')"
+                  v-model:value="depositErc20" placeholder="0" suffix="" style="height: 60px;" /></p>
             </a-modal>
             <!--withdraw erc20 modal windows -->
-            <a-modal v-model:open="withdrawErc20Open" title="Withdraw" ok-text="OK" cancel-text="CX" @ok="hideErc20Withdraw()" @cancel="cancelErc20Withdraw()">
-              <p style="font-size: medium;">{{ this.tokenName }}<a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="withdrawErc20" placeholder="0" suffix=""
-                  style="height: 60px;" /></p>
+            <a-modal v-model:open="withdrawErc20Open" title="Withdraw" ok-text="OK" cancel-text="CX"
+              @ok="hideErc20Withdraw()" @cancel="cancelErc20Withdraw()">
+              <p style="font-size: medium;">{{ this.tokenName }}<a-input oninput="value=value.replace(/[^0-9.]/g,'')"
+                  v-model:value="withdrawErc20" placeholder="0" suffix="" style="height: 60px;" /></p>
             </a-modal>
             <!--drawer of ETH operating-->
-            <a-drawer
-              v-model:open="operateEthOpen"
-              class="custom-class"
-              root-class-name="root-class-name"
-              :root-style="{ color: 'blue' }"
-              style="color: rgb(24, 18, 18)"
-              title="ETH"
-              placement="right"
-              @after-open-change="afterOpenChange"
-            >
+            <a-drawer v-model:open="operateEthOpen" class="custom-class" root-class-name="root-class-name"
+              :root-style="{ color: 'blue' }" style="color: rgb(24, 18, 18)" title="ETH" placement="right"
+              @after-open-change="afterOpenChange">
               <a-button type="primary" :loading="iconLoadingDepositEth" @click="showEthDeposit()"
                 style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                 <template #icon>
@@ -238,16 +221,9 @@
               </a-button>
             </a-drawer>
             <!--drawer of ERC20 operating-->
-            <a-drawer
-              v-model:open="operateErc20Open"
-              class="custom-class"
-              root-class-name="root-class-name"
-              :root-style="{ color: 'blue' }"
-              style="color: rgb(24, 18, 18)"
-              :title="tokenName"
-              placement="right"
-              @after-open-change="afterOpenChange"
-            >
+            <a-drawer v-model:open="operateErc20Open" class="custom-class" root-class-name="root-class-name"
+              :root-style="{ color: 'blue' }" style="color: rgb(24, 18, 18)" :title="tokenName" placement="right"
+              @after-open-change="afterOpenChange">
               <a-button type="primary" :loading="iconLoadingApproveErc20" @click="showErc20Approve()"
                 style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                 <template #icon>
@@ -271,28 +247,23 @@
               </a-button>
             </a-drawer>
             <!--drawer of ERC20 adding-->
-            <a-drawer
-              v-model:open="addErc20Open"
-              class="custom-class"
-              root-class-name="root-class-name"
-              :root-style="{ color: 'blue' }"
-              style="color: rgb(24, 18, 18)"
-              title="Add ERC20"
-              placement="bottom"
-              @after-open-change="afterOpenChange"
-            >
-            <span style="position: absolute; width: 80%; left: 10%;line-height: 40px;">
-              <a-input oninput="value=value.replace(/[\W]/g,'')" v-model:value="addErc20Address" addon-before="erc20 token address" />
-              <a-input oninput="value=value.replace(/[\W]/g,'')" v-model:value="addErc20Symbol" addon-before="erc20 token symbol" />
+            <a-drawer v-model:open="addErc20Open" class="custom-class" root-class-name="root-class-name"
+              :root-style="{ color: 'blue' }" style="color: rgb(24, 18, 18)" title="Add ERC20" placement="bottom"
+              @after-open-change="afterOpenChange">
+              <span style="position: absolute; width: 80%; left: 10%;line-height: 40px;">
+                <a-input oninput="value=value.replace(/[\W]/g,'')" v-model:value="addErc20Address"
+                  addon-before="erc20 token address" />
+                <a-input oninput="value=value.replace(/[\W]/g,'')" v-model:value="addErc20Symbol"
+                  addon-before="erc20 token symbol" />
 
-              <a-button type="primary" @click="addCustomToken()"
-                style="width: 200px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
-                <template #icon>
-                  <PoweroffOutlined />
-                </template>
-                Add Custom Token
-              </a-button>
-            </span>
+                <a-button type="primary" @click="addCustomToken()"
+                  style="width: 200px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
+                  <template #icon>
+                    <PoweroffOutlined />
+                  </template>
+                  Add Custom Token
+                </a-button>
+              </span>
             </a-drawer>
           </div>
         </div>
@@ -311,7 +282,8 @@
           <div id="contentRight1" v-show="numberr == 0">
             <span ref="tokenList">
               <span v-for="value in object">
-                <a-button type="text" style="text-align: left; width: 100%; height: 100px; border-radius: 15px;" @click="showOperateDrawer(value)">
+                <a-button type="text" style="text-align: left; width: 100%; height: 100px; border-radius: 15px;"
+                  @click="showOperateDrawer(value)">
                   <span>{{ value.token }}</span><span>:&nbsp</span><span>{{ value.balance }}</span>
                 </a-button>
               </span>
@@ -337,7 +309,8 @@
               <a-list size="large" bordered :data-source="orderData"
                 style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
                 <template #renderItem="{ item }">
-                  <a-list-item><span style="margin-left:8%;">Order Number:&nbsp</span>{{ item }}<span>&nbsp&nbsp&nbsp&nbsp&nbsp</span>
+                  <a-list-item><span style="margin-left:8%;">Order Number:&nbsp</span>{{ item
+                  }}<span>&nbsp&nbsp&nbsp&nbsp&nbsp</span>
                     <!-- <a-button  type="primary" style="height: 40px;width: 100px; margin-left: 30%;">Edit</a-button> -->
                     <a-button danger type="primary" shape="round" style="height: 40px;width: 80px; margin-left: 45%;">
                       Cancel
@@ -369,6 +342,7 @@
   font-size: larger;
   // background-color: #2d3a4b;
 }
+
 /* left */
 .leftbar {
   position: absolute;
@@ -501,7 +475,7 @@
 </style>
 <script>
 import { ref, createVNode } from 'vue';
-import { Modal,notification } from 'ant-design-vue';
+import { Modal, notification } from 'ant-design-vue';
 import VueMetamask from 'vue-metamask';
 import { ethers, utils, BigNumber } from 'ethers';
 
@@ -539,17 +513,17 @@ var optionSrc = [
 ];
 //wrap map data set to store pool addresses
 let rateMap = new Map();
-rateMap.set("ethuni","0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801");
+rateMap.set("ethuni", "0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801");
 //wrap map data set to store contract addresses
 let contractAddrMap = new Map();
-contractAddrMap.set("eth","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14");
-contractAddrMap.set("uni","0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984");
+contractAddrMap.set("eth", "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14");
+contractAddrMap.set("uni", "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984");
 
 
-let wrapObj = [{token:"ETH",address:"0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",balance:0},
-               {token:"UNI",address:"0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",balance:0},
-               {token:"USDC",address:"0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",balance:0},
-              ];
+let wrapObj = [{ token: "ETH", address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14", balance: 0 },
+{ token: "UNI", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
+{ token: "USDC", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
+];
 
 let tokenName = "ERC20";
 
@@ -571,6 +545,8 @@ export default {
       contractAddrMap: contractAddrMap,
       subKeySrc: "eth",
       subKeyDes: "uni",
+      subKeyLimitedSrc: "eth",
+      subKeyLimitedDes: "uni",
       size: ref('large'),
       numberl: 0, //点击后的值，与下标同步，为0表示默认第一个按钮与div为选中状态
       numberr: 0,
@@ -633,7 +609,7 @@ export default {
         // { option: 'Strategy' },
       ],
       data: [],
-      orderData:["123","456"],
+      orderData: ["123", "456"],
       optionSrc: optionSrc,
       optionDes: optionDes,
     }
@@ -650,18 +626,18 @@ export default {
       });
     },
     showOperateDrawer(value) {
-      console.log("token name:",value.token);
+      console.log("token name:", value.token);
       if (value.token == "ETH") {
         this.showOperateEthDrawer();
-      }else {
+      } else {
         this.showOperateErc20Drawer(value);
       }
     },
     addCustomToken() {
-      if (this.addErc20Address!=undefined && this.addErc20Symbol!=undefined) {
-        console.log("addErc20Address: ",this.addErc20Address);
-        console.log("addCustomToken: ",this.addErc20Symbol);
-        let tmpObj = {token:this.addErc20Symbol, address:this.addErc20Address, balance:0};
+      if (this.addErc20Address != undefined && this.addErc20Symbol != undefined) {
+        console.log("addErc20Address: ", this.addErc20Address);
+        console.log("addCustomToken: ", this.addErc20Symbol);
+        let tmpObj = { token: this.addErc20Symbol, address: this.addErc20Address, balance: 0 };
         this.object.push(tmpObj);
         this.addErc20Open = false;
       }
@@ -674,7 +650,7 @@ export default {
       this.operateEthOpen = true;
     },
     showOperateErc20Drawer(value) {
-      console.log("get token name:",value.token);
+      console.log("get token name:", value.token);
       this.operateErc20Open = true;
       this.tokenName = value.token;
     },
@@ -693,6 +669,14 @@ export default {
       this.subKeyDes = value;
       // alert(this.subKeyDes);
     },
+    //get limited order select src value
+    handleChangeLimitedSrc(value) {
+      this.subKeyLimitedSrc = value;
+    },
+    //get limited order select des value
+    handleChangeLimitedDes(value) {
+      this.subKeyLimitedDes = value;
+    },
     //定义切换方法
     tableft(index) {
       this.numberl = index;
@@ -710,36 +694,26 @@ export default {
       if (this.ethLimitedAmount == undefined || this.erc20LimitedAmount == undefined) {
         return;
       }
+      console.log("eth limited Amount;", this.ethLimitedAmount);
+      console.log("erc20 limited Amount:", this.erc20LimitedAmount);
+
+      if (!this.contractAddrMap.has(this.subKeyLimitedSrc)) {
+        console.log("Invaild limited order src contract address");
+        return;
+      }
+      if (!this.contractAddrMap.has(this.subKeyLimitedDes)) {
+        console.log("Invaild limited order des contract address");
+        return;
+      }
+      // loading icon
       this.iconLoadingLimited = true;
-      console.log("eth limited Amount;",this.ethLimitedAmount);
-      console.log("erc20 limited Amount:",this.erc20LimitedAmount);
-      setTimeout(() => {
-        // alert(this.iconLoading);
-        this.iconLoadingLimited = false;
-      }, 1000);
-    },
-    submitSwap() {
-      if (this.user == null) {
-        alert("Please connect wallet.");
-        return;
-      }
-      if (this.ethAmount == undefined || this.erc20Amount == undefined) {
-        return;
-      }
-      this.iconLoading = true;
-      let amountOutMinimum = String(this.erc20Amount*(1-this.slipPoint/100)).substring(0,8);
-      console.log("ethAmount",this.ethAmount);
-      console.log("amountOutMinimum",amountOutMinimum);
-      if (!this.contractAddrMap.has(this.subKeySrc)) {
-        console.log("Invaild src contract address");
-        return;
-      }
-      if (!this.contractAddrMap.has(this.subKeyDes)) {
-        console.log("Invaild src contract address");
-        return;
-      }
-      createTypedData(this.contractAddrMap.get(this.subKeySrc), this.contractAddrMap.get(this.subKeyDes), this.fee, this.routerAddress, this.ethAmount, amountOutMinimum, this.chainId).then((res)=>{
-        console.log("response:",res);
+      // get metamask signature
+      createTypedData(this.contractAddrMap.get(this.subKeyLimitedSrc), this.contractAddrMap.get(this.subKeyLimitedDes), this.fee, this.routerAddress, this.ethLimitedAmount, this.erc20LimitedAmount, this.chainId).then((res) => {
+        console.log("response:", res);
+        if (res == undefined) {
+          this.iconLoading = false;
+          return;
+        }
         // call exactInputSingle in relayer
         let obj = {
           r: res.r,
@@ -755,8 +729,87 @@ export default {
             sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
           },
           user: this.user,
-          v:res.v,
-          flag: this.privateKey
+          v: res.v,
+          flag: this.PriTxChecked
+        };
+        console.log("limited order obj string:", JSON.stringify(obj));
+        // axios.post('/api/v1/instant_swap', {
+        //   r: res.r,
+        //   s: res.s,
+        //   salt: res.value.salt,
+        //   tx_value: {
+        //     amount_in: String(res.value.amountIn),
+        //     amount_out_minimum: String(res.value.amountOutMinimum),
+        //     fee: res.value.fee,
+        //     recipient: res.value.recipient,
+        //     token_in: res.value.tokenIn,
+        //     token_out: res.value.tokenOut,
+        //     sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
+        //   },
+        //   user: this.user,
+        //   v: res.v,
+        //   flag: this.PriTxChecked
+        // })
+        //   .then(function (response) {
+        //     console.log(response);
+        //     if (response.data.code == 1000) {
+        //       console.log("swap success!");
+        //     }
+        //   })
+        //   .catch(function (error) {
+        //     console.log(error);
+        //   });
+      });
+
+      setTimeout(() => {
+        // alert(this.iconLoading);
+        this.iconLoadingLimited = false;
+      }, 1000);
+    },
+    submitSwap() {
+      if (this.user == null) {
+        alert("Please connect wallet.");
+        return;
+      }
+      if (this.ethAmount == undefined || this.erc20Amount == undefined) {
+        return;
+      }
+      let amountOutMinimum = String(this.erc20Amount * (1 - this.slipPoint / 100)).substring(0, 8);
+      console.log("ethAmount", this.ethAmount);
+      console.log("amountOutMinimum", amountOutMinimum);
+      if (!this.contractAddrMap.has(this.subKeySrc)) {
+        console.log("Invaild src contract address");
+        return;
+      }
+      if (!this.contractAddrMap.has(this.subKeyDes)) {
+        console.log("Invaild des contract address");
+        return;
+      }
+      // loading icon
+      this.iconLoading = true;
+      createTypedData(this.contractAddrMap.get(this.subKeySrc), this.contractAddrMap.get(this.subKeyDes), this.fee, this.routerAddress, this.ethAmount, amountOutMinimum, this.chainId).then((res) => {
+        console.log("response:", res);
+        if (res == undefined) {
+          this.iconLoading = false;
+          return;
+        }
+        // call exactInputSingle in relayer
+        let obj = {
+          r: res.r,
+          s: res.s,
+          salt: res.value.salt,
+          tx_value: {
+            amount_in: String(res.value.amountIn),
+            amount_out_minimum: String(res.value.amountOutMinimum),
+            fee: res.value.fee,
+            recipient: res.value.recipient,
+            token_in: res.value.tokenIn,
+            token_out: res.value.tokenOut,
+            sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
+          },
+          user: this.user,
+          v: res.v,
+          flag: this.PriTxChecked
         };
         console.log("obj string:", JSON.stringify(obj));
         axios.post('/api/v1/instant_swap', {
@@ -773,8 +826,8 @@ export default {
             sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
           },
           user: this.user,
-          v:res.v,
-          flag: this.privateKey
+          v: res.v,
+          flag: this.PriTxChecked
         })
           .then(function (response) {
             console.log(response);
@@ -823,12 +876,12 @@ export default {
       this.openSetting = true;
     },
     hideModal() {
-      console.log("slipPoint:",this.slipPoint);
-      console.log("deadLine:",this.deadLine);
+      console.log("slipPoint:", this.slipPoint);
+      console.log("deadLine:", this.deadLine);
       console.log("PriTxChecked:", this.PriTxChecked);
       this.openSetting = false;
     },
-    cancelModal(){
+    cancelModal() {
       // this.slipPoint = null;
       // this.deadLine = null;
     },
@@ -840,15 +893,17 @@ export default {
         this.iconLoadingDepositEth = true;
         // deposit ETH
         depositETH(this.user, this.depositEth, this.hideEthDepositCallback);
+        this.depositEth = null;
+        
+        this.openNotifaction("info", "Transaction pending.");
       }
-      this.depositEth = null;
       this.depositEthOpen = false;
     },
     hideEthDepositCallback(value) {
-      console.log("receipt status:",value);
+      console.log("receipt status:", value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Deposit Succeed! Transaction hash: "+value.transactionHash);
+        this.openNotifaction("success", "Deposit Succeed! Transaction hash: " + value.transactionHash);
         // update  eth balance
         for (let index = 0; index < this.object.length; index++) {
           const element = this.object[index];
@@ -857,11 +912,11 @@ export default {
               console.log(element.token + " balance:" + response.balance.toNumber());
               this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
             } else {
-              console.log("get "+element.token+" balance falied!");
+              console.log("get " + element.token + " balance falied!");
             }
           });
         }
-      }else{
+      } else {
         this.openNotifaction("error", "Deposit Failed!");
       }
       // update loading icon
@@ -892,15 +947,17 @@ export default {
         } else {
           this.notification("error", "Invaild token address!");
         }
+        this.depositErc20 = null;
+        
+        this.openNotifaction("info", "Transaction pending.");
       }
-      this.depositErc20 = null;
       this.depositErc20Open = false;
     },
     hideErc20DepositCallback(value) {
-      console.log("receipt status:",value);
+      console.log("receipt status:", value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Deposit Succeed! Transaction hash: "+value.transactionHash);
+        this.openNotifaction("success", "Deposit Succeed! Transaction hash: " + value.transactionHash);
         // update  erc20 balance
         for (let index = 0; index < this.object.length; index++) {
           const element = this.object[index];
@@ -909,11 +966,11 @@ export default {
               console.log(element.token + " balance:" + response.balance.toNumber());
               this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
             } else {
-              console.log("get "+element.token+" balance falied!");
+              console.log("get " + element.token + " balance falied!");
             }
           });
         }
-      }else{
+      } else {
         this.openNotifaction("error", "Deposit Failed!");
       }
       // update loading icon
@@ -930,15 +987,17 @@ export default {
         this.iconLoadingWithdrawEth = true;
         // withdraw ETH
         withdrawETH(this.user, this.withdrawEth, this.hideEthWithdrawCallback);
+        this.withdrawEth = null;
+        
+        this.openNotifaction("info", "Transaction pending.");
       }
-      this.withdrawEth = null;
       this.withdrawEthOpen = false;
     },
     hideEthWithdrawCallback(value) {
-      console.log("receipt status:",value);
+      console.log("receipt status:", value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Withdraw Succeed! Transaction hash: "+value.transactionHash);
+        this.openNotifaction("success", "Withdraw Succeed! Transaction hash: " + value.transactionHash);
         // update  eth balance
         for (let index = 0; index < this.object.length; index++) {
           const element = this.object[index];
@@ -947,11 +1006,11 @@ export default {
               console.log(element.token + " balance:" + response.balance.toNumber());
               this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
             } else {
-              console.log("get "+element.token+" balance falied!");
+              console.log("get " + element.token + " balance falied!");
             }
           });
         }
-      }else{
+      } else {
         this.openNotifaction("error", "Withdraw Failed!");
       }
       // update loading icon
@@ -981,15 +1040,17 @@ export default {
         } else {
           this.notification("error", "Invaild token address!");
         }
+        this.withdrawErc20 = null;
+        
+        this.openNotifaction("info", "Transaction pending.");
       }
-      this.withdrawErc20 = null;
       this.withdrawErc20Open = false;
     },
     hideErc20WithdrawCallback(value) {
-      console.log("receipt status:",value);
+      console.log("receipt status:", value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Withdraw erc20 Succeed! Transaction hash: "+value.transactionHash);
+        this.openNotifaction("success", "Withdraw erc20 Succeed! Transaction hash: " + value.transactionHash);
         // update  erc20 balance
         for (let index = 0; index < this.object.length; index++) {
           const element = this.object[index];
@@ -998,11 +1059,11 @@ export default {
               console.log(element.token + " balance:" + response.balance.toNumber());
               this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
             } else {
-              console.log("get "+element.token+" balance falied!");
+              console.log("get " + element.token + " balance falied!");
             }
           });
         }
-      }else{
+      } else {
         this.openNotifaction("error", "Withdraw erc20 Failed!");
       }
       // update loading icon
@@ -1029,25 +1090,27 @@ export default {
           console.log("match success! index is:", flag);
           console.log("token address: ", this.object[flag].address);
           approve(this.walletAddress, this.object[flag].address, this.approveErc20, this.hideErc20ApproveCallback);
-        }else{
-          this.notification("error","Invaild token address!");
+        } else {
+          this.notification("error", "Invaild token address!");
         }
+        this.approveErc20 = null;
+        
+        this.openNotifaction("info", "Transaction pending.");
       }
-      this.approveErc20 = null;
       this.approveErc20Open = false;
     },
     hideErc20ApproveCallback(value) {
-      console.log("receipt status:",value);
+      console.log("receipt status:", value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Approve Succeed! Transaction hash: "+value.transactionHash);
-      }else{
+        this.openNotifaction("success", "Approve Succeed! Transaction hash: " + value.transactionHash);
+      } else {
         this.openNotifaction("error", "Approve Failed!");
       }
       // update loading icon
       this.iconLoadingApproveErc20 = false;
     },
-    cancelErc20Approve(){
+    cancelErc20Approve() {
       this.approveErc20 = null;
     },
     connect() {
@@ -1089,7 +1152,7 @@ export default {
               console.log(element.token + " balance:" + response.balance.toNumber());
               this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
             } else {
-              console.log("get "+element.token+" balance falied!");
+              console.log("get " + element.token + " balance falied!");
             }
           });
         }
@@ -1118,9 +1181,9 @@ export default {
     //USDC pooladdress:0x7bea39867e4169dbe237d55c8242a8f2fcdcc387
     calculateRateE() {
       let pooladdr = "";
-      if (this.rateMap.has(this.subKeySrc+this.subKeyDes)) {
-        pooladdr = this.rateMap.get(this.subKeySrc+this.subKeyDes);
-      }else{
+      if (this.rateMap.has(this.subKeySrc + this.subKeyDes)) {
+        pooladdr = this.rateMap.get(this.subKeySrc + this.subKeyDes);
+      } else {
         console.log("Invalid pool address!");
         return;
       };
@@ -1129,7 +1192,7 @@ export default {
         query: `
           {
             pools(where: {
-              id_in: ["`+pooladdr+`"]
+              id_in: ["`+ pooladdr + `"]
             }) {
               token0 {
                 symbol
@@ -1147,9 +1210,9 @@ export default {
           if (res.data != null) {
             console.log(res.data.data.pools[0]);
             var rate = res.data.data.pools[0].token0Price;
-            this.erc20Amount = String(this.ethAmount * Number(rate.substring(0, 8))).substring(0,8);
+            this.erc20Amount = String(this.ethAmount * Number(rate.substring(0, 8))).substring(0, 8);
             // console.log("uniAmount: ",String(this.uniAmount).substring(0,8));
-            this.$refs.exchangeRate.innerHTML = "rate: 1 "+this.subKeySrc+" = " + rate.substring(0, 8) + " "+this.subKeyDes;
+            this.$refs.exchangeRate.innerHTML = "rate: 1 " + this.subKeySrc + " = " + rate.substring(0, 8) + " " + this.subKeyDes;
           }
         })
         .catch((error) => {
@@ -1160,9 +1223,9 @@ export default {
     //USDC pooladdress:0x7bea39867e4169dbe237d55c8242a8f2fcdcc387
     calculateRateU() {
       let pooladdr = "";
-      if (this.rateMap.has(this.subKeySrc+this.subKeyDes)) {
-        pooladdr = this.rateMap.get(this.subKeySrc+this.subKeyDes);
-      }else{
+      if (this.rateMap.has(this.subKeySrc + this.subKeyDes)) {
+        pooladdr = this.rateMap.get(this.subKeySrc + this.subKeyDes);
+      } else {
         console.log("Invalid pool address!");
         return;
       };
@@ -1170,7 +1233,7 @@ export default {
         query: `
           {
             pools(where: {
-              id_in: ["`+pooladdr+`"]
+              id_in: ["`+ pooladdr + `"]
             }) {
               token0 {
                 symbol
@@ -1188,9 +1251,9 @@ export default {
           if (res.data != null) {
             console.log(res.data.data.pools[0]);
             var rate = res.data.data.pools[0].token1Price;
-            this.ethAmount = String(this.erc20Amount * Number(rate.substring(0, 8))).substring(0,8);
+            this.ethAmount = String(this.erc20Amount * Number(rate.substring(0, 8))).substring(0, 8);
             // console.log("1 ETH = "+rate.substring(0,8)+" UNI");
-            this.$refs.exchangeRate.innerHTML = "rate: 1 "+this.subKeyDes+" = " + rate.substring(0, 8) + " "+this.subKeySrc;
+            this.$refs.exchangeRate.innerHTML = "rate: 1 " + this.subKeyDes + " = " + rate.substring(0, 8) + " " + this.subKeySrc;
           }
         })
         .catch((error) => {
@@ -1198,9 +1261,9 @@ export default {
         })
     },
     getTxHistory() {
-      axios.post("https://api-sepolia.etherscan.io/api?module=account&action=txlist&address="+this.user+"&startblock=0&endblock=99999999&page=1&offset=10000&sort=asc&apikey=C8EH3QCAH18KHGDVTQIM3HWWVBV9FW3AQ9").then((res)=>{
+      axios.post("https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=" + this.user + "&startblock=0&endblock=99999999&page=1&offset=10000&sort=asc&apikey=C8EH3QCAH18KHGDVTQIM3HWWVBV9FW3AQ9").then((res) => {
         if (res != null) {
-          console.log("Tx history:",res.data.result);
+          console.log("Tx history:", res.data.result);
           res.data.result.forEach(element => {
             let tmpObj = {
               blockHash: element.blockHash,
