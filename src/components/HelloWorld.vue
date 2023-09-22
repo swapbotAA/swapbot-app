@@ -293,7 +293,7 @@
           </div>
           <div id="contentRight2" v-show="numberr == 2" style="">
             <span>
-              <a-list size="large" bordered :data-source="data"
+              <a-list size="large" bordered :data-source="dataHistory"
                 style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
                 <template #renderItem="{ item }">
                   <a-list-item>{{ item }}</a-list-item>
@@ -309,10 +309,16 @@
               <a-list size="large" bordered :data-source="orderData"
                 style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
                 <template #renderItem="{ item }">
-                  <a-list-item><span style="margin-left:8%;">Order Number:&nbsp</span>{{ item
-                  }}<span>&nbsp&nbsp&nbsp&nbsp&nbsp</span>
+                  <a-list-item>
+                    <span>order number:&nbsp</span>{{item.orderNo}}
+                    <br/>
+                    <span>order content:&nbsp</span>
+                    <br/>
+                    <span>token in:&nbsp</span>{{item.orderContent.tokenIn}}<span>&nbsp amount:&nbsp</span>{{item.orderContent.tokenInAmount}}
+                    <br/>
+                    <span>token out:&nbsp</span>{{item.orderContent.tokenOut}}<span>&nbsp amount:&nbsp</span>{{item.orderContent.tokenOutAmount}}
                     <!-- <a-button  type="primary" style="height: 40px;width: 100px; margin-left: 30%;">Edit</a-button> -->
-                    <a-button danger type="primary" shape="round" style="height: 40px;width: 80px; margin-left: 45%;">
+                    <a-button danger type="primary" shape="round"  @click="cancelLimitedOrder(item.orderNo)" style="height: 30px;width: 80px; margin-left: 45%;">
                       Cancel
                     </a-button>
                   </a-list-item>
@@ -520,9 +526,10 @@ contractAddrMap.set("eth", "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14");
 contractAddrMap.set("uni", "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984");
 
 
-let wrapObj = [{ token: "ETH", address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14", balance: 0 },
-{ token: "UNI", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
-{ token: "USDC", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
+let wrapObj = [
+  { token: "ETH", address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14", balance: 0 },
+  { token: "UNI", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
+  { token: "USDC", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
 ];
 
 let tokenName = "ERC20";
@@ -608,13 +615,25 @@ export default {
         { option: 'History' },
         // { option: 'Strategy' },
       ],
-      data: [],
-      orderData: ["123", "456"],
+      dataHistory: [],
+      orderData: [
+        { orderNo: "1",orderContent: { tokenIn: "eth", tokenOut: "uni", tokenInAmount: "0.0001", tokenOutAmount: "0.0003" } },
+        { orderNo: "2",orderContent: { tokenIn: "eth", tokenOut: "uni", tokenInAmount: "0.0001", tokenOutAmount: "0.0003" } },
+      ],
       optionSrc: optionSrc,
       optionDes: optionDes,
     }
   },
   methods: {
+    cancelLimitedOrder(orderNo) {
+      for (let index = 0; index < this.orderData.length; index++) {
+        const element = this.orderData[index];
+        if (element.orderNo == orderNo) {
+          this.orderData.splice(index,1);
+        }
+      }
+      alert("delete succeed!");
+    },
     openNotifaction(type, content) {
       notification[type]({
         message: 'Notification',
@@ -1270,7 +1289,7 @@ export default {
               blockNumber: element.blockNumber,
               timeStamp: element.timeStamp
             };
-            this.data.push(tmpObj);
+            this.dataHistory.push(tmpObj);
           });
           // this.data[0].blockHash = res.data.result[3].blockHash;
           // this.data[0].blockNumber = res.data.result[3].blockNumber;
