@@ -310,9 +310,9 @@
                 style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
                 <template #renderItem="{ item }">
                   <a-list-item>
-                    <span>order number:&nbsp</span>{{item.orderNo}}
+                    <span style="font-weight: 700;">order number:&nbsp</span>{{item.orderNo}}
                     <br/>
-                    <span>order content:&nbsp</span>
+                    <span style="font-weight: 700;">order content:&nbsp</span>
                     <br/>
                     <span>token in:&nbsp</span>{{item.orderContent.tokenIn}}<span>&nbsp amount:&nbsp</span>{{item.orderContent.tokenInAmount}}
                     <br/>
@@ -617,8 +617,8 @@ export default {
       ],
       dataHistory: [],
       orderData: [
-        { orderNo: "1",orderContent: { tokenIn: "eth", tokenOut: "uni", tokenInAmount: "0.0001", tokenOutAmount: "0.0003" } },
-        { orderNo: "2",orderContent: { tokenIn: "eth", tokenOut: "uni", tokenInAmount: "0.0001", tokenOutAmount: "0.0003" } },
+        // { orderNo: "1",orderContent: { tokenIn: "eth", tokenOut: "uni", tokenInAmount: "0.0001", tokenOutAmount: "0.0003" } },
+        // { orderNo: "2",orderContent: { tokenIn: "eth", tokenOut: "uni", tokenInAmount: "0.0001", tokenOutAmount: "0.0003" } },
       ],
       optionSrc: optionSrc,
       optionDes: optionDes,
