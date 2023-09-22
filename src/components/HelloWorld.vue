@@ -752,6 +752,10 @@ export default {
           flag: this.PriTxChecked
         };
         console.log("limited order obj string:", JSON.stringify(obj));
+        let timeStamp = new Date().getTime();
+        console.log("current timestamp: ", timeStamp);
+        let limitedOrderTmpObj = {orderNo: timeStamp, orderContent: { tokenIn: this.subKeyLimitedSrc, tokenOut: this.subKeyLimitedDes, tokenInAmount: this.ethLimitedAmount, tokenOutAmount: this.erc20LimitedAmount }};
+        this.orderData.push(limitedOrderTmpObj);
         // axios.post('/api/v1/instant_swap', {
         //   r: res.r,
         //   s: res.s,
