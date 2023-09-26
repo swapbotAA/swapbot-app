@@ -245,6 +245,22 @@
                 </template>
                 Withdraw
               </a-button>
+              <a-button type="dashed" :loading="iconLoadingWithdrawErc20" @click="showDeleteButton()"
+                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                ...
+              </a-button>
+              <div v-show="showDeleteFlage">
+                <a-button type="primary" danger :loading="iconLoadingWithdrawErc20" @click="deleteToken(tokenName)"
+                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                Delete Token
+              </a-button>
+              </div>
             </a-drawer>
             <!--drawer of ERC20 adding-->
             <a-drawer v-model:open="addErc20Open" class="custom-class" root-class-name="root-class-name"
@@ -541,6 +557,7 @@ export default {
   },
   data() {
     return {
+      showDeleteFlage: ref(false),
       ethLimitedAmount: null,
       erc20LimitedAmount: null,
       PriTxChecked: ref(false),
@@ -625,6 +642,18 @@ export default {
     }
   },
   methods: {
+    deleteToken(value) {
+      for (let index = 0; index < this.object.length; index++) {
+        const element = this.object[index];
+        if (element.token == value) {
+          this.object.splice(index,1);
+        }
+      }
+      alert("delete token succeed!");
+    },
+    showDeleteButton() {
+      this.showDeleteFlage = this.showDeleteFlage == false ? true : false;
+    },
     cancelLimitedOrder(orderNo) {
       for (let index = 0; index < this.orderData.length; index++) {
         const element = this.orderData[index];
