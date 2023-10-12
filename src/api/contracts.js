@@ -274,15 +274,46 @@ async function withdrawETH(user, addr, salt, wethAddr, amount, chainId, callback
 }
 
 //withdrawERC20
-async function withdrawERC20(user,contractAddress, rawAmount, callback) {
+async function withdrawERC20(user, addr, salt, uniAddr, rawAmount, chainId, callback) {
     try {
         let erc2Amount = ethers.utils.parseUnits(rawAmount);
-        await walletInstance.withdrawERC20(user, contractAddress, erc2Amount).then(transactionResponse => {
+        // get tx nonce
+        let nonce = await entryPointInstance.getNonce(addr, 0);
+        console.log("tx nonce: ",nonce);
+        // if nonce is 0, we need to deploy smart contract account
+        let initCode = "0x";
+        if (String(nonce) == "0") {
+            // create initcode salt == nonce
+            initCode = createInitCode(sparkyAccountFactory_address, user, salt);
+        }
+        // create call data
+        let func = createCallData("transfer", [user, erc2Amount]);
+        // let func = "0x";
+        // let calldata = createCallData("execute",[user, someEther, func]);
+        let calldata = createCallData("execute", [uniAddr, 0, func]);
+        // create UserOperationWithouSig
+        let userOperationWithoutSig = new UserOperationWithoutSig(
+            addr, // wallet addr
+            nonce, // nonce
+            initCode, 
+            calldata,
+            300000, // You can use this value temporarily, and then increase it
+            300000, // You can use this value temporarily, and then increase it
+            100000, // You can use this value temporarily, and then increase it
+            500000000000, // this is 10gwei，value can be adjusted according to the actual situation
+            5000000000,  // this is 5gwei
+            sparkyPaymaster_address, // sparkyPaymaster address
+        );
+        // user sign 
+        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
+        // add user signature to userOperation
+        let userOperation = userOperationWithoutSig.addSig(sig);
+        await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
             transactionResponse.wait().then(receipt => {
-                console.log("withdraw erc20 receipt status: ",receipt);
+                console.log("withdraw erc20 receipt status: ", receipt);
                 let tmpObj = receipt;
                 callback(tmpObj);
-            })
+            });
         });
     } catch (e) {
         console.error(e);

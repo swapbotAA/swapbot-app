@@ -245,14 +245,14 @@
                 </template>
                 Withdraw
               </a-button>
-              <a-button type="dashed" :loading="iconLoadingWithdrawErc20" @click="showDeleteButton()"
+              <a-button type="dashed" @click="showDeleteButton()"
                 style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
                 </template>
                 ...
               </a-button>
-              <a-button v-show="showDeleteFlage" type="primary" danger :loading="iconLoadingWithdrawErc20" @click="deleteToken(tokenName)"
+              <a-button v-show="showDeleteFlage" type="primary" danger @click="deleteToken(tokenName)"
                   style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                   <template #icon>
                     <PoweroffOutlined />
@@ -1154,7 +1154,7 @@ export default {
       if (this.withdrawEth > 0) {
         this.iconLoadingWithdrawEth = true;
         // withdraw ETH
-        withdrawETH(this.user, this.walletAddress, this.walletNum,this.object[0].address, this.withdrawEth, this.chainId, this.hideEthWithdrawCallback);
+        withdrawETH(this.user, this.walletAddress, this.walletNum, this.object[0].address, this.withdrawEth, this.chainId, this.hideEthWithdrawCallback);
         this.withdrawEth = null;
 
         this.openNotifaction("info", "Transaction pending.");
@@ -1205,7 +1205,7 @@ export default {
         if (flag != null) {
           console.log("match success! index is:", flag);
           console.log("token address: ", this.object[flag].address);
-          withdrawERC20(this.user, this.object[flag].address, this.withdrawErc20, this.hideErc20WithdrawCallback);
+          withdrawERC20(this.user, this.walletAddress, this.walletNum, this.object[flag].address, this.withdrawErc20, this.chainId, this.hideErc20WithdrawCallback);
         } else {
           this.notification("error", "Invaild token address!");
         }
@@ -1221,9 +1221,9 @@ export default {
         // notice: transaction success
         this.openNotifaction("success", "Withdraw erc20 Succeed! Transaction hash: " + value.transactionHash);
         // update  erc20 balance
-        for (let index = 0; index < this.object.length; index++) {
+        for (let index = 1; index < this.object.length; index++) {
           const element = this.object[index];
-          getBalance(this.user, element.address).then((response) => {
+          getErc20Balance(this.walletAddress, element.address).then((response) => {
             if (response.status) {
               console.log(element.token + " balance:" + response.balance.toNumber());
               this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
