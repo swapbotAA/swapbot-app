@@ -539,7 +539,7 @@ import UniswapRouter from "../api/abis/UniswapRouter.json";
 import {
   getWeb3Provider,
   initInstances,
-  getBalance,
+  getErc20Balance,
   depositETH,
   approve,
   depositERC20,
@@ -579,7 +579,7 @@ contractAddrMap.set("uni", "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984");
 let wrapObj = [
   { token: "ETH", address: "0xCeCd6718a8Fd49c7fA2220d9b034C0f36a8DaA88", balance: 0 },
   // { token: "WETH", address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14", balance: 0 },
-  // { token: "UNI", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
+  { token: "UNI", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
   // { token: "USDC", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
 ];
 
@@ -1091,7 +1091,7 @@ export default {
         if (flag != null) {
           console.log("match success! index is:", flag);
           console.log("token address: ", this.object[flag].address);
-          depositERC20(this.user, this.object[flag].address, this.depositErc20, this.hideErc20DepositCallback);
+          depositERC20(this.walletAddress, this.object[flag].address, this.depositErc20, this.hideErc20DepositCallback);
         } else {
           this.notification("error", "Invaild token address!");
         }
@@ -1107,9 +1107,9 @@ export default {
         // notice: transaction success
         this.openNotifaction("success", "Deposit Succeed! Transaction hash: " + value.transactionHash);
         // update  erc20 balance
-        for (let index = 0; index < this.object.length; index++) {
+        for (let index = 1; index < this.object.length; index++) {
           const element = this.object[index];
-          getBalance(this.user, element.address).then((response) => {
+          getErc20Balance(this.walletAddress, element.address).then((response) => {
             if (response.status) {
               console.log(element.token + " balance:" + response.balance.toNumber());
               this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
@@ -1293,10 +1293,8 @@ export default {
             console.log("Init failed");;
           }
         });
-        for (let index = 0; index < this.object.length; index++) {
-          const element = this.object[index];
-          // update  eth balance
-          getEthBalance(this.walletAddress).then((response) => {
+        // update  eth balance
+        getEthBalance(this.walletAddress).then((response) => {
             if (response.status) {
               // console.log(element.token + " balance:" + response.balance.toNumber());
               this.object.forEach(element => {
@@ -1307,15 +1305,18 @@ export default {
             } else {
               console.log("get ETH balance falied!");
             }
+        });
+        // update erc20 balance
+        for (let index = 1; index < this.object.length; index++) {
+          const element = this.object[index];
+          getErc20Balance(this.walletAddress, element.address).then((response) => {
+            if (response.status) {
+              console.log(element.token + " balance:" + response.balance.toNumber());
+              this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+            } else {
+              console.log("get " + element.token + " balance falied!");
+            }
           });
-          // getBalance(this.user, element.address).then((response) => {
-          //   if (response.status) {
-          //     console.log(element.token + " balance:" + response.balance.toNumber());
-          //     this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
-          //   } else {
-          //     console.log("get " + element.token + " balance falied!");
-          //   }
-          // });
         }
       }
       // console.log('data:', this.user);

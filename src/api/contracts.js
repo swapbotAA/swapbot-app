@@ -81,7 +81,7 @@ async function getAddress(signerAddr, salt, callback) {
 // get account balance ETH-Hangzhou
 async function getEthBalance(addr) {
     let amount = await window.web3Provider.getBalance(addr);
-    console.log("amount: ",amount);
+    console.log("eth amount: ",amount);
     if (amount != "") {
         return { status: true, balance: amount };
     } else {
@@ -89,10 +89,20 @@ async function getEthBalance(addr) {
     }
 }
 
-//get account balance
-async function getBalance(user, contractAddress) {
-    let amount = await walletInstance.balanceOf(user, contractAddress);
-    console.log("amount: ",amount);
+//get account balance ETH-Hangzhou
+async function getErc20Balance(addr, erc20Address) {
+    let flag = null;
+        for (let index = 0; index < erc20_address_list.length; index++) {
+            if(erc20_address_list[index] == erc20Address) {
+                flag = index;
+            }
+        }
+        if (flag == null) {
+            console.log("Invalid erc20Address!");
+            return;
+        }
+    let amount = await erc20InstanceList[flag].balanceOf(addr);
+    console.log("erc20 amount: ",amount);
     if (amount != "") {
         return { status: true, balance: amount };
     } else {
@@ -167,11 +177,23 @@ async function approve(walletAddress, erc20Address, rawAmount, callback) {
     }
 }
 
+
 //deposit ERC20
-async function depositERC20(user, erc20Address, rawAmount, callback) {
+async function depositERC20(addr, erc20Address, rawAmount, callback){
     try {
+        let flag = null;
+        for (let index = 0; index < erc20_address_list.length; index++) {
+            if(erc20_address_list[index] == erc20Address) {
+                flag = index;
+            }
+        }
+        if (flag == null) {
+            console.log("Invalid erc20Address!");
+            callback(0);
+            return;
+        }
         let erc2Amount = ethers.utils.parseUnits(rawAmount);
-        await walletInstance.depositERC20(user, erc20Address, erc2Amount).then(transactionResponse => {
+        await erc20InstanceList[flag].transfer(addr, erc2Amount).then(transactionResponse => {
             transactionResponse.wait().then(receipt => {
                 console.log("deposit erc20 receipt status: ", receipt);
                 let tmpObj = receipt;
@@ -183,6 +205,22 @@ async function depositERC20(user, erc20Address, rawAmount, callback) {
         callback(0);
     }
 }
+//deposit ERC20
+// async function depositERC20(user, erc20Address, rawAmount, callback) {
+//     try {
+//         let erc2Amount = ethers.utils.parseUnits(rawAmount);
+//         await walletInstance.depositERC20(user, erc20Address, erc2Amount).then(transactionResponse => {
+//             transactionResponse.wait().then(receipt => {
+//                 console.log("deposit erc20 receipt status: ", receipt);
+//                 let tmpObj = receipt;
+//                 callback(tmpObj);
+//             })
+//         });
+//     } catch (e) {
+//         console.error(e);
+//         callback(0);
+//     }
+// }
 
 //withdraw ETH
 async function withdrawETH(user, amount, callback) {
@@ -291,7 +329,7 @@ async function createTypedDataAndSign(tokenIn, tokenOut, fee, routerAddress, amo
 export {
   getWeb3Provider,
   initInstances,
-  getBalance,
+  getErc20Balance,
   getEthBalance,
   depositETH,
   approve,
