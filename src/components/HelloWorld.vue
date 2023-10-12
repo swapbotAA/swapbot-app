@@ -288,7 +288,7 @@
     <div class="rightbar">
       <div class="tabright">
         <div class="content">
-          <div style="margin: auto;width: 90%;margin-top: -60px;position: absolute;text-align: left;;">
+          <div style="margin: auto;width: 90%;margin-top: -60px;position: absolute;text-align: left;">
             <!--4个按钮-->
             <button :class="indexr == numberr ? 'btnr1' : 'btnr'" @click="tabright(indexr)"
               v-for="(itemr, indexr) in dataListRight" :key="indexr">{{ itemr.option }}
@@ -300,7 +300,7 @@
               <span v-for="value in walletObj">
                 <a-button :class=" value.address == walletAddress ?'btnwallet1' : 'btnwallet'" type="text"
                   @click="changeWallet(value)">
-                  <span>Address:</span><span>:&nbsp</span><span>{{ value.address }}</span>
+                  <span>Address</span><span>:&nbsp</span><span>{{ value.address }}</span>
                 </a-button>
               </span>
             </span>
@@ -572,7 +572,8 @@ contractAddrMap.set("uni", "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984");
 
 
 let wrapObj = [
-  { token: "ETH", address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14", balance: 0 },
+  // {token: "ETH", address: null, balance: 0},
+  { token: "WETH", address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14", balance: 0 },
   { token: "UNI", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
   { token: "USDC", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
 ];
@@ -619,7 +620,6 @@ export default {
       authorization: null,
       buyAddress: null,
       amount: null,
-      // walletAddress: null,
       privateKey: null,
       gasFee: null,
       gasLimit: null,
@@ -630,7 +630,7 @@ export default {
       // wethAddress: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
       // uniAddress: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
       fee: 3000,
-      walletAddress: "0x90CaF385c36b19d9f2BB9B5098398b6844eff8eB",
+      walletAddress: null,
       routerAddress: "0x63A62CBFeBaADFE58CA7E876b6b72868C4aA7CB6",
       // amountOutMinimum: 0,
       chainId: "11155111",
@@ -679,7 +679,6 @@ export default {
     addWallet() {
       console.log("this function will add a wallet address!");
       getAddress(this.user, this.walletNum, this.addWalletCallback);
-      this.walletNum = this.walletNum + 1;
     },
     addWalletCallback(value) {
       console.log("receipt status:", value);
@@ -690,6 +689,10 @@ export default {
       } else {
         this.openNotifaction("error", "Create Account Address Failed!");
       }
+      if (this.walletNum == 0) {
+          this.walletAddress = value;
+        }
+      this.walletNum = this.walletNum + 1;
     },
     changeWallet(value) {
       this.walletAddress = value.address;
