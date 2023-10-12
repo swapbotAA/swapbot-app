@@ -289,13 +289,25 @@
       <div class="tabright">
         <div class="content">
           <div style="margin: auto;width: 90%;margin-top: -60px;position: absolute;text-align: left;;">
-            <!--3个按钮-->
+            <!--4个按钮-->
             <button :class="indexr == numberr ? 'btnr1' : 'btnr'" @click="tabright(indexr)"
               v-for="(itemr, indexr) in dataListRight" :key="indexr">{{ itemr.option }}
             </button>
           </div>
           <!--3个div-->
-          <div id="contentRight1" v-show="numberr == 0">
+          <div id="contentRight0" v-show="numberr == 0">
+            <span ref="tokenList">
+              <span v-for="value in walletObj">
+                <a-button type="text" style="text-align: left; width: 100%; height: 100px; border-radius: 15px;"
+                  @click="changeWallet(value)">
+                  <span>Address:</span><span>:&nbsp</span><span>{{ value.address }}</span>
+                </a-button>
+              </span>
+            </span>
+            <!-- @click="openNotifaction('success')" -->
+            <a-button type="primary" shape="circle" @click="addWallet()">+</a-button>
+          </div>
+          <div id="contentRight1" v-show="numberr == 1">
             <span ref="tokenList">
               <span v-for="value in object">
                 <a-button type="text" style="text-align: left; width: 100%; height: 100px; border-radius: 15px;"
@@ -307,20 +319,7 @@
             <!-- @click="openNotifaction('success')" -->
             <a-button type="primary" shape="circle" @click="showAddErc20Drawer()">+</a-button>
           </div>
-          <div id="contentRight2" v-show="numberr == 2" style="">
-            <span>
-              <a-list size="large" bordered :data-source="dataHistory"
-                style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
-                <template #renderItem="{ item }">
-                  <a-list-item>{{ item }}</a-list-item>
-                </template>
-                <template #footer>
-                  <div style="text-align: center;">....</div>
-                </template>
-              </a-list>
-            </span>
-          </div>
-          <div id="contentRight3" v-show="numberr == 1">
+          <div id="contentRight2" v-show="numberr == 2">
             <span>
               <a-list size="large" bordered :data-source="orderData"
                 style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
@@ -342,7 +341,20 @@
               </a-list>
             </span>
           </div>
-          <div id="contentRight4" v-show="numberr == 3">
+          <div id="contentRight3" v-show="numberr == 3" style="">
+            <span>
+              <a-list size="large" bordered :data-source="dataHistory"
+                style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
+                <template #renderItem="{ item }">
+                  <a-list-item>{{ item }}</a-list-item>
+                </template>
+                <template #footer>
+                  <div style="text-align: center;">....</div>
+                </template>
+              </a-list>
+            </span>
+          </div>
+          <div id="contentRight4" v-show="numberr == 4">
             <span>Coming soon!</span>
           </div>
         </div>
@@ -472,6 +484,7 @@
     border-radius: 15px;
   }
 
+  #contentRight0,
   #contentRight1,
   #contentRight2,
   #contentRight3,
@@ -548,6 +561,10 @@ let wrapObj = [
   { token: "USDC", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
 ];
 
+let walletAddr = [
+  {address: "0x123"},
+];
+
 let tokenName = "ERC20";
 
 export default {
@@ -565,6 +582,7 @@ export default {
       addErc20Symbol: null,
       tokenName: tokenName,
       object: wrapObj,
+      walletObj: walletAddr,
       rateMap: rateMap,
       contractAddrMap: contractAddrMap,
       subKeySrc: "eth",
@@ -627,9 +645,10 @@ export default {
         // { option: 'Front Running' },
       ],
       dataListRight: [
+        {option: 'Wallet'},
         { option: 'Balance' },
         { option: 'Order List' },
-        { option: 'History' },
+        // { option: 'History' },
         // { option: 'Strategy' },
       ],
       dataHistory: [],
@@ -642,6 +661,14 @@ export default {
     }
   },
   methods: {
+    addWallet() {
+      console.log("this function will add a wallet address!");
+      this.walletObj.push({address: "0x345"});
+    },
+    changeWallet(value) {
+      this.walletAddress = value.address;
+      console.log("wallet address changed!");
+    },
     deleteToken(value) {
       for (let index = 0; index < this.object.length; index++) {
         const element = this.object[index];
