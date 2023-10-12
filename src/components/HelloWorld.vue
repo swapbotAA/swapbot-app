@@ -254,12 +254,12 @@
               </a-button>
               <div v-show="showDeleteFlage">
                 <a-button type="primary" danger :loading="iconLoadingWithdrawErc20" @click="deleteToken(tokenName)"
-                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
-                <template #icon>
-                  <PoweroffOutlined />
-                </template>
-                Delete Token
-              </a-button>
+                  style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+                  <template #icon>
+                    <PoweroffOutlined />
+                  </template>
+                  Delete Token
+                </a-button>
               </div>
             </a-drawer>
             <!--drawer of ERC20 adding-->
@@ -296,9 +296,9 @@
           </div>
           <!--4个div-->
           <div id="contentRight0" v-show="numberr == 0">
-            <span >
+            <span>
               <span v-for="value in walletObj">
-                <a-button :class=" value.address == walletAddress ?'btnwallet1' : 'btnwallet'" type="text"
+                <a-button :class="value.address == walletAddress ? 'btnwallet1' : 'btnwallet'" type="text"
                   @click="changeWallet(value)">
                   <span>Address</span><span>:&nbsp</span><span>{{ value.address }}</span>
                 </a-button>
@@ -325,15 +325,18 @@
                 style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
                 <template #renderItem="{ item }">
                   <a-list-item>
-                    <span style="font-weight: 700;">order number:&nbsp</span>{{item.orderNo}}
-                    <br/>
+                    <span style="font-weight: 700;">order number:&nbsp</span>{{ item.orderNo }}
+                    <br />
                     <span style="font-weight: 700;">order content:&nbsp</span>
-                    <br/>
-                    <span>token in:&nbsp</span>{{item.orderContent.tokenIn}}<span>&nbsp amount:&nbsp</span>{{item.orderContent.tokenInAmount}}
-                    <br/>
-                    <span>token out:&nbsp</span>{{item.orderContent.tokenOut}}<span>&nbsp amount:&nbsp</span>{{item.orderContent.tokenOutAmount}}
+                    <br />
+                    <span>token in:&nbsp</span>{{ item.orderContent.tokenIn }}<span>&nbsp
+                      amount:&nbsp</span>{{ item.orderContent.tokenInAmount }}
+                    <br />
+                    <span>token out:&nbsp</span>{{ item.orderContent.tokenOut }}<span>&nbsp
+                      amount:&nbsp</span>{{ item.orderContent.tokenOutAmount }}
                     <!-- <a-button  type="primary" style="height: 40px;width: 100px; margin-left: 30%;">Edit</a-button> -->
-                    <a-button danger type="primary" shape="round"  @click="cancelLimitedOrder(item.orderNo)" style="height: 30px;width: 80px; margin-left: 45%;">
+                    <a-button danger type="primary" shape="round" @click="cancelLimitedOrder(item.orderNo)"
+                      style="height: 30px;width: 80px; margin-left: 45%;">
                       Cancel
                     </a-button>
                   </a-list-item>
@@ -466,15 +469,16 @@
   }
 
   .btnwallet {
-    text-align: left; 
-    width: 100%; 
-    height: 100px; 
+    text-align: left;
+    width: 100%;
+    height: 100px;
     border-radius: 15px;
   }
+
   .btnwallet1 {
-    text-align: left; 
-    width: 100%; 
-    height: 100px; 
+    text-align: left;
+    width: 100%;
+    height: 100px;
     border-radius: 15px;
     background-color: #feecf9;
   }
@@ -543,6 +547,7 @@ import {
   withdrawERC20,
   createTypedData,
   getAddress,
+  getEthBalance,
 } from "../api/contracts";
 
 const axios = require('axios');
@@ -570,15 +575,18 @@ let contractAddrMap = new Map();
 contractAddrMap.set("eth", "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14");
 contractAddrMap.set("uni", "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984");
 
-
+// default null
 let wrapObj = [
-  // {token: "ETH", address: null, balance: 0},
-  { token: "WETH", address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14", balance: 0 },
-  { token: "UNI", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
-  { token: "USDC", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
+  { token: "ETH", address: "0xCeCd6718a8Fd49c7fA2220d9b034C0f36a8DaA88", balance: 0 },
+  // { token: "WETH", address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14", balance: 0 },
+  // { token: "UNI", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
+  // { token: "USDC", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
 ];
 
-let walletAddr = [];
+// default null
+let walletAddr = [
+  { address: "0xCeCd6718a8Fd49c7fA2220d9b034C0f36a8DaA88" }
+];
 
 let tokenName = "ERC20";
 
@@ -589,7 +597,7 @@ export default {
   },
   data() {
     return {
-      walletNum: 0,
+      walletNum: 1,//default 0
       showDeleteFlage: ref(false),
       ethLimitedAmount: null,
       erc20LimitedAmount: null,
@@ -630,7 +638,7 @@ export default {
       // wethAddress: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
       // uniAddress: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
       fee: 3000,
-      walletAddress: null,
+      walletAddress: "0xCeCd6718a8Fd49c7fA2220d9b034C0f36a8DaA88",//default null
       routerAddress: "0x63A62CBFeBaADFE58CA7E876b6b72868C4aA7CB6",
       // amountOutMinimum: 0,
       chainId: "11155111",
@@ -660,7 +668,7 @@ export default {
         // { option: 'Front Running' },
       ],
       dataListRight: [
-        {option: 'Wallet'},
+        { option: 'Wallet' },
         { option: 'Balance' },
         { option: 'Order List' },
         // { option: 'History' },
@@ -685,25 +693,44 @@ export default {
       if (value) {
         // notice: transaction success
         this.openNotifaction("success", "Create Account Address Succeed! Address: " + value);
-        this.walletObj.push({address: value});
+        this.walletObj.push({ address: value });
       } else {
         this.openNotifaction("error", "Create Account Address Failed!");
       }
-      if (this.walletNum == 0) {
-          this.walletAddress = value;
-        }
+      // if (this.walletNum == 0) {
+      //     this.walletAddress = value;
+      //     let tmpObj = { token: "ETH", address: this.walletAddress, balance: 0 };
+      //     this.object.push(tmpObj);
+      //   }
       this.walletNum = this.walletNum + 1;
     },
     changeWallet(value) {
       this.walletAddress = value.address;
       this.openNotifaction("success", "wallet address changed! add: " + this.walletAddress);
-      // console.log("wallet address changed! add: ", this.walletAddress);
+      this.object.forEach(element => {
+        if (element.token == "ETH") {
+          element.address = this.walletAddress;
+        }
+      })
+      console.log(this.object);
+      getEthBalance(this.walletAddress).then((response) => {
+        if (response.status) {
+          // console.log(element.token + " balance:" + response.balance.toNumber());
+          this.object.forEach(element => {
+            if (element.token == "ETH") {
+              element.balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+            }
+          })
+        } else {
+          console.log("get ETH balance falied!");
+        }
+      });
     },
     deleteToken(value) {
       for (let index = 0; index < this.object.length; index++) {
         const element = this.object[index];
         if (element.token == value) {
-          this.object.splice(index,1);
+          this.object.splice(index, 1);
         }
       }
       alert("delete token succeed!");
@@ -715,7 +742,7 @@ export default {
       for (let index = 0; index < this.orderData.length; index++) {
         const element = this.orderData[index];
         if (element.orderNo == orderNo) {
-          this.orderData.splice(index,1);
+          this.orderData.splice(index, 1);
         }
       }
       alert("delete succeed!");
@@ -840,7 +867,7 @@ export default {
         console.log("limited order obj string:", JSON.stringify(obj));
         let timeStamp = new Date().getTime();
         console.log("current timestamp: ", timeStamp);
-        let limitedOrderTmpObj = {orderNo: timeStamp, orderContent: { tokenIn: this.subKeyLimitedSrc, tokenOut: this.subKeyLimitedDes, tokenInAmount: this.ethLimitedAmount, tokenOutAmount: this.erc20LimitedAmount }};
+        let limitedOrderTmpObj = { orderNo: timeStamp, orderContent: { tokenIn: this.subKeyLimitedSrc, tokenOut: this.subKeyLimitedDes, tokenInAmount: this.ethLimitedAmount, tokenOutAmount: this.erc20LimitedAmount } };
         this.orderData.push(limitedOrderTmpObj);
         // axios.post('/api/v1/instant_swap', {
         //   r: res.r,
@@ -1001,9 +1028,9 @@ export default {
       if (this.depositEth > 0) {
         this.iconLoadingDepositEth = true;
         // deposit ETH
-        depositETH(this.user, this.depositEth, this.hideEthDepositCallback);
+        depositETH(this.walletAddress, this.depositEth, this.hideEthDepositCallback);
         this.depositEth = null;
-        
+
         this.openNotifaction("info", "Transaction pending.");
       }
       this.depositEthOpen = false;
@@ -1014,17 +1041,29 @@ export default {
         // notice: transaction success
         this.openNotifaction("success", "Deposit Succeed! Transaction hash: " + value.transactionHash);
         // update  eth balance
-        for (let index = 0; index < this.object.length; index++) {
-          const element = this.object[index];
-          getBalance(this.user, element.address).then((response) => {
-            if (response.status) {
-              console.log(element.token + " balance:" + response.balance.toNumber());
-              this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
-            } else {
-              console.log("get " + element.token + " balance falied!");
-            }
-          });
-        }
+        getEthBalance(this.walletAddress).then((response) => {
+          if (response.status) {
+            // console.log(element.token + " balance:" + response.balance.toNumber());
+            this.object.forEach(element => {
+              if (element.token == "ETH") {
+                element.balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+              }
+            })
+          } else {
+            console.log("get ETH balance falied!");
+          }
+        });
+        // for (let index = 0; index < this.object.length; index++) {
+        //   const element = this.object[index];
+        //   getBalance(this.user, element.address).then((response) => {
+        //     if (response.status) {
+        //       console.log(element.token + " balance:" + response.balance.toNumber());
+        //       this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+        //     } else {
+        //       console.log("get " + element.token + " balance falied!");
+        //     }
+        //   });
+        // }
       } else {
         this.openNotifaction("error", "Deposit Failed!");
       }
@@ -1057,7 +1096,7 @@ export default {
           this.notification("error", "Invaild token address!");
         }
         this.depositErc20 = null;
-        
+
         this.openNotifaction("info", "Transaction pending.");
       }
       this.depositErc20Open = false;
@@ -1097,7 +1136,7 @@ export default {
         // withdraw ETH
         withdrawETH(this.user, this.withdrawEth, this.hideEthWithdrawCallback);
         this.withdrawEth = null;
-        
+
         this.openNotifaction("info", "Transaction pending.");
       }
       this.withdrawEthOpen = false;
@@ -1150,7 +1189,7 @@ export default {
           this.notification("error", "Invaild token address!");
         }
         this.withdrawErc20 = null;
-        
+
         this.openNotifaction("info", "Transaction pending.");
       }
       this.withdrawErc20Open = false;
@@ -1203,7 +1242,7 @@ export default {
           this.notification("error", "Invaild token address!");
         }
         this.approveErc20 = null;
-        
+
         this.openNotifaction("info", "Transaction pending.");
       }
       this.approveErc20Open = false;
@@ -1256,14 +1295,27 @@ export default {
         });
         for (let index = 0; index < this.object.length; index++) {
           const element = this.object[index];
-          getBalance(this.user, element.address).then((response) => {
+          // update  eth balance
+          getEthBalance(this.walletAddress).then((response) => {
             if (response.status) {
-              console.log(element.token + " balance:" + response.balance.toNumber());
-              this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+              // console.log(element.token + " balance:" + response.balance.toNumber());
+              this.object.forEach(element => {
+                if (element.token == "ETH") {
+                  element.balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+                }
+              })
             } else {
-              console.log("get " + element.token + " balance falied!");
+              console.log("get ETH balance falied!");
             }
           });
+          // getBalance(this.user, element.address).then((response) => {
+          //   if (response.status) {
+          //     console.log(element.token + " balance:" + response.balance.toNumber());
+          //     this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+          //   } else {
+          //     console.log("get " + element.token + " balance falied!");
+          //   }
+          // });
         }
       }
       // console.log('data:', this.user);

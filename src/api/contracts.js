@@ -78,9 +78,21 @@ async function getAddress(signerAddr, salt, callback) {
     }
 }
 
+// get account balance ETH-Hangzhou
+async function getEthBalance(addr) {
+    let amount = await window.web3Provider.getBalance(addr);
+    console.log("amount: ",amount);
+    if (amount != "") {
+        return { status: true, balance: amount };
+    } else {
+        return { status: false, response: null };
+    }
+}
+
 //get account balance
 async function getBalance(user, contractAddress) {
     let amount = await walletInstance.balanceOf(user, contractAddress);
+    console.log("amount: ",amount);
     if (amount != "") {
         return { status: true, balance: amount };
     } else {
@@ -88,17 +100,27 @@ async function getBalance(user, contractAddress) {
     }
 }
 //deposit ETH
-async function depositETH(user, amount, callback) {
+async function depositETH(toAddr, amount, callback) {
     try {
         let someEther = ethers.utils.parseEther(amount);
-        await walletInstance.depositETH(user, { value: someEther }).then(transactionResponse => {
+        await window.web3Provider.getSigner().sendTransaction({
+            to: toAddr,
+            value: someEther
+        }).then(transactionResponse => {
             transactionResponse.wait().then(receipt => {
                 console.log("deposit receipt status: ", receipt);
                 let tmpObj = receipt;
                 callback(tmpObj);
-                // console.log("deposit finish!");
             })
         });
+        // await walletInstance.depositETH(user, { value: someEther }).then(transactionResponse => {
+        //     transactionResponse.wait().then(receipt => {
+        //         console.log("deposit receipt status: ", receipt);
+        //         let tmpObj = receipt;
+        //         callback(tmpObj);
+        //         // console.log("deposit finish!");
+        //     })
+        // });
     } catch (e) {
         console.error(e);
         callback(0);
@@ -270,6 +292,7 @@ export {
   getWeb3Provider,
   initInstances,
   getBalance,
+  getEthBalance,
   depositETH,
   approve,
   depositERC20,
