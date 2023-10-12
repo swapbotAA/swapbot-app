@@ -294,11 +294,11 @@
               v-for="(itemr, indexr) in dataListRight" :key="indexr">{{ itemr.option }}
             </button>
           </div>
-          <!--3个div-->
+          <!--4个div-->
           <div id="contentRight0" v-show="numberr == 0">
-            <span ref="tokenList">
+            <span >
               <span v-for="value in walletObj">
-                <a-button type="text" style="text-align: left; width: 100%; height: 100px; border-radius: 15px;"
+                <a-button :class=" value.address == walletAddress ?'btnwallet1' : 'btnwallet'" type="text"
                   @click="changeWallet(value)">
                   <span>Address:</span><span>:&nbsp</span><span>{{ value.address }}</span>
                 </a-button>
@@ -465,6 +465,21 @@
     background-color: #8c55ec;
   }
 
+  .btnwallet {
+    text-align: left; 
+    width: 100%; 
+    height: 100px; 
+    border-radius: 15px;
+  }
+  .btnwallet1 {
+    text-align: left; 
+    width: 100%; 
+    height: 100px; 
+    border-radius: 15px;
+    background-color: #feecf9;
+  }
+
+
   #contentLeft1,
   #contentLeft2 {
     background-color: rgb(245 246 252);
@@ -489,7 +504,7 @@
   #contentRight2,
   #contentRight3,
   #contentRight4 {
-    background-color: rgb(255 244 250);
+    background-color: rgb(245 246 252);
     height: 500px;
     font-size: 16px;
     line-height: 100px;
@@ -527,6 +542,7 @@ import {
   withdrawETH,
   withdrawERC20,
   createTypedData,
+  getAddress,
 } from "../api/contracts";
 
 const axios = require('axios');
@@ -561,9 +577,7 @@ let wrapObj = [
   { token: "USDC", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
 ];
 
-let walletAddr = [
-  {address: "0x123"},
-];
+let walletAddr = [];
 
 let tokenName = "ERC20";
 
@@ -574,6 +588,7 @@ export default {
   },
   data() {
     return {
+      walletNum: 0,
       showDeleteFlage: ref(false),
       ethLimitedAmount: null,
       erc20LimitedAmount: null,
@@ -663,11 +678,23 @@ export default {
   methods: {
     addWallet() {
       console.log("this function will add a wallet address!");
-      this.walletObj.push({address: "0x345"});
+      getAddress(this.user, this.walletNum, this.addWalletCallback);
+      this.walletNum = this.walletNum + 1;
+    },
+    addWalletCallback(value) {
+      console.log("receipt status:", value);
+      if (value) {
+        // notice: transaction success
+        this.openNotifaction("success", "Create Account Address Succeed! Address: " + value);
+        this.walletObj.push({address: value});
+      } else {
+        this.openNotifaction("error", "Create Account Address Failed!");
+      }
     },
     changeWallet(value) {
       this.walletAddress = value.address;
-      console.log("wallet address changed!");
+      this.openNotifaction("success", "wallet address changed! add: " + this.walletAddress);
+      // console.log("wallet address changed! add: ", this.walletAddress);
     },
     deleteToken(value) {
       for (let index = 0; index < this.object.length; index++) {
