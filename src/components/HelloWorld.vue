@@ -720,11 +720,12 @@ export default {
         }
       })
       console.log(this.object);
+      // update eth balance
       getEthBalance(this.walletAddress).then((response) => {
         if (response.status) {
-          // console.log(element.token + " balance:" + response.balance.toNumber());
           this.object.forEach(element => {
             if (element.token == "ETH") {
+              console.log("eth balance:" + response.balance.toNumber());
               element.balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
             }
           })
@@ -732,6 +733,18 @@ export default {
           console.log("get ETH balance falied!");
         }
       });
+      // update  erc20 balance
+      for (let index = 1; index < this.object.length; index++) {
+          const element = this.object[index];
+          getErc20Balance(this.walletAddress, element.address).then((response) => {
+            if (response.status) {
+              console.log(element.token + " balance:" + response.balance.toNumber());
+              this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+            } else {
+              console.log("get " + element.token + " balance falied!");
+            }
+          });
+        }
     },
     deleteToken(value) {
       for (let index = 0; index < this.object.length; index++) {
@@ -1141,7 +1154,7 @@ export default {
       if (this.withdrawEth > 0) {
         this.iconLoadingWithdrawEth = true;
         // withdraw ETH
-        withdrawETH(this.user, this.withdrawEth, this.hideEthWithdrawCallback);
+        withdrawETH(this.user, this.walletAddress, this.walletNum,this.object[0].address, this.withdrawEth, this.chainId, this.hideEthWithdrawCallback);
         this.withdrawEth = null;
 
         this.openNotifaction("info", "Transaction pending.");
@@ -1154,17 +1167,18 @@ export default {
         // notice: transaction success
         this.openNotifaction("success", "Withdraw Succeed! Transaction hash: " + value.transactionHash);
         // update  eth balance
-        for (let index = 0; index < this.object.length; index++) {
-          const element = this.object[index];
-          getBalance(this.user, element.address).then((response) => {
-            if (response.status) {
-              console.log(element.token + " balance:" + response.balance.toNumber());
-              this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
-            } else {
-              console.log("get " + element.token + " balance falied!");
-            }
-          });
-        }
+        getEthBalance(this.walletAddress).then((response) => {
+          if (response.status) {
+            this.object.forEach(element => {
+              if (element.token == "ETH") {
+                console.log("eth balance:" + response.balance.toNumber());
+                element.balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+              }
+            })
+          } else {
+            console.log("get ETH balance falied!");
+          }
+        });
       } else {
         this.openNotifaction("error", "Withdraw Failed!");
       }
