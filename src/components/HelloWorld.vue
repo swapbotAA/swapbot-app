@@ -224,13 +224,13 @@
             <a-drawer v-model:open="operateErc20Open" class="custom-class" root-class-name="root-class-name"
               :root-style="{ color: 'blue' }" style="color: rgb(24, 18, 18)" :title="tokenName" placement="right"
               @after-open-change="afterOpenChange">
-              <a-button type="primary" :loading="iconLoadingApproveErc20" @click="showErc20Approve()"
+              <!-- <a-button type="primary" :loading="iconLoadingApproveErc20" @click="showErc20Approve()"
                 style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                 <template #icon>
                   <PoweroffOutlined />
                 </template>
                 Approve
-              </a-button>
+              </a-button> -->
               <a-button type="primary" :loading="iconLoadingDepositErc20" @click="showErc20Deposit()"
                 style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                 <template #icon>
@@ -252,7 +252,14 @@
                 </template>
                 ...
               </a-button>
-              <div v-show="showDeleteFlage">
+              <a-button v-show="showDeleteFlage" type="primary" danger :loading="iconLoadingWithdrawErc20" @click="deleteToken(tokenName)"
+                  style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+                  <template #icon>
+                    <PoweroffOutlined />
+                  </template>
+                  Delete Token
+                </a-button>
+              <!-- <div v-show="showDeleteFlage">
                 <a-button type="primary" danger :loading="iconLoadingWithdrawErc20" @click="deleteToken(tokenName)"
                   style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                   <template #icon>
@@ -260,7 +267,7 @@
                   </template>
                   Delete Token
                 </a-button>
-              </div>
+              </div> -->
             </a-drawer>
             <!--drawer of ERC20 adding-->
             <a-drawer v-model:open="addErc20Open" class="custom-class" root-class-name="root-class-name"
