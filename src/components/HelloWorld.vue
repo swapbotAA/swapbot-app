@@ -580,7 +580,7 @@
 
   #contentLeft1,
   #contentLeft2 {
-    background: linear-gradient(#ffeef9, #9198e5);;
+    background: linear-gradient(#ffeef9, #91bee5);;
     height: 500px;
     font-size: 16px;
     line-height: 100px;
@@ -589,7 +589,7 @@
   }
 
   #contentLeft3 {
-    background: linear-gradient(#ffeef9, #9198e5);;
+    background: linear-gradient(#ffeef9, #91bee5);;
     height: 500px;
     font-size: 16px;
     line-height: 40px;
@@ -602,7 +602,7 @@
   #contentRight2,
   #contentRight3,
   #contentRight4 {
-    background: linear-gradient(#cddfca, #bbd76d);;
+    background: linear-gradient(#cddfca, #f3d789);;
     height: 500px;
     font-size: 16px;
     line-height: 100px;
