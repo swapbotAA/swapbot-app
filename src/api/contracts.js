@@ -6,7 +6,7 @@ import SparkyAccountFactory from "./abis/SparkyAccountFactory.json";
 import EntryPoint from "./abis/EntryPoint.json";
 
 const wallet_address = "0x90CaF385c36b19d9f2BB9B5098398b6844eff8eB";
-const uniswapRouter_address = "0x63A62CBFeBaADFE58CA7E876b6b72868C4aA7CB6";
+const uniswapRouter_address = "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E";
 const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"];// [0:Uni]
 
 // ETH-Hangzhou branch begin
@@ -323,29 +323,72 @@ async function withdrawERC20(user, addr, salt, uniAddr, rawAmount, chainId, call
 
 
 //createTypedDataAndSign
-async function createTypedData(tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId) {
+async function createTypedData(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
     try {
         let amountInBig = ethers.utils.parseUnits(amountIn);
         let amountOutMinimumBig = ethers.utils.parseUnits(amountOutMinimum);
-        let salt = await randomString(32);
-        let saltByte32 = web3.utils.asciiToHex(salt);
-        console.log("salt:",saltByte32);
-        let { value, r, s, v } = await createTypedDataAndSign(tokenIn, tokenOut, fee, routerAddress, amountInBig, amountOutMinimumBig, window.web3Provider.getSigner(), chainId, saltByte32);
-        console.log("sign finish");
-        return { value, r, s, v };
+        // get tx nonce
+        let nonce = await entryPointInstance.getNonce(addr, 0);
+        console.log("tx nonce: ",nonce);
+        // if nonce is 0, we need to deploy smart contract account
+        let initCode = "0x";
+        if (String(nonce) == "0") {
+            // create initcode salt == nonce
+            initCode = createInitCode(sparkyAccountFactory_address, user, salt);
+        }
+
+        // wrap params
+        let params = {
+            tokenIn: tokenIn, // uniswapV3中用WETH的合约地址替代ETH的地址
+            tokenOut: tokenOut,
+            fee: fee,
+            recipient: addr, 
+            amountIn: amountInBig, 
+            amountOutMinimum: amountOutMinimumBig, // calculate according to slip point
+            sqrtPriceLimitX96: 0
+        }
+        console.log("params: ",params);
+        let func_swap = createCallData("exactInputSingle", [params]);
+        // function execute(dest,value,func)
+        // dest is func call destination address，here is ROUTER address，value is tranfer amount，func_swap is calldata
+        let calldata = createCallData("execute", [routerAddress, amountInBig, func_swap])
+        let userOperationWithoutSig = new UserOperationWithoutSig(
+            addr,
+            nonce,
+            initCode,
+            calldata,
+            300000,
+            300000,
+            100000,
+            500000000000,
+            5000000000,
+            sparkyPaymaster_address,
+        );
+        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
+        let userOperation = userOperationWithoutSig.addSig(sig);
+
+        await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
+            transactionResponse.wait().then(receipt => {
+                console.log("withdraw erc20 receipt status: ", receipt);
+                let tmpObj = receipt;
+                callback(tmpObj);
+            });
+        });
+
+        return null;
     } catch (e) {
         console.error(e);
     }
 }
 
-async function randomString(e) {    
-    e = e || 32;
-    var t = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678",
-    a = t.length,
-    n = "";
-    for (var i = 0; i < e; i++) n += t.charAt(Math.floor(Math.random() * a));
-    return n;
-}
+// async function randomString(e) {    
+//     e = e || 32;
+//     var t = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678",
+//     a = t.length,
+//     n = "";
+//     for (var i = 0; i < e; i++) n += t.charAt(Math.floor(Math.random() * a));
+//     return n;
+// }
 
 function createInitCode(
     factory,

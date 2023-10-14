@@ -370,7 +370,7 @@
         </div>
       </div>
     </div>
-    <div class="bottom">Designed by BlockModel</div>
+    <div class="bottom"></div><!--Designed by BlockModel-->
   </div>
 </template>
 
@@ -604,6 +604,7 @@ export default {
   },
   data() {
     return {
+      walletIndex:0,
       walletNum: 1,//default 0
       showDeleteFlage: ref(false),
       ethLimitedAmount: null,
@@ -646,7 +647,7 @@ export default {
       // uniAddress: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
       fee: 3000,
       walletAddress: "0xCeCd6718a8Fd49c7fA2220d9b034C0f36a8DaA88",//default null
-      routerAddress: "0x63A62CBFeBaADFE58CA7E876b6b72868C4aA7CB6",
+      routerAddress: "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E",
       // amountOutMinimum: 0,
       chainId: "11155111",
       ethBalance: null,
@@ -713,13 +714,21 @@ export default {
     },
     changeWallet(value) {
       this.walletAddress = value.address;
-      this.openNotifaction("success", "wallet address changed! add: " + this.walletAddress);
+      this.openNotifaction("success", "wallet address changed! addr: " + this.walletAddress);
       this.object.forEach(element => {
         if (element.token == "ETH") {
           element.address = this.walletAddress;
         }
       })
       console.log(this.object);
+      // update walletIndex
+      for (let index = 0; index < this.walletObj.length; index++) {
+        const element = this.walletObj[index];
+        if (element.address == this.walletAddress) {
+          this.walletIndex = index;
+          console.log("wallet index: ",this.walletIndex);
+        }
+      }
       // update eth balance
       getEthBalance(this.walletAddress).then((response) => {
         if (response.status) {
@@ -943,62 +952,99 @@ export default {
       }
       // loading icon
       this.iconLoading = true;
-      createTypedData(this.contractAddrMap.get(this.subKeySrc), this.contractAddrMap.get(this.subKeyDes), this.fee, this.routerAddress, this.ethAmount, amountOutMinimum, this.chainId).then((res) => {
-        console.log("response:", res);
-        if (res == undefined) {
-          this.iconLoading = false;
-          return;
-        }
+      createTypedData(this.user, this.walletAddress, this.walletIndex, this.contractAddrMap.get(this.subKeySrc), this.contractAddrMap.get(this.subKeyDes), this.fee, this.routerAddress, this.ethAmount, amountOutMinimum, this.chainId, this.submitSwapCallback);
+      // .then((res) => {
+      //   console.log("response:", res);
+      //   if (res == undefined) {
+      //     this.iconLoading = false;
+      //     return;
+      //   }
         // call exactInputSingle in relayer
-        let obj = {
-          r: res.r,
-          s: res.s,
-          salt: res.value.salt,
-          tx_value: {
-            amount_in: String(res.value.amountIn),
-            amount_out_minimum: String(res.value.amountOutMinimum),
-            fee: res.value.fee,
-            recipient: res.value.recipient,
-            token_in: res.value.tokenIn,
-            token_out: res.value.tokenOut,
-            sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
-          },
-          user: this.user,
-          v: res.v,
-          flag: this.PriTxChecked
-        };
-        console.log("obj string:", JSON.stringify(obj));
-        axios.post('/api/v1/instant_swap', {
-          r: res.r,
-          s: res.s,
-          salt: res.value.salt,
-          tx_value: {
-            amount_in: String(res.value.amountIn),
-            amount_out_minimum: String(res.value.amountOutMinimum),
-            fee: res.value.fee,
-            recipient: res.value.recipient,
-            token_in: res.value.tokenIn,
-            token_out: res.value.tokenOut,
-            sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
-          },
-          user: this.user,
-          v: res.v,
-          flag: this.PriTxChecked
-        })
-          .then(function (response) {
-            console.log(response);
-            if (response.data.code == 1000) {
-              console.log("swap success!");
+        // let obj = {
+        //   r: res.r,
+        //   s: res.s,
+        //   salt: res.value.salt,
+        //   tx_value: {
+        //     amount_in: String(res.value.amountIn),
+        //     amount_out_minimum: String(res.value.amountOutMinimum),
+        //     fee: res.value.fee,
+        //     recipient: res.value.recipient,
+        //     token_in: res.value.tokenIn,
+        //     token_out: res.value.tokenOut,
+        //     sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
+        //   },
+        //   user: this.user,
+        //   v: res.v,
+        //   flag: this.PriTxChecked
+        // };
+        // console.log("obj string:", JSON.stringify(obj));
+        // axios.post('/api/v1/instant_swap', {
+        //   r: res.r,
+        //   s: res.s,
+        //   salt: res.value.salt,
+        //   tx_value: {
+        //     amount_in: String(res.value.amountIn),
+        //     amount_out_minimum: String(res.value.amountOutMinimum),
+        //     fee: res.value.fee,
+        //     recipient: res.value.recipient,
+        //     token_in: res.value.tokenIn,
+        //     token_out: res.value.tokenOut,
+        //     sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
+        //   },
+        //   user: this.user,
+        //   v: res.v,
+        //   flag: this.PriTxChecked
+        // })
+        //   .then(function (response) {
+        //     console.log(response);
+        //     if (response.data.code == 1000) {
+        //       console.log("swap success!");
+        //     }
+        //   })
+        //   .catch(function (error) {
+        //     console.log(error);
+        //   });
+      // });
+      // setTimeout(() => {
+      //   // alert(this.iconLoading);
+      //   this.iconLoading = false;
+      // }, 1000);
+    },
+    submitSwapCallback(value) {
+      console.log("receipt status:", value);
+      if (value) {
+        // notice: transaction success
+        this.openNotifaction("success", "Swap Succeed! Transaction hash: " + value.transactionHash);
+        // update eth balance
+        getEthBalance(this.walletAddress).then((response) => {
+          if (response.status) {
+            this.object.forEach(element => {
+              if (element.token == "ETH") {
+                console.log("eth balance:" + response.balance.toNumber());
+                element.balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+              }
+            })
+          } else {
+            console.log("get ETH balance falied!");
+          }
+        });
+        // update  erc20 balance
+        for (let index = 1; index < this.object.length; index++) {
+          const element = this.object[index];
+          getErc20Balance(this.walletAddress, element.address).then((response) => {
+            if (response.status) {
+              console.log(element.token + " balance:" + response.balance.toNumber());
+              this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+            } else {
+              console.log("get " + element.token + " balance falied!");
             }
-          })
-          .catch(function (error) {
-            console.log(error);
           });
-      });
-      setTimeout(() => {
-        // alert(this.iconLoading);
-        this.iconLoading = false;
-      }, 1000);
+        }
+      } else {
+        this.openNotifaction("error", "Swap Failed!");
+      }
+      // update loading icon
+      this.iconLoading = false;
     },
     submitFrontRun() {
       if (this.user == null) {
@@ -1154,7 +1200,7 @@ export default {
       if (this.withdrawEth > 0) {
         this.iconLoadingWithdrawEth = true;
         // withdraw ETH
-        withdrawETH(this.user, this.walletAddress, this.walletNum, this.object[0].address, this.withdrawEth, this.chainId, this.hideEthWithdrawCallback);
+        withdrawETH(this.user, this.walletAddress, this.walletIndex, this.object[0].address, this.withdrawEth, this.chainId, this.hideEthWithdrawCallback);
         this.withdrawEth = null;
 
         this.openNotifaction("info", "Transaction pending.");
@@ -1205,7 +1251,7 @@ export default {
         if (flag != null) {
           console.log("match success! index is:", flag);
           console.log("token address: ", this.object[flag].address);
-          withdrawERC20(this.user, this.walletAddress, this.walletNum, this.object[flag].address, this.withdrawErc20, this.chainId, this.hideErc20WithdrawCallback);
+          withdrawERC20(this.user, this.walletAddress, this.walletIndex, this.object[flag].address, this.withdrawErc20, this.chainId, this.hideErc20WithdrawCallback);
         } else {
           this.notification("error", "Invaild token address!");
         }
