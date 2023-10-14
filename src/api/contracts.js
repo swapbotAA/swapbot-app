@@ -320,10 +320,65 @@ async function withdrawERC20(user, addr, salt, uniAddr, rawAmount, chainId, call
         callback(0);
     }
 }
+//erc20ToEthDataOperationWrapper
+async function erc20ToEthDataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
+    console.log("erc20 To Eth DataOperation Wrapper start:");
+    try {
+        let amountInBig = ethers.utils.parseUnits(amountIn);
+        let amountOutMinimumBig = ethers.utils.parseUnits(amountOutMinimum);
+        let func_approve = createCallData("approve", [routerAddress, amountInBig]);
+        // get tx nonce
+        let nonce = await entryPointInstance.getNonce(addr, 0);
+        console.log("tx nonce: ",nonce);
+        // if nonce is 0, we need to deploy smart contract account
+        let initCode = "0x";
+        if (String(nonce) == "0") {
+            // create initcode salt == nonce
+            initCode = createInitCode(sparkyAccountFactory_address, user, salt);
+        }
+        // wrap params
+        let params = {
+            tokenIn: tokenIn,
+            tokenOut: tokenOut,
+            fee: fee,
+            recipient: addr,
+            amountIn: amountInBig,
+            amountOutMinimum: amountOutMinimumBig,
+            sqrtPriceLimitX96: 0
+        };
+        let func_swap = createCallData("exactInputSingle", [params]);
+        // merge tx
+        let calldata = createCallData("executeBatch", [[tokenIn, routerAddress], [0, 0], [func_approve, func_swap]]);
+        let userOperationWithoutSig = new UserOperationWithoutSig(
+            addr,
+            nonce,
+            initCode,
+            calldata,
+            300000,
+            300000,
+            100000,
+            500000000000,
+            5000000000,
+            sparkyPaymaster_address,
+        );
+        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
+        let userOperation = userOperationWithoutSig.addSig(sig);
+        await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
+            transactionResponse.wait().then(receipt => {
+                console.log("withdraw erc20 receipt status: ", receipt);
+                let tmpObj = receipt;
+                callback(tmpObj);
+            });
+        });
+        return userOperation;
+    } catch (e) {
+        console.error(e);
+    }
+}
 
-
-//createTypedDataAndSign
-async function createTypedData(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
+//ethToErc20DataOperationWrapper
+async function ethToErc20DataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
+    console.log("eth To Erc20 DataOperation Wrapper start:");
     try {
         let amountInBig = ethers.utils.parseUnits(amountIn);
         let amountOutMinimumBig = ethers.utils.parseUnits(amountOutMinimum);
@@ -339,7 +394,7 @@ async function createTypedData(user, addr, salt, tokenIn, tokenOut, fee, routerA
 
         // wrap params
         let params = {
-            tokenIn: tokenIn, // uniswapV3中用WETH的合约地址替代ETH的地址
+            tokenIn: tokenIn, 
             tokenOut: tokenOut,
             fee: fee,
             recipient: addr, 
@@ -351,7 +406,7 @@ async function createTypedData(user, addr, salt, tokenIn, tokenOut, fee, routerA
         let func_swap = createCallData("exactInputSingle", [params]);
         // function execute(dest,value,func)
         // dest is func call destination address，here is ROUTER address，value is tranfer amount，func_swap is calldata
-        let calldata = createCallData("execute", [routerAddress, amountInBig, func_swap])
+        let calldata = createCallData("execute", [routerAddress, amountInBig, func_swap]);
         let userOperationWithoutSig = new UserOperationWithoutSig(
             addr,
             nonce,
@@ -375,12 +430,129 @@ async function createTypedData(user, addr, salt, tokenIn, tokenOut, fee, routerA
             });
         });
 
-        return null;
+        return userOperation;
     } catch (e) {
         console.error(e);
     }
 }
+//ethToErc20LimitedDataOperationWrapper
+async function ethToErc20LimitedDataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
+    console.log("eth To Erc20 DataOperation Wrapper start:");
+    try {
+        let amountInBig = ethers.utils.parseUnits(amountIn);
+        let amountOutMinimumBig = ethers.utils.parseUnits(amountOutMinimum);
+        // get tx nonce
+        let nonce = await entryPointInstance.getNonce(addr, 0);
+        console.log("tx nonce: ",nonce);
+        // if nonce is 0, we need to deploy smart contract account
+        let initCode = "0x";
+        if (String(nonce) == "0") {
+            // create initcode salt == nonce
+            initCode = createInitCode(sparkyAccountFactory_address, user, salt);
+        }
 
+        // wrap params
+        let params = {
+            tokenIn: tokenIn, 
+            tokenOut: tokenOut,
+            fee: fee,
+            recipient: addr, 
+            amountIn: amountInBig, 
+            amountOutMinimum: amountOutMinimumBig, // calculate according to slip point
+            sqrtPriceLimitX96: 0
+        }
+        console.log("params: ",params);
+        let func_swap = createCallData("exactInputSingle", [params]);
+        // function execute(dest,value,func)
+        // dest is func call destination address，here is ROUTER address，value is tranfer amount，func_swap is calldata
+        let calldata = createCallData("execute", [routerAddress, amountInBig, func_swap]);
+        let userOperationWithoutSig = new UserOperationWithoutSig(
+            addr,
+            nonce,
+            initCode,
+            calldata,
+            300000,
+            300000,
+            100000,
+            500000000000,
+            5000000000,
+            sparkyPaymaster_address,
+        );
+        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
+        let userOperation = userOperationWithoutSig.addSig(sig);
+
+        // await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
+        //     transactionResponse.wait().then(receipt => {
+        //         console.log("withdraw erc20 receipt status: ", receipt);
+        //         let tmpObj = receipt;
+        //         callback(tmpObj);
+        //     });
+        // });
+
+        return userOperation;
+    } catch (e) {
+        console.error(e);
+    }
+}
+//erc20ToEthLimitedDataOperationWrapper
+async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
+    console.log("eth To Erc20 DataOperation Wrapper start:");
+    try {
+        let amountInBig = ethers.utils.parseUnits(amountIn);
+        let amountOutMinimumBig = ethers.utils.parseUnits(amountOutMinimum);
+        // get tx nonce
+        let nonce = await entryPointInstance.getNonce(addr, 0);
+        console.log("tx nonce: ",nonce);
+        // if nonce is 0, we need to deploy smart contract account
+        let initCode = "0x";
+        if (String(nonce) == "0") {
+            // create initcode salt == nonce
+            initCode = createInitCode(sparkyAccountFactory_address, user, salt);
+        }
+
+        // wrap params
+        let params = {
+            tokenIn: tokenIn, 
+            tokenOut: tokenOut,
+            fee: fee,
+            recipient: addr, 
+            amountIn: amountInBig, 
+            amountOutMinimum: amountOutMinimumBig, // calculate according to slip point
+            sqrtPriceLimitX96: 0
+        }
+        console.log("params: ",params);
+        let func_swap = createCallData("exactInputSingle", [params]);
+        // function execute(dest,value,func)
+        // dest is func call destination address，here is ROUTER address，value is tranfer amount，func_swap is calldata
+        let calldata = createCallData("execute", [routerAddress, amountInBig, func_swap]);
+        let userOperationWithoutSig = new UserOperationWithoutSig(
+            addr,
+            nonce,
+            initCode,
+            calldata,
+            300000,
+            300000,
+            100000,
+            500000000000,
+            5000000000,
+            sparkyPaymaster_address,
+        );
+        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
+        let userOperation = userOperationWithoutSig.addSig(sig);
+
+        // await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
+        //     transactionResponse.wait().then(receipt => {
+        //         console.log("withdraw erc20 receipt status: ", receipt);
+        //         let tmpObj = receipt;
+        //         callback(tmpObj);
+        //     });
+        // });
+
+        return userOperation;
+    } catch (e) {
+        console.error(e);
+    }
+}
 // async function randomString(e) {    
 //     e = e || 32;
 //     var t = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678",
@@ -538,7 +710,10 @@ export {
   depositERC20,
   withdrawETH,
   withdrawERC20,
-  createTypedData,
+  ethToErc20DataOperationWrapper,
+  erc20ToEthDataOperationWrapper,
+  ethToErc20LimitedDataOperationWrapper,
+  erc20ToEthLimitedDataOperationWrapper,
   getAddress,
   // approveNFT,
   // registerNFTSale,

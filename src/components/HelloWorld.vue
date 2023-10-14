@@ -31,38 +31,75 @@
           <div id="contentLeft1" v-show="numberl == 0">
 
             <span>
-              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
-                <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()"
+              <div v-show="changePositionFlag == 0">
+                <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
+                  <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()"
                   placeholder="0" suffix="ETH" style="height: 60px;" /> -->
-                <span>
-                  <label>
-                    <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount"
-                      @change="calculateRateE()" placeholder="0" style="width: 70%; height: 40px;" />
-                  </label>
-                  <label>
-                    <a-select :size="size" default-value="eth" style="width: 30%;" @select="handleChangeSrc">
-                      <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
-                        v-for="item in optionSrc" :key="item.value">{{ item.label }}</a-select-option>
-                    </a-select>
-                  </label>
-                </span>
-              </div>
-              <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px;"></div>
-              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
-                <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="uniAmount"
+                  <span>
+                    <label>
+                      <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount"
+                        @change="calculateRateE()" placeholder="0" style="width: 70%; height: 40px;" />
+                    </label>
+                    <label>
+                      <a-select :size="size" default-value="eth" style="width: 30%;" @select="handleChangeSrc">
+                        <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
+                          v-for="item in optionSrc" :key="item.value">{{ item.label }}</a-select-option>
+                      </a-select>
+                    </label>
+                  </span>
+                </div>
+                <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px;" @click="changePosition()"></div>
+                <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
+                  <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="uniAmount"
                   @change="calculateRateU()" placeholder="0" suffix="UNI" style="height: 60px;"/> -->
-                <span>
-                  <label>
-                    <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="erc20Amount"
-                      @change="calculateRateU()" placeholder="0" style="width: 70%; height: 40px; " />
-                  </label>
-                  <label>
-                    <a-select :size="size" default-value="uni" style="width: 30%;" @select="handleChangeDes">
-                      <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
-                        v-for="item in optionDes" :key="item.value">{{ item.label }}</a-select-option>
-                    </a-select>
-                  </label>
-                </span>
+                  <span>
+                    <label>
+                      <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="erc20Amount"
+                        @change="calculateRateU()" placeholder="0" style="width: 70%; height: 40px; " />
+                    </label>
+                    <label>
+                      <a-select :size="size" default-value="uni" style="width: 30%;" @select="handleChangeDes">
+                        <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
+                          v-for="item in optionDes" :key="item.value">{{ item.label }}</a-select-option>
+                      </a-select>
+                    </label>
+                  </span>
+                </div>
+              </div>
+              <div v-show="changePositionFlag == 1">
+                <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
+                  <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="uniAmount"
+                  @change="calculateRateU()" placeholder="0" suffix="UNI" style="height: 60px;"/> -->
+                  <span>
+                    <label>
+                      <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="erc20Amount"
+                        @change="calculateRateU()" placeholder="0" style="width: 70%; height: 40px; " />
+                    </label>
+                    <label>
+                      <a-select :size="size" default-value="uni" style="width: 30%;" @select="handleChangeDes">
+                        <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
+                          v-for="item in optionDes" :key="item.value">{{ item.label }}</a-select-option>
+                      </a-select>
+                    </label>
+                  </span>
+                </div>
+                <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px;" @click="changePosition()"></div>
+                <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
+                  <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()"
+                  placeholder="0" suffix="ETH" style="height: 60px;" /> -->
+                  <span>
+                    <label>
+                      <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount"
+                        @change="calculateRateE()" placeholder="0" style="width: 70%; height: 40px;" />
+                    </label>
+                    <label>
+                      <a-select :size="size" default-value="eth" style="width: 30%;" @select="handleChangeSrc">
+                        <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
+                          v-for="item in optionSrc" :key="item.value">{{ item.label }}</a-select-option>
+                      </a-select>
+                    </label>
+                  </span>
+                </div>
               </div>
               <div style="line-height: 50px;" ref="exchangeRate">rate:?</div>
               <a-button type="primary" :loading="iconLoading" @click="submitSwap()"
@@ -77,38 +114,75 @@
 
           <div id="contentLeft2" v-show="numberl == 1">
             <span>
-              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
-                <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()"
+              <div v-show="changeLimitedPositionFlag == 0">
+                  <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
+                  <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()"
                   placeholder="0" suffix="ETH" style="height: 60px;" /> -->
-                <span>
-                  <label>
-                    <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethLimitedAmount"
-                      placeholder="0" style="width: 70%; height: 40px;" />
-                  </label>
-                  <label>
-                    <a-select :size="size" default-value="eth" style="width: 30%;" @select="handleChangeLimitedSrc">
-                      <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
-                        v-for="item in optionSrc" :key="item.value">{{ item.label }}</a-select-option>
-                    </a-select>
-                  </label>
-                </span>
-              </div>
-              <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px;"></div>
-              <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
-                <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="uniAmount"
+                  <span>
+                    <label>
+                      <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethLimitedAmount"
+                        placeholder="0" style="width: 70%; height: 40px;" />
+                    </label>
+                    <label>
+                      <a-select :size="size" default-value="eth" style="width: 30%;" @select="handleChangeLimitedSrc">
+                        <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
+                          v-for="item in optionSrc" :key="item.value">{{ item.label }}</a-select-option>
+                      </a-select>
+                    </label>
+                  </span>
+                </div>
+                <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px; " @click="changeLimitedPosition()"></div>
+                <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
+                  <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="uniAmount"
                   @change="calculateRateU()" placeholder="0" suffix="UNI" style="height: 60px;"/> -->
-                <span>
-                  <label>
-                    <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="erc20LimitedAmount"
-                      placeholder="0" style="width: 70%; height: 40px; " />
-                  </label>
-                  <label>
-                    <a-select :size="size" default-value="uni" style="width: 30%;" @select="handleChangelimitedDes">
-                      <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
-                        v-for="item in optionDes" :key="item.value">{{ item.label }}</a-select-option>
-                    </a-select>
-                  </label>
-                </span>
+                  <span>
+                    <label>
+                      <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="erc20LimitedAmount"
+                        placeholder="0" style="width: 70%; height: 40px; " />
+                    </label>
+                    <label>
+                      <a-select :size="size" default-value="uni" style="width: 30%;" @select="handleChangelimitedDes">
+                        <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
+                          v-for="item in optionDes" :key="item.value">{{ item.label }}</a-select-option>
+                      </a-select>
+                    </label>
+                  </span>
+                </div>
+              </div>
+              <div v-show="changeLimitedPositionFlag == 1">
+                <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
+                  <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="uniAmount"
+                  @change="calculateRateU()" placeholder="0" suffix="UNI" style="height: 60px;"/> -->
+                  <span>
+                    <label>
+                      <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="erc20LimitedAmount"
+                        placeholder="0" style="width: 70%; height: 40px; " />
+                    </label>
+                    <label>
+                      <a-select :size="size" default-value="uni" style="width: 30%;" @select="handleChangelimitedDes">
+                        <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
+                          v-for="item in optionDes" :key="item.value">{{ item.label }}</a-select-option>
+                      </a-select>
+                    </label>
+                  </span>
+                </div>
+                <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px;" @click="changeLimitedPosition()"></div>
+                <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
+                  <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()"
+                  placeholder="0" suffix="ETH" style="height: 60px;" /> -->
+                  <span>
+                    <label>
+                      <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethLimitedAmount"
+                        placeholder="0" style="width: 70%; height: 40px;" />
+                    </label>
+                    <label>
+                      <a-select :size="size" default-value="eth" style="width: 30%;" @select="handleChangeLimitedSrc">
+                        <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
+                          v-for="item in optionSrc" :key="item.value">{{ item.label }}</a-select-option>
+                      </a-select>
+                    </label>
+                  </span>
+                </div>
               </div>
               <!-- <div style="line-height: 50px;" ref="exchangeRate">rate:?</div> -->
               <a-button type="primary" :loading="iconLoadingLimited" @click="submitLimitedSwap()"
@@ -334,7 +408,7 @@
                   <a-list-item>
                     <span style="font-weight: 700;">order number:&nbsp</span>{{ item.orderNo }}
                     <br />
-                    <span style="font-weight: 700;">order content:&nbsp</span>
+                    <span style="font-weight: 700;">order details:&nbsp</span>
                     <br />
                     <span>token in:&nbsp</span>{{ item.orderContent.tokenIn }}<span>&nbsp
                       amount:&nbsp</span>{{ item.orderContent.tokenInAmount }}
@@ -552,7 +626,10 @@ import {
   depositERC20,
   withdrawETH,
   withdrawERC20,
-  createTypedData,
+  ethToErc20DataOperationWrapper,
+  erc20ToEthDataOperationWrapper,
+  ethToErc20LimitedDataOperationWrapper,
+  erc20ToEthLimitedDataOperationWrapper,
   getAddress,
   getEthBalance,
 } from "../api/contracts";
@@ -604,6 +681,8 @@ export default {
   },
   data() {
     return {
+      changePositionFlag:0,
+      changeLimitedPositionFlag:0,
       walletIndex:0,
       walletNum: 1,//default 0
       showDeleteFlage: ref(false),
@@ -692,6 +771,16 @@ export default {
     }
   },
   methods: {
+    changeLimitedPosition() {
+      console.log("before change limited order PositionFlag: ", this.changeLimitedPositionFlag);
+      this.changeLimitedPositionFlag = this.changeLimitedPositionFlag == 0 ? 1 : 0;
+      console.log("after change limited order PositionFlag: ", this.changeLimitedPositionFlag);
+    },
+    changePosition() {
+      console.log("before change PositionFlag: ", this.changePositionFlag);
+      this.changePositionFlag = this.changePositionFlag == 0 ? 1 : 0;
+      console.log("after change PositionFlag: ", this.changePositionFlag);
+    },
     addWallet() {
       console.log("this function will add a wallet address!");
       getAddress(this.user, this.walletNum, this.addWalletCallback);
@@ -734,8 +823,8 @@ export default {
         if (response.status) {
           this.object.forEach(element => {
             if (element.token == "ETH") {
-              console.log("eth balance:" + response.balance.toNumber());
-              element.balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+              console.log("eth balance:" + String(response.balance));
+              element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
             }
           })
         } else {
@@ -747,8 +836,8 @@ export default {
           const element = this.object[index];
           getErc20Balance(this.walletAddress, element.address).then((response) => {
             if (response.status) {
-              console.log(element.token + " balance:" + response.balance.toNumber());
-              this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+              console.log(element.token + " balance:" +String(response.balance));
+              this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
             } else {
               console.log("get " + element.token + " balance falied!");
             }
@@ -869,35 +958,56 @@ export default {
       // loading icon
       this.iconLoadingLimited = true;
       // get metamask signature
-      createTypedData(this.contractAddrMap.get(this.subKeyLimitedSrc), this.contractAddrMap.get(this.subKeyLimitedDes), this.fee, this.routerAddress, this.ethLimitedAmount, this.erc20LimitedAmount, this.chainId).then((res) => {
-        console.log("response:", res);
-        if (res == undefined) {
-          this.iconLoading = false;
-          return;
-        }
-        // call exactInputSingle in relayer
-        let obj = {
-          r: res.r,
-          s: res.s,
-          salt: res.value.salt,
-          tx_value: {
-            amount_in: String(res.value.amountIn),
-            amount_out_minimum: String(res.value.amountOutMinimum),
-            fee: res.value.fee,
-            recipient: res.value.recipient,
-            token_in: res.value.tokenIn,
-            token_out: res.value.tokenOut,
-            sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
-          },
-          user: this.user,
-          v: res.v,
-          flag: this.PriTxChecked
-        };
-        console.log("limited order obj string:", JSON.stringify(obj));
-        let timeStamp = new Date().getTime();
-        console.log("current timestamp: ", timeStamp);
-        let limitedOrderTmpObj = { orderNo: timeStamp, orderContent: { tokenIn: this.subKeyLimitedSrc, tokenOut: this.subKeyLimitedDes, tokenInAmount: this.ethLimitedAmount, tokenOutAmount: this.erc20LimitedAmount } };
-        this.orderData.push(limitedOrderTmpObj);
+      if (this.changeLimitedPositionFlag == 0) {
+        ethToErc20LimitedDataOperationWrapper(this.user, this.walletAddress, this.walletIndex, this.contractAddrMap.get(this.subKeyLimitedSrc), this.contractAddrMap.get(this.subKeyLimitedDes), this.fee, this.routerAddress, this.ethLimitedAmount, this.erc20LimitedAmount, this.chainId).then(res => {
+          if (res != undefined) {
+            console.log("userOperation: ", res);
+            let timeStamp = new Date().getTime();
+            console.log("current timestamp: ", timeStamp);
+            let limitedOrderTmpObj = { orderNo: timeStamp, orderContent: { tokenIn: this.subKeyLimitedSrc, tokenOut: this.subKeyLimitedDes, tokenInAmount: this.ethLimitedAmount, tokenOutAmount: this.erc20LimitedAmount } };
+            this.orderData.push(limitedOrderTmpObj);
+          }
+          this.iconLoadingLimited = false;
+        });
+      }
+      if (this.changeLimitedPositionFlag == 1) {
+        erc20ToEthLimitedDataOperationWrapper(this.user, this.walletAddress, this.walletIndex, this.contractAddrMap.get(this.subKeyLimitedDes), this.contractAddrMap.get(this.subKeyLimitedSrc), this.fee, this.routerAddress, this.erc20LimitedAmount, this.ethLimitedAmount, this.chainId).then(res => {
+          if (res != undefined) {
+            console.log("userOperation: ", res);
+            let timeStamp = new Date().getTime();
+            console.log("current timestamp: ", timeStamp);
+            let limitedOrderTmpObj = { orderNo: timeStamp, orderContent: { tokenIn: this.subKeyLimitedDes, tokenOut: this.subKeyLimitedDes, tokenInAmount: this.erc20LimitedAmount, tokenOutAmount: this.ethLimitedAmount } };
+            this.orderData.push(limitedOrderTmpObj);
+          }
+          this.iconLoadingLimited = false;
+        });
+      }
+      // .then((res) => {
+      //   console.log("response:", res);
+      //   if (res == undefined) {
+      //     this.iconLoading = false;
+      //     return;
+      //   }
+      //   // call exactInputSingle in relayer
+      //   let obj = {
+      //     r: res.r,
+      //     s: res.s,
+      //     salt: res.value.salt,
+      //     tx_value: {
+      //       amount_in: String(res.value.amountIn),
+      //       amount_out_minimum: String(res.value.amountOutMinimum),
+      //       fee: res.value.fee,
+      //       recipient: res.value.recipient,
+      //       token_in: res.value.tokenIn,
+      //       token_out: res.value.tokenOut,
+      //       sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
+      //     },
+      //     user: this.user,
+      //     v: res.v,
+      //     flag: this.PriTxChecked
+      //   };
+      //   console.log("limited order obj string:", JSON.stringify(obj));
+        
         // axios.post('/api/v1/instant_swap', {
         //   r: res.r,
         //   s: res.s,
@@ -924,12 +1034,12 @@ export default {
         //   .catch(function (error) {
         //     console.log(error);
         //   });
-      });
+      // });
 
-      setTimeout(() => {
-        // alert(this.iconLoading);
-        this.iconLoadingLimited = false;
-      }, 1000);
+      // setTimeout(() => {
+      //   // alert(this.iconLoading);
+      //   this.iconLoadingLimited = false;
+      // }, 1000);
     },
     submitSwap() {
       if (this.user == null) {
@@ -939,9 +1049,7 @@ export default {
       if (this.ethAmount == undefined || this.erc20Amount == undefined) {
         return;
       }
-      let amountOutMinimum = String(this.erc20Amount * (1 - this.slipPoint / 100)).substring(0, 8);
-      console.log("ethAmount", this.ethAmount);
-      console.log("amountOutMinimum", amountOutMinimum);
+
       if (!this.contractAddrMap.has(this.subKeySrc)) {
         console.log("Invaild src contract address");
         return;
@@ -952,7 +1060,32 @@ export default {
       }
       // loading icon
       this.iconLoading = true;
-      createTypedData(this.user, this.walletAddress, this.walletIndex, this.contractAddrMap.get(this.subKeySrc), this.contractAddrMap.get(this.subKeyDes), this.fee, this.routerAddress, this.ethAmount, amountOutMinimum, this.chainId, this.submitSwapCallback);
+      let amountOutMinimum = "";
+      if (this.changePositionFlag == 0) {
+        console.log("we will swap eth to erc20!");
+        amountOutMinimum = String(this.erc20Amount * (1 - this.slipPoint / 100)).substring(0, 8);
+        console.log("ethAmount", this.ethAmount);
+        console.log("erc20Amount", this.erc20Amount);
+        console.log("amountOutMinimum", amountOutMinimum);
+        ethToErc20DataOperationWrapper(this.user, this.walletAddress, this.walletIndex, this.contractAddrMap.get(this.subKeySrc), this.contractAddrMap.get(this.subKeyDes), this.fee, this.routerAddress, this.ethAmount, amountOutMinimum, this.chainId, this.submitSwapCallback).then(res => {
+          if (res == undefined) {
+            this.iconLoading = false;
+          }
+        });
+      };
+      if (this.changePositionFlag == 1){
+        console.log("we will swap erc20 to eth!");
+        amountOutMinimum = String(this.ethAmount * (1 - this.slipPoint / 100)).substring(0, 8);
+        console.log("ethAmount", this.ethAmount);
+        console.log("erc20Amount", this.erc20Amount);
+        console.log("amountOutMinimum", amountOutMinimum);
+        erc20ToEthDataOperationWrapper(this.user, this.walletAddress, this.walletIndex, this.contractAddrMap.get(this.subKeyDes), this.contractAddrMap.get(this.subKeySrc), this.fee, this.routerAddress, this.erc20Amount, amountOutMinimum, this.chainId, this.submitSwapCallback).then(res => {
+          if (res == undefined) {
+            this.iconLoading = false;
+          }
+        });
+      }
+      return;
       // .then((res) => {
       //   console.log("response:", res);
       //   if (res == undefined) {
@@ -1020,8 +1153,8 @@ export default {
           if (response.status) {
             this.object.forEach(element => {
               if (element.token == "ETH") {
-                console.log("eth balance:" + response.balance.toNumber());
-                element.balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+                console.log("eth balance:" + String(response.balance));
+                element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
               }
             })
           } else {
@@ -1033,8 +1166,8 @@ export default {
           const element = this.object[index];
           getErc20Balance(this.walletAddress, element.address).then((response) => {
             if (response.status) {
-              console.log(element.token + " balance:" + response.balance.toNumber());
-              this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+              console.log(element.token + " balance:" + String(response.balance));
+              this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
             } else {
               console.log("get " + element.token + " balance falied!");
             }
@@ -1112,7 +1245,7 @@ export default {
             // console.log(element.token + " balance:" + response.balance.toNumber());
             this.object.forEach(element => {
               if (element.token == "ETH") {
-                element.balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+                element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
               }
             })
           } else {
@@ -1177,8 +1310,8 @@ export default {
           const element = this.object[index];
           getErc20Balance(this.walletAddress, element.address).then((response) => {
             if (response.status) {
-              console.log(element.token + " balance:" + response.balance.toNumber());
-              this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+              console.log(element.token + " balance:" + String(response.balance));
+              this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
             } else {
               console.log("get " + element.token + " balance falied!");
             }
@@ -1217,8 +1350,8 @@ export default {
           if (response.status) {
             this.object.forEach(element => {
               if (element.token == "ETH") {
-                console.log("eth balance:" + response.balance.toNumber());
-                element.balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+                console.log("eth balance:" + String(response.balance));
+                element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
               }
             })
           } else {
@@ -1271,8 +1404,8 @@ export default {
           const element = this.object[index];
           getErc20Balance(this.walletAddress, element.address).then((response) => {
             if (response.status) {
-              console.log(element.token + " balance:" + response.balance.toNumber());
-              this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+              console.log(element.token + " balance:" + String(response.balance));
+              this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
             } else {
               console.log("get " + element.token + " balance falied!");
             }
@@ -1366,7 +1499,7 @@ export default {
               // console.log(element.token + " balance:" + response.balance.toNumber());
               this.object.forEach(element => {
                 if (element.token == "ETH") {
-                  element.balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+                  element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
                 }
               })
             } else {
@@ -1378,8 +1511,8 @@ export default {
           const element = this.object[index];
           getErc20Balance(this.walletAddress, element.address).then((response) => {
             if (response.status) {
-              console.log(element.token + " balance:" + response.balance.toNumber());
-              this.object[index].balance = this.formateNumber(response.balance.toNumber() / 1000000000000000000);
+              console.log(element.token + " balance:" + String(response.balance));
+              this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
             } else {
               console.log("get " + element.token + " balance falied!");
             }
