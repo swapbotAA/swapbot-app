@@ -4,8 +4,21 @@
             userMessage="msg" 
             @onComplete="onComplete"
         >
+        "color"
+"ball"
+"lines"
+"thick"
+"circle"
+"cobweb"
+"polygon"
+"square"
+"tadpole"
+"fountain"
+"random"
+"custom"
         </vue-metamask> -->
-    <div class="header"><img src="../assets/robot.svg" style="height: 45px;width: 45px; padding-right: 10px;">
+    <particles-bg type="circle" :bg="true" />
+    <div class="header"><img src="../assets/robot.svg" style="height: 100px;width: 100px; padding-right: 10px;">
       Sparky
       <vue-metamask ref="metamask" @onComplete="onComplete"></vue-metamask>
       <a-button type="primary" danger style="position: absolute; right: 10px; top: 10px;" @click="connect">
@@ -453,11 +466,11 @@
 .header {
   position: absolute;
   line-height: 50px;
-  top: 0px;
+  top: 3%;//0px;
   left: 0px;
   right: 0px;
-  color: rgb(11, 15, 18);
-  font-size: larger;
+  color: rgb(134, 50, 159);
+  font-size: 60px;
   // background-color: #2d3a4b;
 }
 
@@ -465,7 +478,7 @@
 .leftbar {
   position: absolute;
   width: 45%;
-  top: 60px;
+  top: 15%;//60px;
   /* 距离上面50像素 */
   left: 4.5%;
   bottom: 60px;
@@ -478,7 +491,7 @@
 .rightbar {
   position: absolute;
   width: 45%;
-  top: 60px;
+  top: 15%;//60px;
   /* left: 230px; */
   bottom: 60px;
   right: 4.5%;
@@ -613,7 +626,7 @@ import { ref, createVNode } from 'vue';
 import { Modal, notification } from 'ant-design-vue';
 import VueMetamask from 'vue-metamask';
 import { ethers, utils, BigNumber } from 'ethers';
-
+import { ParticlesBg } from "particles-bg-vue";
 import Wallet from '../api/abis/Wallet.json';
 import UniswapRouter from "../api/abis/UniswapRouter.json";
 
@@ -678,6 +691,7 @@ export default {
   name: "tableft",
   components: {
     VueMetamask,
+    ParticlesBg,
   },
   data() {
     return {
