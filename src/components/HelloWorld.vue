@@ -61,7 +61,8 @@
                     </label>
                   </span>
                 </div>
-                <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px;" @click="changePosition()"></div>
+                <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px;"
+                    @click="changePosition()"></div>
                 <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
                   <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="uniAmount"
                   @change="calculateRateU()" placeholder="0" suffix="UNI" style="height: 60px;"/> -->
@@ -96,7 +97,8 @@
                     </label>
                   </span>
                 </div>
-                <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px;" @click="changePosition()"></div>
+                <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px;"
+                    @click="changePosition()"></div>
                 <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
                   <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()"
                   placeholder="0" suffix="ETH" style="height: 60px;" /> -->
@@ -128,7 +130,7 @@
           <div id="contentLeft2" v-show="numberl == 1">
             <span>
               <div v-show="changeLimitedPositionFlag == 0">
-                  <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
+                <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%; padding-top: 10%;">
                   <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()"
                   placeholder="0" suffix="ETH" style="height: 60px;" /> -->
                   <span>
@@ -144,14 +146,15 @@
                     </label>
                   </span>
                 </div>
-                <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px; " @click="changeLimitedPosition()"></div>
+                <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px; "
+                    @click="changeLimitedPosition()"></div>
                 <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
                   <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="uniAmount"
                   @change="calculateRateU()" placeholder="0" suffix="UNI" style="height: 60px;"/> -->
                   <span>
                     <label>
-                      <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="erc20LimitedAmount"
-                        placeholder="0" style="width: 70%; height: 40px; " />
+                      <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')"
+                        v-model:value="erc20LimitedAmount" placeholder="0" style="width: 70%; height: 40px; " />
                     </label>
                     <label>
                       <a-select :size="size" default-value="uni" style="width: 30%;" @select="handleChangelimitedDes">
@@ -168,8 +171,8 @@
                   @change="calculateRateU()" placeholder="0" suffix="UNI" style="height: 60px;"/> -->
                   <span>
                     <label>
-                      <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="erc20LimitedAmount"
-                        placeholder="0" style="width: 70%; height: 40px; " />
+                      <a-input :size="size" oninput="value=value.replace(/[^0-9.]/g,'')"
+                        v-model:value="erc20LimitedAmount" placeholder="0" style="width: 70%; height: 40px; " />
                     </label>
                     <label>
                       <a-select :size="size" default-value="uni" style="width: 30%;" @select="handleChangelimitedDes">
@@ -179,7 +182,8 @@
                     </label>
                   </span>
                 </div>
-                <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px;" @click="changeLimitedPosition()"></div>
+                <div style="line-height: 20px;"><img src="../assets/swap.svg" style="height: 20px; width: 20px;"
+                    @click="changeLimitedPosition()"></div>
                 <div class="components-input-demo-presuffix" style="width: 60%;margin-left: 20%;">
                   <!-- <a-input oninput="value=value.replace(/[^0-9.]/g,'')" v-model:value="ethAmount" @change="calculateRateE()"
                   placeholder="0" suffix="ETH" style="height: 60px;" /> -->
@@ -340,12 +344,12 @@
                 ...
               </a-button>
               <a-button v-show="showDeleteFlage" type="primary" danger @click="deleteToken(tokenName)"
-                  style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
-                  <template #icon>
-                    <PoweroffOutlined />
-                  </template>
-                  Delete Token
-                </a-button>
+                style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
+                <template #icon>
+                  <PoweroffOutlined />
+                </template>
+                Delete Token
+              </a-button>
               <!-- <div v-show="showDeleteFlage">
                 <a-button type="primary" danger :loading="iconLoadingWithdrawErc20" @click="deleteToken(tokenName)"
                   style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
@@ -394,7 +398,7 @@
               <span v-for="value in walletObj">
                 <a-button :class="value.address == walletAddress ? 'btnwallet1' : 'btnwallet'" type="text"
                   @click="changeWallet(value)">
-                  <span>Address</span><span>:&nbsp</span><span>{{ value.address }}</span>
+                  <span>smart contract account</span><span>:&nbsp</span><span>{{ value.address }}</span>
                 </a-button>
               </span>
             </span>
@@ -416,7 +420,7 @@
           <div id="contentRight2" v-show="numberr == 2">
             <span>
               <a-list size="large" bordered :data-source="orderData"
-                style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
+                style="top: 5%; width: 90%; margin-left: 5%;text-align: left; background: #feecf9;">
                 <template #renderItem="{ item }">
                   <a-list-item>
                     <span style="font-weight: 700;">order number:&nbsp</span>{{ item.orderNo }}
@@ -428,9 +432,20 @@
                     <br />
                     <span>token out:&nbsp</span>{{ item.orderContent.tokenOut }}<span>&nbsp
                       amount:&nbsp</span>{{ item.orderContent.tokenOutAmount }}
+                    <br />
+                    <span v-show="flagSpan == 0" style="font-weight: 700;">status: </span><span v-show="flagSpan == 0"
+                      style="color:red; font-weight: 700;">pending</span>
                     <!-- <a-button  type="primary" style="height: 40px;width: 100px; margin-left: 30%;">Edit</a-button> -->
-                    <a-button danger type="primary" shape="round" @click="cancelLimitedOrder(item.orderNo)"
-                      style="height: 30px;width: 80px; margin-left: 45%;">
+                    <a-button v-show="flagSpan == 0" danger type="primary" shape="round"
+                      @click="cancelLimitedOrder(item.orderNo)" style="height: 30px;width: 80px; margin-left: 278px;">
+                      Cancel
+                    </a-button>
+
+                    <span v-show="flagSpan == 1" style="font-weight: 700;">status: </span><span v-show="flagSpan == 1"
+                      style="color:green; font-weight: 700;">complete</span>
+                    <!-- <a-button  type="primary" style="height: 40px;width: 100px; margin-left: 30%;">Edit</a-button> -->
+                    <a-button v-show="flagSpan == 1" danger type="disabled" shape="round"
+                      @click="cancelLimitedOrder(item.orderNo)" style="height: 30px;width: 80px; margin-left: 270px;">
                       Cancel
                     </a-button>
                   </a-list-item>
@@ -466,7 +481,7 @@
 .header {
   position: absolute;
   line-height: 50px;
-  top: 3%;//0px;
+  top: 3%; //0px;
   left: 0px;
   right: 0px;
   color: rgb(134, 50, 159);
@@ -478,7 +493,7 @@
 .leftbar {
   position: absolute;
   width: 45%;
-  top: 15%;//60px;
+  top: 15%; //60px;
   /* 距离上面50像素 */
   left: 4.5%;
   bottom: 60px;
@@ -491,7 +506,7 @@
 .rightbar {
   position: absolute;
   width: 45%;
-  top: 15%;//60px;
+  top: 15%; //60px;
   /* left: 230px; */
   bottom: 60px;
   right: 4.5%;
@@ -580,7 +595,8 @@
 
   #contentLeft1,
   #contentLeft2 {
-    background: linear-gradient(#ffeef9, #91bee5);;
+    background: linear-gradient(#ffeef9, #91bee5);
+    ;
     height: 500px;
     font-size: 16px;
     line-height: 100px;
@@ -589,7 +605,8 @@
   }
 
   #contentLeft3 {
-    background: linear-gradient(#ffeef9, #91bee5);;
+    background: linear-gradient(#ffeef9, #91bee5);
+    ;
     height: 500px;
     font-size: 16px;
     line-height: 40px;
@@ -602,7 +619,8 @@
   #contentRight2,
   #contentRight3,
   #contentRight4 {
-    background: linear-gradient(#cddfca, #f3d789);;
+    background: linear-gradient(#cddfca, #f3d789);
+    ;
     height: 500px;
     font-size: 16px;
     line-height: 100px;
@@ -682,7 +700,7 @@ let wrapObj = [
 
 // default null
 let walletAddr = [
-  { address: "0xCeCd6718a8Fd49c7fA2220d9b034C0f36a8DaA88" }
+  // { address: "0xCeCd6718a8Fd49c7fA2220d9b034C0f36a8DaA88" }
 ];
 
 let tokenName = "ERC20";
@@ -695,10 +713,11 @@ export default {
   },
   data() {
     return {
-      changePositionFlag:0,
-      changeLimitedPositionFlag:0,
-      walletIndex:0,
-      walletNum: 1,//default 0
+      flagSpan: 0,
+      changePositionFlag: 0,
+      changeLimitedPositionFlag: 0,
+      walletIndex: 0,
+      walletNum: 0,//default 0
       showDeleteFlage: ref(false),
       ethLimitedAmount: null,
       erc20LimitedAmount: null,
@@ -732,14 +751,14 @@ export default {
       privateKey: null,
       gasFee: null,
       gasLimit: null,
-      slipPoint: null,
+      slipPoint: 100,
       slipPointfr: null,
       deadLine: null,
       minimumLiquidity: null,
       // wethAddress: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
       // uniAddress: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
       fee: 3000,
-      walletAddress: "0xCeCd6718a8Fd49c7fA2220d9b034C0f36a8DaA88",//default null
+      walletAddress: null,//default null
       routerAddress: "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E",
       // amountOutMinimum: 0,
       chainId: "11155111",
@@ -803,8 +822,9 @@ export default {
       console.log("receipt status:", value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Create Account Address Succeed! Address: " + value);
+        this.openNotifaction("success", "Create Account Address successfully! Address: " + value);
         this.walletObj.push({ address: value });
+        this.walletAddress = value;
       } else {
         this.openNotifaction("error", "Create Account Address Failed!");
       }
@@ -829,7 +849,7 @@ export default {
         const element = this.walletObj[index];
         if (element.address == this.walletAddress) {
           this.walletIndex = index;
-          console.log("wallet index: ",this.walletIndex);
+          console.log("wallet index: ", this.walletIndex);
         }
       }
       // update eth balance
@@ -847,16 +867,16 @@ export default {
       });
       // update  erc20 balance
       for (let index = 1; index < this.object.length; index++) {
-          const element = this.object[index];
-          getErc20Balance(this.walletAddress, element.address).then((response) => {
-            if (response.status) {
-              console.log(element.token + " balance:" +String(response.balance));
-              this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
-            } else {
-              console.log("get " + element.token + " balance falied!");
-            }
-          });
-        }
+        const element = this.object[index];
+        getErc20Balance(this.walletAddress, element.address).then((response) => {
+          if (response.status) {
+            console.log(element.token + " balance:" + String(response.balance));
+            this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+          } else {
+            console.log("get " + element.token + " balance falied!");
+          }
+        });
+      }
     },
     deleteToken(value) {
       for (let index = 0; index < this.object.length; index++) {
@@ -865,7 +885,7 @@ export default {
           this.object.splice(index, 1);
         }
       }
-      alert("delete token succeed!");
+      this.openNotifaction("success", "delete token successfully!");
     },
     showDeleteButton() {
       this.showDeleteFlage = this.showDeleteFlage == false ? true : false;
@@ -877,7 +897,7 @@ export default {
           this.orderData.splice(index, 1);
         }
       }
-      alert("delete succeed!");
+      this.openNotifaction("success", "cancel successfully!");
     },
     openNotifaction(type, content) {
       notification[type]({
@@ -952,7 +972,7 @@ export default {
     },
     submitLimitedSwap() {
       if (this.user == null) {
-        alert("Please connect wallet.");
+        this.openNotifaction("info", "Please connect wallet.");
         return;
       }
       if (this.ethLimitedAmount == undefined || this.erc20LimitedAmount == undefined) {
@@ -971,6 +991,7 @@ export default {
       }
       // loading icon
       this.iconLoadingLimited = true;
+      let amountOutMinimum = "";
       // get metamask signature
       if (this.changeLimitedPositionFlag == 0) {
         ethToErc20LimitedDataOperationWrapper(this.user, this.walletAddress, this.walletIndex, this.contractAddrMap.get(this.subKeyLimitedSrc), this.contractAddrMap.get(this.subKeyLimitedDes), this.fee, this.routerAddress, this.ethLimitedAmount, this.erc20LimitedAmount, this.chainId).then(res => {
@@ -985,79 +1006,134 @@ export default {
         });
       }
       if (this.changeLimitedPositionFlag == 1) {
-        erc20ToEthLimitedDataOperationWrapper(this.user, this.walletAddress, this.walletIndex, this.contractAddrMap.get(this.subKeyLimitedDes), this.contractAddrMap.get(this.subKeyLimitedSrc), this.fee, this.routerAddress, this.erc20LimitedAmount, this.ethLimitedAmount, this.chainId).then(res => {
+        amountOutMinimum = String(this.ethLimitedAmount * (1 - this.slipPoint / 100)).substring(0, 8);
+        erc20ToEthLimitedDataOperationWrapper(this.user, this.walletAddress, this.walletIndex, this.contractAddrMap.get(this.subKeyLimitedDes), this.contractAddrMap.get(this.subKeyLimitedSrc), this.fee, this.routerAddress, this.erc20LimitedAmount, amountOutMinimum, this.chainId).then(res => {
           if (res != undefined) {
             console.log("userOperation: ", res);
             let timeStamp = new Date().getTime();
             console.log("current timestamp: ", timeStamp);
             let limitedOrderTmpObj = { orderNo: timeStamp, orderContent: { tokenIn: this.subKeyLimitedDes, tokenOut: this.subKeyLimitedDes, tokenInAmount: this.erc20LimitedAmount, tokenOutAmount: this.ethLimitedAmount } };
             this.orderData.push(limitedOrderTmpObj);
+            
+            let obj = {
+              beneficiary_addr: this.user,
+              user_op: {
+                call_data: res.callData,
+                call_gas_limit: String(res.callGasLimit),
+                init_code: res.initCode,
+                max_fee_per_gas: String(res.maxFeePerGas),
+                max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
+                nonce: String(res.nonce),
+                paymaster_and_data: res.paymasterAndData,
+                pre_verification_gas: String(res.preVerificationGas),
+                sender: res.sender,
+                signature: res.signature,
+                verification_gas_limit: String(res.verificationGasLimit)
+              }
+            };
+            console.log("obj string:", JSON.stringify(obj));
+            axios.post('/api/v1/handle_op', {
+              beneficiary_addr: this.user,
+              user_op: {
+                call_data: res.callData,
+                call_gas_limit: String(res.callGasLimit),
+                init_code: res.initCode,
+                max_fee_per_gas: String(res.maxFeePerGas),
+                max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
+                nonce: String(res.nonce),
+                paymaster_and_data: res.paymasterAndData,
+                pre_verification_gas: String(res.preVerificationGas),
+                sender: res.sender,
+                signature: res.signature,
+                verification_gas_limit: String(res.verificationGasLimit)
+              }
+            })
+              .then(response => {
+                console.log(response);
+                if (response.data.code == 1000) {
+                  // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                  console.log("swap successfully!");
+
+                  setTimeout(() => {
+                  // update eth balance
+                  getEthBalance(this.walletAddress).then((response) => {
+                    if (response.status) {
+                      this.object.forEach(element => {
+                        if (element.token == "ETH") {
+                          console.log("eth balance:" + String(response.balance));
+                          element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                        }
+                      })
+                    } else {
+                      console.log("get ETH balance falied!");
+                    }
+                  });
+                  // update  erc20 balance
+                  for (let index = 1; index < this.object.length; index++) {
+                    const element = this.object[index];
+                    getErc20Balance(this.walletAddress, element.address).then((response) => {
+                      if (response.status) {
+                        console.log(element.token + " balance:" + String(response.balance));
+                        this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                      } else {
+                        console.log("get " + element.token + " balance falied!");
+                      }
+                    });
+                  }
+                  this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                  this.iconLoadingLimited = false;
+                  this.flagSpan = 1;
+                }, 15000);
+
+                  // setTimeout(() => {
+                  //   // alert(this.iconLoading);
+                  //   this.flagSpan = 1;
+                  // }, 1000);
+                }
+                if (response.data.code == 1003) {
+                  this.openNotifaction("info", "Swap error! error: " + response.data.data);
+                  console.log("swap error!");
+                  this.iconLoadingLimited = false;
+                }
+              })
+              .catch(error => {
+                console.log(error);
+                this.iconLoadingLimited = false;
+              });
           }
-          this.iconLoadingLimited = false;
         });
       }
-      // .then((res) => {
-      //   console.log("response:", res);
-      //   if (res == undefined) {
-      //     this.iconLoading = false;
-      //     return;
-      //   }
-      //   // call exactInputSingle in relayer
-      //   let obj = {
-      //     r: res.r,
-      //     s: res.s,
-      //     salt: res.value.salt,
-      //     tx_value: {
-      //       amount_in: String(res.value.amountIn),
-      //       amount_out_minimum: String(res.value.amountOutMinimum),
-      //       fee: res.value.fee,
-      //       recipient: res.value.recipient,
-      //       token_in: res.value.tokenIn,
-      //       token_out: res.value.tokenOut,
-      //       sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
-      //     },
-      //     user: this.user,
-      //     v: res.v,
-      //     flag: this.PriTxChecked
-      //   };
-      //   console.log("limited order obj string:", JSON.stringify(obj));
-        
-        // axios.post('/api/v1/instant_swap', {
-        //   r: res.r,
-        //   s: res.s,
-        //   salt: res.value.salt,
-        //   tx_value: {
-        //     amount_in: String(res.value.amountIn),
-        //     amount_out_minimum: String(res.value.amountOutMinimum),
-        //     fee: res.value.fee,
-        //     recipient: res.value.recipient,
-        //     token_in: res.value.tokenIn,
-        //     token_out: res.value.tokenOut,
-        //     sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
-        //   },
-        //   user: this.user,
-        //   v: res.v,
-        //   flag: this.PriTxChecked
-        // })
-        //   .then(function (response) {
-        //     console.log(response);
-        //     if (response.data.code == 1000) {
-        //       console.log("swap success!");
-        //     }
-        //   })
-        //   .catch(function (error) {
-        //     console.log(error);
-        //   });
-      // });
 
-      // setTimeout(() => {
-      //   // alert(this.iconLoading);
-      //   this.iconLoadingLimited = false;
-      // }, 1000);
+      // update eth balance
+      getEthBalance(this.walletAddress).then((response) => {
+        if (response.status) {
+          this.object.forEach(element => {
+            if (element.token == "ETH") {
+              console.log("eth balance:" + String(response.balance));
+              element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+            }
+          })
+        } else {
+          console.log("get ETH balance falied!");
+        }
+      });
+      // update  erc20 balance
+      for (let index = 1; index < this.object.length; index++) {
+        const element = this.object[index];
+        getErc20Balance(this.walletAddress, element.address).then((response) => {
+          if (response.status) {
+            console.log(element.token + " balance:" + String(response.balance));
+            this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+          } else {
+            console.log("get " + element.token + " balance falied!");
+          }
+        });
+      }
+
     },
     submitSwap() {
       if (this.user == null) {
-        alert("Please connect wallet.");
+        this.openNotifaction("info", "Please connect wallet.");
         return;
       }
       if (this.ethAmount == undefined || this.erc20Amount == undefined) {
@@ -1082,12 +1158,89 @@ export default {
         console.log("erc20Amount", this.erc20Amount);
         console.log("amountOutMinimum", amountOutMinimum);
         ethToErc20DataOperationWrapper(this.user, this.walletAddress, this.walletIndex, this.contractAddrMap.get(this.subKeySrc), this.contractAddrMap.get(this.subKeyDes), this.fee, this.routerAddress, this.ethAmount, amountOutMinimum, this.chainId, this.submitSwapCallback).then(res => {
+          // console.log("222222:",res);  
           if (res == undefined) {
             this.iconLoading = false;
           }
+          // call exactInputSingle in relayer
+          let obj = {
+            beneficiary_addr: this.user,
+            user_op: {
+              call_data: res.callData,
+              call_gas_limit: String(res.callGasLimit),
+              init_code: res.initCode,
+              max_fee_per_gas: String(res.maxFeePerGas),
+              max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
+              nonce: String(res.nonce),
+              paymaster_and_data: res.paymasterAndData,
+              pre_verification_gas: String(res.preVerificationGas),
+              sender: res.sender,
+              signature: res.signature,
+              verification_gas_limit: String(res.verificationGasLimit)
+            }
+          };
+          console.log("obj string:", JSON.stringify(obj));
+          axios.post('/api/v1/handle_op', {
+            beneficiary_addr: this.user,
+            user_op: {
+              call_data: res.callData,
+              call_gas_limit: String(res.callGasLimit),
+              init_code: res.initCode,
+              max_fee_per_gas: String(res.maxFeePerGas),
+              max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
+              nonce: String(res.nonce),
+              paymaster_and_data: res.paymasterAndData,
+              pre_verification_gas: String(res.preVerificationGas),
+              sender: res.sender,
+              signature: res.signature,
+              verification_gas_limit: String(res.verificationGasLimit)
+            }
+          })
+            .then(response => {
+              console.log(response);
+              if (response.data.code == 1000) {
+                // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                console.log("swap successfully!");
+
+
+                setTimeout(() => {
+                  // update eth balance
+                  getEthBalance(this.walletAddress).then((response) => {
+                    if (response.status) {
+                      this.object.forEach(element => {
+                        if (element.token == "ETH") {
+                          console.log("eth balance:" + String(response.balance));
+                          element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                        }
+                      })
+                    } else {
+                      console.log("get ETH balance falied!");
+                    }
+                  });
+                  // update  erc20 balance
+                  for (let index = 1; index < this.object.length; index++) {
+                    const element = this.object[index];
+                    getErc20Balance(this.walletAddress, element.address).then((response) => {
+                      if (response.status) {
+                        console.log(element.token + " balance:" + String(response.balance));
+                        this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                      } else {
+                        console.log("get " + element.token + " balance falied!");
+                      }
+                    });
+                  }
+                  this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                  this.iconLoading = false;
+                }, 15000);
+              }
+            })
+            .catch(error => {
+              console.log(error);
+              this.iconLoading = false;
+            });
         });
       };
-      if (this.changePositionFlag == 1){
+      if (this.changePositionFlag == 1) {
         console.log("we will swap erc20 to eth!");
         amountOutMinimum = String(this.ethAmount * (1 - this.slipPoint / 100)).substring(0, 8);
         console.log("ethAmount", this.ethAmount);
@@ -1099,6 +1252,7 @@ export default {
           }
         });
       }
+
       return;
       // .then((res) => {
       //   console.log("response:", res);
@@ -1106,51 +1260,51 @@ export default {
       //     this.iconLoading = false;
       //     return;
       //   }
-        // call exactInputSingle in relayer
-        // let obj = {
-        //   r: res.r,
-        //   s: res.s,
-        //   salt: res.value.salt,
-        //   tx_value: {
-        //     amount_in: String(res.value.amountIn),
-        //     amount_out_minimum: String(res.value.amountOutMinimum),
-        //     fee: res.value.fee,
-        //     recipient: res.value.recipient,
-        //     token_in: res.value.tokenIn,
-        //     token_out: res.value.tokenOut,
-        //     sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
-        //   },
-        //   user: this.user,
-        //   v: res.v,
-        //   flag: this.PriTxChecked
-        // };
-        // console.log("obj string:", JSON.stringify(obj));
-        // axios.post('/api/v1/instant_swap', {
-        //   r: res.r,
-        //   s: res.s,
-        //   salt: res.value.salt,
-        //   tx_value: {
-        //     amount_in: String(res.value.amountIn),
-        //     amount_out_minimum: String(res.value.amountOutMinimum),
-        //     fee: res.value.fee,
-        //     recipient: res.value.recipient,
-        //     token_in: res.value.tokenIn,
-        //     token_out: res.value.tokenOut,
-        //     sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
-        //   },
-        //   user: this.user,
-        //   v: res.v,
-        //   flag: this.PriTxChecked
-        // })
-        //   .then(function (response) {
-        //     console.log(response);
-        //     if (response.data.code == 1000) {
-        //       console.log("swap success!");
-        //     }
-        //   })
-        //   .catch(function (error) {
-        //     console.log(error);
-        //   });
+      // call exactInputSingle in relayer
+      // let obj = {
+      //   r: res.r,
+      //   s: res.s,
+      //   salt: res.value.salt,
+      //   tx_value: {
+      //     amount_in: String(res.value.amountIn),
+      //     amount_out_minimum: String(res.value.amountOutMinimum),
+      //     fee: res.value.fee,
+      //     recipient: res.value.recipient,
+      //     token_in: res.value.tokenIn,
+      //     token_out: res.value.tokenOut,
+      //     sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
+      //   },
+      //   user: this.user,
+      //   v: res.v,
+      //   flag: this.PriTxChecked
+      // };
+      // console.log("obj string:", JSON.stringify(obj));
+      // axios.post('/api/v1/instant_swap', {
+      //   r: res.r,
+      //   s: res.s,
+      //   salt: res.value.salt,
+      //   tx_value: {
+      //     amount_in: String(res.value.amountIn),
+      //     amount_out_minimum: String(res.value.amountOutMinimum),
+      //     fee: res.value.fee,
+      //     recipient: res.value.recipient,
+      //     token_in: res.value.tokenIn,
+      //     token_out: res.value.tokenOut,
+      //     sqrtPriceLimitX96: res.value.sqrtPriceLimitX96
+      //   },
+      //   user: this.user,
+      //   v: res.v,
+      //   flag: this.PriTxChecked
+      // })
+      //   .then(function (response) {
+      //     console.log(response);
+      //     if (response.data.code == 1000) {
+      //       console.log("swap success!");
+      //     }
+      //   })
+      //   .catch(function (error) {
+      //     console.log(error);
+      //   });
       // });
       // setTimeout(() => {
       //   // alert(this.iconLoading);
@@ -1161,7 +1315,7 @@ export default {
       console.log("receipt status:", value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Swap Succeed! Transaction hash: " + value.transactionHash);
+        this.openNotifaction("success", "Swap successfully! Transaction hash: " + value.transactionHash);
         // update eth balance
         getEthBalance(this.walletAddress).then((response) => {
           if (response.status) {
@@ -1195,7 +1349,7 @@ export default {
     },
     submitFrontRun() {
       if (this.user == null) {
-        alert("Please connect wallet.");
+        this.openNotifaction("info", "Please connect wallet.");
         return;
       }
       this.iconLoadingSend = true;
@@ -1252,7 +1406,7 @@ export default {
       console.log("receipt status:", value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Deposit Succeed! Transaction hash: " + value.transactionHash);
+        this.openNotifaction("success", "Deposit successfully! Transaction hash: " + value.transactionHash);
         // update  eth balance
         getEthBalance(this.walletAddress).then((response) => {
           if (response.status) {
@@ -1318,7 +1472,7 @@ export default {
       console.log("receipt status:", value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Deposit Succeed! Transaction hash: " + value.transactionHash);
+        this.openNotifaction("success", "Deposit successfully! Transaction hash: " + value.transactionHash);
         // update  erc20 balance
         for (let index = 1; index < this.object.length; index++) {
           const element = this.object[index];
@@ -1358,7 +1512,7 @@ export default {
       console.log("receipt status:", value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Withdraw Succeed! Transaction hash: " + value.transactionHash);
+        this.openNotifaction("success", "Withdraw successfully! Transaction hash: " + value.transactionHash);
         // update  eth balance
         getEthBalance(this.walletAddress).then((response) => {
           if (response.status) {
@@ -1412,7 +1566,7 @@ export default {
       console.log("receipt status:", value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Withdraw erc20 Succeed! Transaction hash: " + value.transactionHash);
+        this.openNotifaction("success", "Withdraw erc20 successfully! Transaction hash: " + value.transactionHash);
         // update  erc20 balance
         for (let index = 1; index < this.object.length; index++) {
           const element = this.object[index];
@@ -1465,7 +1619,7 @@ export default {
       console.log("receipt status:", value);
       if (value) {
         // notice: transaction success
-        this.openNotifaction("success", "Approve Succeed! Transaction hash: " + value.transactionHash);
+        this.openNotifaction("success", "Approve successfully! Transaction hash: " + value.transactionHash);
       } else {
         this.openNotifaction("error", "Approve Failed!");
       }
@@ -1508,7 +1662,8 @@ export default {
           }
         });
         // update  eth balance
-        getEthBalance(this.walletAddress).then((response) => {
+        if (this.walletAddress != null) {
+          getEthBalance(this.walletAddress).then((response) => {
             if (response.status) {
               // console.log(element.token + " balance:" + response.balance.toNumber());
               this.object.forEach(element => {
@@ -1519,18 +1674,19 @@ export default {
             } else {
               console.log("get ETH balance falied!");
             }
-        });
-        // update erc20 balance
-        for (let index = 1; index < this.object.length; index++) {
-          const element = this.object[index];
-          getErc20Balance(this.walletAddress, element.address).then((response) => {
-            if (response.status) {
-              console.log(element.token + " balance:" + String(response.balance));
-              this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
-            } else {
-              console.log("get " + element.token + " balance falied!");
-            }
           });
+          // update erc20 balance
+          for (let index = 1; index < this.object.length; index++) {
+            const element = this.object[index];
+            getErc20Balance(this.walletAddress, element.address).then((response) => {
+              if (response.status) {
+                console.log(element.token + " balance:" + String(response.balance));
+                this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+              } else {
+                console.log("get " + element.token + " balance falied!");
+              }
+            });
+          }
         }
       }
       // console.log('data:', this.user);

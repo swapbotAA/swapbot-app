@@ -10,9 +10,9 @@ const uniswapRouter_address = "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E";
 const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"];// [0:Uni]
 
 // ETH-Hangzhou branch begin
-const sparkyAccountFactory_address = "0x8f22d87aB8124356291e79AABaA2977183D68B07";
+const sparkyAccountFactory_address = "0x81003ED6857971b34967dEC7C979a6d51C793Ef4";
 const entryPoint_address = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
-const sparkyPaymaster_address = "0x875d20e08449602dA1535Dd14144cE676d989882";
+const sparkyPaymaster_address = "0x7BC827dF7aAdD95fCd1F670Bc2c36a860b4518AD";
 // ETH-Hangzhou branch end
 
 let walletInstance = null;
@@ -141,44 +141,44 @@ async function depositETH(toAddr, amount, callback) {
 }
 
 //approve wallet
-// async function approve(walletAddress, erc20Address, rawAmount, callback) {
-//     try {
-//         let flag = null;
-//         for (let index = 0; index < erc20_address_list.length; index++) {
-//             if(erc20_address_list[index] == erc20Address) {
-//                 flag = index;
-//             }
-//         }
-//         if (flag == null) {
-//             console.log("Invalid erc20Address!");
-//             callback(0);
-//             return;
-//         }
-//         let erc2Amount = ethers.utils.parseUnits(rawAmount);
-//         console.log("erc2Amount:",erc2Amount);
-//         await erc20InstanceList[flag].approve(walletAddress, erc2Amount).then(transactionResponse => {
-//             transactionResponse.wait().then(receipt => {
-//                 console.log("approve erc20 receipt status: ", receipt);
-//                 let tmpObj = receipt;
-//                 callback(tmpObj);
-//                 // console.log("approve finish!");
-//             })
-//         });
+async function approve(walletAddress, erc20Address, rawAmount, callback) {
+    try {
+        let flag = null;
+        for (let index = 0; index < erc20_address_list.length; index++) {
+            if(erc20_address_list[index] == erc20Address) {
+                flag = index;
+            }
+        }
+        if (flag == null) {
+            console.log("Invalid erc20Address!");
+            callback(0);
+            return;
+        }
+        let erc2Amount = ethers.utils.parseUnits(rawAmount);
+        console.log("erc2Amount:",erc2Amount);
+        await erc20InstanceList[flag].approve(walletAddress, erc2Amount).then(transactionResponse => {
+            transactionResponse.wait().then(receipt => {
+                console.log("approve erc20 receipt status: ", receipt);
+                let tmpObj = receipt;
+                callback(tmpObj);
+                // console.log("approve finish!");
+            })
+        });
 
-//         // let eventFilter = erc20Instance.filters.Approval();
-//         // console.log("tx.blockNumber: ",tx.blockNumber);
-//         // let events = await erc20Instance.queryFilter(eventFilter, tx.blockNumber, "latest");
-//         // let eventLen = events.length;
-//         // console.log("event arg1", events[eventLen-1].args[0]);
-//         // console.log("event arg2", events[eventLen-1].args[1]);
-//         // console.log("event arg3", events[eventLen-1].args[2]);
+        // let eventFilter = erc20Instance.filters.Approval();
+        // console.log("tx.blockNumber: ",tx.blockNumber);
+        // let events = await erc20Instance.queryFilter(eventFilter, tx.blockNumber, "latest");
+        // let eventLen = events.length;
+        // console.log("event arg1", events[eventLen-1].args[0]);
+        // console.log("event arg2", events[eventLen-1].args[1]);
+        // console.log("event arg3", events[eventLen-1].args[2]);
 
-//         // return { status: "success", response: {owner: events[eventLen-1].args[0], operator: events[eventLen-1].args[1], amount: events[eventLen-1].args[2]}};
-//     } catch (e) {
-//         console.error(e);
-//         callback(0);
-//     }
-// }
+        // return { status: "success", response: {owner: events[eventLen-1].args[0], operator: events[eventLen-1].args[1], amount: events[eventLen-1].args[2]}};
+    } catch (e) {
+        console.error(e);
+        callback(0);
+    }
+}
 
 
 //deposit ERC20
@@ -252,8 +252,8 @@ async function withdrawETH(user, addr, salt, wethAddr, amount, chainId, callback
             300000, // You can use this value temporarily, and then increase it
             300000, // You can use this value temporarily, and then increase it
             100000, // You can use this value temporarily, and then increase it
-            500000000000, // this is 10gwei，value can be adjusted according to the actual situation
-            5000000000,  // this is 5gwei
+            1000000000, // this is 10gwei，value can be adjusted according to the actual situation
+            1000000000,  // this is 5gwei
             sparkyPaymaster_address, // sparkyPaymaster address
         );
         // user sign 
@@ -363,13 +363,13 @@ async function erc20ToEthDataOperationWrapper(user, addr, salt, tokenIn, tokenOu
         );
         let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
         let userOperation = userOperationWithoutSig.addSig(sig);
-        await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
-            transactionResponse.wait().then(receipt => {
-                console.log("withdraw erc20 receipt status: ", receipt);
-                let tmpObj = receipt;
-                callback(tmpObj);
-            });
-        });
+        // await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
+        //     transactionResponse.wait().then(receipt => {
+        //         console.log("withdraw erc20 receipt status: ", receipt);
+        //         let tmpObj = receipt;
+        //         callback(tmpObj);
+        //     });
+        // });
         return userOperation;
     } catch (e) {
         console.error(e);
@@ -415,20 +415,20 @@ async function ethToErc20DataOperationWrapper(user, addr, salt, tokenIn, tokenOu
             300000,
             300000,
             100000,
-            500000000000,
-            5000000000,
+            1000000000,
+            1000000000,
             sparkyPaymaster_address,
         );
         let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
         let userOperation = userOperationWithoutSig.addSig(sig);
 
-        await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
-            transactionResponse.wait().then(receipt => {
-                console.log("withdraw erc20 receipt status: ", receipt);
-                let tmpObj = receipt;
-                callback(tmpObj);
-            });
-        });
+        // await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
+        //     transactionResponse.wait().then(receipt => {
+        //         console.log("withdraw erc20 receipt status: ", receipt);
+        //         let tmpObj = receipt;
+        //         callback(tmpObj);
+        //     });
+        // });
 
         return userOperation;
     } catch (e) {
@@ -437,7 +437,7 @@ async function ethToErc20DataOperationWrapper(user, addr, salt, tokenIn, tokenOu
 }
 //ethToErc20LimitedDataOperationWrapper
 async function ethToErc20LimitedDataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
-    console.log("eth To Erc20 DataOperation Wrapper start:");
+    console.log("eth To Erc20 limited orders DataOperation Wrapper start:");
     try {
         let amountInBig = ethers.utils.parseUnits(amountIn);
         let amountOutMinimumBig = ethers.utils.parseUnits(amountOutMinimum);
@@ -474,8 +474,8 @@ async function ethToErc20LimitedDataOperationWrapper(user, addr, salt, tokenIn, 
             300000,
             300000,
             100000,
-            500000000000,
-            5000000000,
+            1000000000,
+            1000000000,
             sparkyPaymaster_address,
         );
         let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
@@ -496,10 +496,11 @@ async function ethToErc20LimitedDataOperationWrapper(user, addr, salt, tokenIn, 
 }
 //erc20ToEthLimitedDataOperationWrapper
 async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
-    console.log("eth To Erc20 DataOperation Wrapper start:");
+    console.log("erc20 To eth limited orders DataOperation Wrapper start:");
     try {
         let amountInBig = ethers.utils.parseUnits(amountIn);
         let amountOutMinimumBig = ethers.utils.parseUnits(amountOutMinimum);
+        let func_approve = createCallData("approve", [routerAddress, amountInBig]);
         // get tx nonce
         let nonce = await entryPointInstance.getNonce(addr, 0);
         console.log("tx nonce: ",nonce);
@@ -509,22 +510,19 @@ async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, 
             // create initcode salt == nonce
             initCode = createInitCode(sparkyAccountFactory_address, user, salt);
         }
-
         // wrap params
         let params = {
-            tokenIn: tokenIn, 
+            tokenIn: tokenIn,
             tokenOut: tokenOut,
             fee: fee,
-            recipient: addr, 
-            amountIn: amountInBig, 
-            amountOutMinimum: amountOutMinimumBig, // calculate according to slip point
+            recipient: addr,
+            amountIn: amountInBig,
+            amountOutMinimum: amountOutMinimumBig,
             sqrtPriceLimitX96: 0
-        }
-        console.log("params: ",params);
+        };
         let func_swap = createCallData("exactInputSingle", [params]);
-        // function execute(dest,value,func)
-        // dest is func call destination address，here is ROUTER address，value is tranfer amount，func_swap is calldata
-        let calldata = createCallData("execute", [routerAddress, amountInBig, func_swap]);
+        // merge tx
+        let calldata = createCallData("executeBatch", [[tokenIn, routerAddress], [0, 0], [func_approve, func_swap]]);
         let userOperationWithoutSig = new UserOperationWithoutSig(
             addr,
             nonce,
@@ -533,18 +531,17 @@ async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, 
             300000,
             300000,
             100000,
-            500000000000,
-            5000000000,
+            1000000000,
+            1000000000,
             sparkyPaymaster_address,
         );
         let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
         let userOperation = userOperationWithoutSig.addSig(sig);
-
         // await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
         //     transactionResponse.wait().then(receipt => {
-        //         console.log("withdraw erc20 receipt status: ", receipt);
-        //         let tmpObj = receipt;
-        //         callback(tmpObj);
+        //         console.log("withdraw eth receipt status: ", receipt);
+        //         // let tmpObj = receipt;
+        //         // callback(tmpObj);
         //     });
         // });
 
@@ -706,7 +703,7 @@ export {
   getErc20Balance,
   getEthBalance,
   depositETH,
-//   approve,
+  approve,
   depositERC20,
   withdrawETH,
   withdrawERC20,
