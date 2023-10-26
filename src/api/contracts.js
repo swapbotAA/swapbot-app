@@ -7,7 +7,7 @@ import EntryPoint from "./abis/EntryPoint.json";
 
 const wallet_address = "0x90CaF385c36b19d9f2BB9B5098398b6844eff8eB";
 const uniswapRouter_address = "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E";
-const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"];// [0:Uni]
+const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"];// [0:Uni]
 
 // ETH-Hangzhou branch begin
 const sparkyAccountFactory_address = "0x81003ED6857971b34967dEC7C979a6d51C793Ef4";
@@ -68,7 +68,7 @@ async function initInstances(provider) {
 }
 
 // calculate account address
-async function getAddress(signerAddr, salt, callback) {
+async function getWalletAddress(signerAddr, salt, callback) {
     try {
         await sparkyAccountFactoryInstance.getAddress(signerAddr, salt).then(transactionResponse => {
             console.log("get address receipt status: ", transactionResponse);
@@ -711,8 +711,7 @@ export {
   erc20ToEthDataOperationWrapper,
   ethToErc20LimitedDataOperationWrapper,
   erc20ToEthLimitedDataOperationWrapper,
-  getAddress,
-  // approveNFT,
+  getWalletAddress,
   // registerNFTSale,
   // makeOfferWithETH,
   // confirmTrade
