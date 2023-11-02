@@ -447,10 +447,10 @@
                     <span v-show="item.orderContent.status == 'complete'" style="font-weight: 700;">tx hash: </span>
                     <span v-show="item.orderContent.status == 'complete'" style="font-weight: 700;">{{ item.orderContent.txHash }}</span>
                     <!-- <a-button  type="primary" style="height: 40px;width: 100px; margin-left: 30%;">Edit</a-button> -->
-                    <a-button v-show="item.orderContent.status == 'complete'" danger type="disabled" shape="round"
+                    <!-- <a-button v-show="item.orderContent.status == 'complete'" danger type="disabled" shape="round"
                       style="height: 30px;width: 80px; margin-left: 270px;">
                       Cancel
-                    </a-button>
+                    </a-button> -->
                   </a-list-item>
                 </template>
               </a-list>
@@ -650,7 +650,6 @@ import { ethers, utils, BigNumber } from 'ethers';
 import { ParticlesBg } from "particles-bg-vue";
 import Wallet from '../api/abis/Wallet.json';
 import UniswapRouter from "../api/abis/UniswapRouter.json";
-
 import {
   getWeb3Provider,
   initInstances,
@@ -809,34 +808,71 @@ export default {
     scheduleTask() {
       const scheduleCronstyle = () => {
         //: schedule task will be executed every 5 minutes
-        schedule.scheduleJob('*/5 * * * *', () => {
-          console.log('scheduleCronstyle:' + new Date());
+        schedule.scheduleJob('*/2 * * * *', () => {
+          // console.log('scheduleCronstyle:' + new Date());
           // query limited order status
-          axios.get('/api/v1/limited_orders',{
+          axios.post('/api/v1/query_limit_orders', {
             sender: this.walletAddress
           })
-          .then(response => {
-            console.log(response);
-            if (resonose.data.code == 1000) {
-              // update order status
-              if (resonse.data.data != null && resonse.data.data.order_list.length > 0) {
-                resonse.data.data.order_list.forEach(elementOut => {
-                  console.log("order details: ",elementOut);
-                  this.orderData.forEach(elementIn => {
-                    if (elementOut.order_no == elementIn.orderNo && elementOut.status == "complete") {
-                      elementIn.status = elementOut.status;
-                      elementIn.txHash = elementOut.tx_hash;
+            .then(response => {
+              console.log(response);
+              if (response.data.code == 1000) {
+                this.orderData = [];
+                // update order status
+                if (response.data.data != null && response.data.data.length > 0) {
+                  response.data.data.forEach(elementOut => {
+                      let tokenInSymbol = null;
+                      let tokenOutSymbol = null;
+                      this.contractAddrMap.forEach(function (value, key) {
+                        if (value == elementOut.TokenIn) {
+                          tokenInSymbol = key;
+                        }
+                        if (value == elementOut.TokenOut) {
+                          tokenOutSymbol = key;
+                        }
+                      });
+                      // console.log("tokenInSymbol: ", tokenInSymbol);
+                      // console.log("tokenOutSymbol: ", tokenOutSymbol);
+                      let limitedOrderTmpObj = { orderNo: elementOut.OrderNo, orderContent: { tokenIn: tokenInSymbol, tokenOut: tokenOutSymbol, tokenInAmount: elementOut.TokenInAmount, tokenOutAmount: elementOut.TokenOutAmount, status: elementOut.Status, txHash: elementOut.TxHash } };
+                      if (elementOut.Status != "cancel") {
+                        this.orderData.push(limitedOrderTmpObj);
+                      }
+                  });
+                }
+
+                // update eth balance
+                getEthBalance(this.walletAddress).then((response) => {
+                  if (response.status) {
+                    this.object.forEach(element => {
+                      if (element.token == "ETH") {
+                        // console.log("eth balance:" + String(response.balance));
+                        element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                      }
+                    })
+                  } else {
+                    console.log("get ETH balance falied!");
+                  }
+                });
+                // update  erc20 balance
+                for (let index = 1; index < this.object.length; index++) {
+                  const element = this.object[index];
+                  getErc20Balance(this.walletAddress, element.address).then((response) => {
+                    if (response.status) {
+                      // console.log(element.token + " balance:" + String(response.balance));
+                      this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                    } else {
+                      console.log("get " + element.token + " balance falied!");
                     }
                   });
-                });
+                }
+
+              } else {
+                console.log("error code: ", response.data.code);
               }
-            } else {
-              console.log("error code: ",resonose.data.code);
-            }
-          })
-          .catch(error => {
-            console.log(error);
-          });
+            })
+            .catch(error => {
+              console.log(error);
+            });
         });
       }
       scheduleCronstyle();
@@ -932,20 +968,97 @@ export default {
         }
       })
       console.log(this.object);
-      // // update walletIndex
-      // for (let index = 0; index < this.walletObj.length; index++) {
-      //   const element = this.walletObj[index];
-      //   if (element.address == this.walletAddress) {
-      //     this.walletIndex = index;
-      //     console.log("wallet index: ", this.walletIndex);
-      //   }
-      // }
+      // when user change wallet account, we need recall query_account_assets
+      axios.post('/api/v1/query_account_assets', {
+                  sender: this.walletAddress
+                })
+                  .then(response => {
+                    console.log(response);
+                    if (response.data.code == 1000) {
+                      // remove erc20 tokens but keep ETH
+                      this.object = [];
+                      let tmpObj = { token: "ETH", address: this.walletAddress, balance: 0 };
+                      this.object.push(tmpObj);
+                      console.log("Successfully obtained user asset list.");
+                      if (response.data.data != null && response.data.data.length > 0) {
+                        response.data.data.forEach(element => {
+                          console.log("asset Address: ", element.Address);
+                          console.log("asset symbol: ", element.Token);
+                          tmpObj = { token: element.Token, address: element.Address, balance: 0 };
+                          this.object.push(tmpObj);
+
+                        })
+                      }
+                    }
+
+                    // update erc20 balance
+                    for (let index = 1; index < this.object.length; index++) {
+                      const element = this.object[index];
+                      getErc20Balance(this.walletAddress, element.address).then((response) => {
+                        if (response.status) {
+                          // console.log(element.token + " balance:" + String(response.balance));
+                          this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                        } else {
+                          console.log("get " + element.token + " balance falied!");
+                        }
+                      });
+                    }
+                    this.orderData = [];
+                    // query limited order status
+                axios.post('/api/v1/query_limit_orders', {
+                  sender: this.walletAddress
+                })
+                  .then(response => {
+                    console.log(response);
+                    if (response.data.code == 1000) {
+                      // update order status
+                      if (response.data.data != null && response.data.data.length > 0) {
+                        response.data.data.forEach(elementOut => {
+                          // console.log("order details: ", elementOut);
+
+                          let tokenInSymbol = null;
+                          let tokenOutSymbol = null;
+                          this.contractAddrMap.forEach(function (value, key) {
+                            if (value == elementOut.TokenIn) {
+                              tokenInSymbol = key;
+                            }
+                            if (value == elementOut.TokenOut) {
+                              tokenOutSymbol = key;
+                            }
+                          });
+                          // console.log("tokenInSymbol: ", tokenInSymbol);
+                          // console.log("tokenOutSymbol: ", tokenOutSymbol);
+                          let limitedOrderTmpObj = { orderNo: elementOut.OrderNo, orderContent: { tokenIn: tokenInSymbol, tokenOut: tokenOutSymbol, tokenInAmount: elementOut.TokenInAmount, tokenOutAmount: elementOut.TokenOutAmount, status: elementOut.Status, txHash: elementOut.TxHash } };
+                          if (elementOut.Status != "cancel") {
+                            this.orderData.push(limitedOrderTmpObj);
+                          }
+
+                          // this.orderData.forEach(elementIn => {
+                          //   if (elementOut.OrderNo == elementIn.orderNo && elementOut.Status == "complete") {
+                          //     elementIn.status = elementOut.Status;
+                          //     elementIn.txHash = elementOut.TxHash;
+                          //   }
+                          // });
+                        });
+                      }
+                    } else {
+                      console.log("error code: ", response.data);
+                    }
+                  })
+                  .catch(error => {
+                    console.log(error);
+                  });
+                  })
+                  .catch(error => {
+                    console.log(error);
+                  });
+
       // update eth balance
       getEthBalance(this.walletAddress).then((response) => {
         if (response.status) {
           this.object.forEach(element => {
             if (element.token == "ETH") {
-              console.log("eth balance:" + String(response.balance));
+              // console.log("eth balance:" + String(response.balance));
               element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
             }
           })
@@ -953,18 +1066,6 @@ export default {
           console.log("get ETH balance falied!");
         }
       });
-      // update  erc20 balance
-      for (let index = 1; index < this.object.length; index++) {
-        const element = this.object[index];
-        getErc20Balance(this.walletAddress, element.address).then((response) => {
-          if (response.status) {
-            console.log(element.token + " balance:" + String(response.balance));
-            this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
-          } else {
-            console.log("get " + element.token + " balance falied!");
-          }
-        });
-      }
     },
     deleteToken(value) {
       for (let index = 0; index < this.object.length; index++) {
@@ -1003,7 +1104,7 @@ export default {
       }
       this.openNotifaction("success", "cancel successfully!");
       // delete order from limited order list
-      axios.delete('/api/v1/limited_orders', {
+      axios.post('/api/v1/cancel_limit_order', {
         sender: this.walletAddress,
         order_no: orderNo // timestamp
       })
@@ -1141,6 +1242,7 @@ export default {
       if (this.changeLimitedPositionFlag == 0) {
         let walletSalt = 0;
         // update walletIndex
+        amountOutMinimum = String(this.erc20LimitedAmount * (1 - this.slipPoint / 100)).substring(0, 8);
         for (let index = 0; index < this.walletObj.length; index++) {
           const element = this.walletObj[index];
           if (element.address == this.walletAddress) {
@@ -1148,13 +1250,12 @@ export default {
             console.log("wallet info: ", element);
           }
         }
-        ethToErc20LimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeyLimitedSrc), this.contractAddrMap.get(this.subKeyLimitedDes), this.fee, this.routerAddress, this.ethLimitedAmount, this.erc20LimitedAmount, this.chainId).then(res => {
+        ethToErc20LimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeyLimitedSrc), this.contractAddrMap.get(this.subKeyLimitedDes), this.fee, this.routerAddress, this.ethLimitedAmount, amountOutMinimum, this.chainId).then(res => {
           if (res != undefined) {
             console.log("userOperation: ", res);
             let timeStamp = new Date().getTime();
             console.log("current timestamp: ", timeStamp);
-            let limitedOrderTmpObj = { orderNo: timeStamp, orderContent: { tokenIn: this.subKeyLimitedSrc, tokenOut: this.subKeyLimitedDes, tokenInAmount: this.ethLimitedAmount, tokenOutAmount: this.erc20LimitedAmount, status: "pending", txHash: null } };
-            this.orderData.push(limitedOrderTmpObj);
+            
             // add order to limited order list
             let obj = {
               beneficiary_addr: this.user,
@@ -1172,19 +1273,19 @@ export default {
                 verification_gas_limit: String(res.verificationGasLimit)
               },
               order_details: {
-                order_no: timeStamp,// timestamp
-                token_in: this.subKeyLimitedDes,
-                token_in_amount: this.erc20LimitedAmount,
-                token_out: this.subKeyLimitedDes,
-                token_out_amount: this.ethLimitedAmount,
-                tx_hash: "",
-                status: "pending"
+                // order_no: timeStamp,// timestamp
+                token_in: this.contractAddrMap.get(this.subKeyLimitedSrc),
+                amount_in: String(ethers.utils.parseUnits(this.ethLimitedAmount)),
+                token_out: this.contractAddrMap.get(this.subKeyLimitedDes),
+                amount_out: String(ethers.utils.parseUnits(this.erc20LimitedAmount)),
+                fee: 0,
+                sender: this.walletAddress,
+                amount_out_minimum: amountOutMinimum,//String(ethers.utils.parseUnits(this.erc20LimitedAmount))
               }
             };
             console.log("obj string:", JSON.stringify(obj));
-            this.openNotifaction("success", "Swap successfully!");
-
-            axios.post('/api/v1/limited_orders', {
+            // return;
+            axios.post('/api/v1/add_limit_order', {
               beneficiary_addr: this.user,
               user_op: {
                 call_data: res.callData,
@@ -1200,31 +1301,77 @@ export default {
                 verification_gas_limit: String(res.verificationGasLimit)
               },
               order_details: {
-                order_no: timeStamp,// timestamp
-                token_in: this.subKeyLimitedDes,
-                token_in_amount: this.erc20LimitedAmount,
-                token_out: this.subKeyLimitedDes,
-                token_out_amount: this.ethLimitedAmount,
-                tx_hash: "",
-                status: "pending"
+                // order_no: timeStamp,// timestamp
+                token_in: this.contractAddrMap.get(this.subKeyLimitedSrc),
+                amount_in: String(ethers.utils.parseUnits(this.ethLimitedAmount)),
+                token_out: this.contractAddrMap.get(this.subKeyLimitedDes),
+                amount_out: String(ethers.utils.parseUnits(this.erc20LimitedAmount)),
+                fee: 0,
+                sender: this.walletAddress,
+                amount_out_minimum: amountOutMinimum,//String(ethers.utils.parseUnits(this.erc20LimitedAmount))
               }
             })
               .then(response => {
                 console.log(response);
                 if (response.data.code == 1000) {
+                  this.openNotifaction("success", "Swap successfully!");
                   // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
                   console.log("successfully submit!");
+
+                  // query order list
+                  axios.post('/api/v1/query_limit_orders', {
+                    sender: this.walletAddress
+                  })
+                    .then(response => {
+                      console.log(response);
+                      if (response.data.code == 1000) {
+                        this.orderData = [];
+                        // update order status
+                        if (response.data.data != null && response.data.data.length > 0) {
+                          response.data.data.forEach(element => {
+                            // console.log("order details: ", element);
+                            let tokenInSymbol = null;
+                            let tokenOutSymbol = null;
+                            this.contractAddrMap.forEach(function(value, key){
+                              if (value == element.TokenIn) {
+                                tokenInSymbol = key;
+                              }
+                              if (value == element.TokenOut) {
+                                tokenOutSymbol = key;
+                              }
+                            });
+                            // console.log("tokenInSymbol: ",tokenInSymbol);
+                            // console.log("tokenOutSymbol: ",tokenOutSymbol);
+                            let limitedOrderTmpObj = { orderNo: element.OrderNo, orderContent: { tokenIn: tokenInSymbol, tokenOut: tokenOutSymbol, tokenInAmount: element.TokenInAmount, tokenOutAmount: element.TokenOutAmount, status: element.Status, txHash: element.TxHash } };
+                            if (element.Status != "cancel") {
+                            this.orderData.push(limitedOrderTmpObj);
+                          }
+                          });
+                        }
+                      } else {
+                        console.log("error code: ", response.data.code);
+                      }
+                    })
+                    .catch(error => {
+                      console.log(error);
+                    });
+                }else {
+                  this.openNotifaction("info", "Swap error! error: " + response.data.message);
+                  console.log("swap error!");
+                  this.iconLoadingLimited = false;
                 }
               })
               .catch(error => {
                 console.log(error);
               });
           }
+
           this.iconLoadingLimited = false;
         });
       }
       if (this.changeLimitedPositionFlag == 1) {
         let walletSalt = 0;
+        amountOutMinimum = String(this.ethLimitedAmount * (1 - this.slipPoint / 100)).substring(0, 8);
         // update walletIndex
         for (let index = 0; index < this.walletObj.length; index++) {
           const element = this.walletObj[index];
@@ -1233,14 +1380,14 @@ export default {
             console.log("wallet info: ", element);
           }
         }
-        amountOutMinimum = String(this.ethLimitedAmount * (1 - this.slipPoint / 100)).substring(0, 8);
+        // amountOutMinimum = String(this.ethLimitedAmount * (1 - this.slipPoint / 100)).substring(0, 8);
         erc20ToEthLimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeyLimitedDes), this.contractAddrMap.get(this.subKeyLimitedSrc), this.fee, this.routerAddress, this.erc20LimitedAmount, amountOutMinimum, this.chainId).then(res => {
           if (res != undefined) {
             console.log("userOperation: ", res);
             let timeStamp = new Date().getTime();
             console.log("current timestamp: ", timeStamp);
-            let limitedOrderTmpObj = { orderNo: timeStamp, orderContent: { tokenIn: this.subKeyLimitedDes, tokenOut: this.subKeyLimitedDes, tokenInAmount: this.erc20LimitedAmount, tokenOutAmount: this.ethLimitedAmount } };
-            this.orderData.push(limitedOrderTmpObj);
+            // let limitedOrderTmpObj = { orderNo: timeStamp, orderContent: { tokenIn: this.subKeyLimitedDes, tokenOut: this.subKeyLimitedDes, tokenInAmount: this.erc20LimitedAmount, tokenOutAmount: this.ethLimitedAmount } };
+            // this.orderData.push(limitedOrderTmpObj);
 
             let obj = {
               beneficiary_addr: this.user,
@@ -1258,19 +1405,18 @@ export default {
                 verification_gas_limit: String(res.verificationGasLimit)
               },
               order_details: {
-                order_no: timeStamp,// timestamp
-                token_in: this.subKeyLimitedDes,
-                token_in_amount: this.erc20LimitedAmount,
-                token_out: this.subKeyLimitedDes,
-                token_out_amount: this.ethLimitedAmount,
-                tx_hash: "",
-                status: "pending"
+                token_in: this.contractAddrMap.get(this.subKeyLimitedDes),
+                amount_in: String(ethers.utils.parseUnits(this.erc20LimitedAmount)),
+                token_out: this.contractAddrMap.get(this.subKeyLimitedSrc),
+                amount_out: String(ethers.utils.parseUnits(this.ethLimitedAmount)),
+                fee: 0,
+                sender: this.walletAddress,
+                amount_out_minimum: amountOutMinimum,//String(ethers.utils.parseUnits(this.ethLimitedAmount))
               }
             };
             console.log("obj string:", JSON.stringify(obj));
-            this.openNotifaction("success", "Swap successfully!");
-
-            axios.post('/api/v1/limited_orders', {
+            // return;
+            axios.post('/api/v1/add_limit_order', {
               beneficiary_addr: this.user,
               user_op: {
                 call_data: res.callData,
@@ -1286,59 +1432,64 @@ export default {
                 verification_gas_limit: String(res.verificationGasLimit)
               },
               order_details: {
-                order_no: timeStamp,// timestamp
-                token_in: this.subKeyLimitedDes,
-                token_in_amount: this.erc20LimitedAmount,
-                token_out: this.subKeyLimitedDes,
-                token_out_amount: this.ethLimitedAmount,
-                tx_hash: "",
-                status: "pending"
+                token_in: this.contractAddrMap.get(this.subKeyLimitedDes),
+                amount_in: String(ethers.utils.parseUnits(this.erc20LimitedAmount)),
+                token_out: this.contractAddrMap.get(this.subKeyLimitedSrc),
+                amount_out: String(ethers.utils.parseUnits(this.ethLimitedAmount)),
+                fee: 0,
+                sender: this.walletAddress,
+                amount_out_minimum: amountOutMinimum,//String(ethers.utils.parseUnits(this.ethLimitedAmount))
               }
             })
               .then(response => {
                 console.log(response);
                 if (response.data.code == 1000) {
+                  this.openNotifaction("success", "Swap successfully!");
                   // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
                   console.log("successfully submit!");
 
-                  // setTimeout(() => {
-                  //   // update eth balance
-                  //   getEthBalance(this.walletAddress).then((response) => {
-                  //     if (response.status) {
-                  //       this.object.forEach(element => {
-                  //         if (element.token == "ETH") {
-                  //           console.log("eth balance:" + String(response.balance));
-                  //           element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
-                  //         }
-                  //       })
-                  //     } else {
-                  //       console.log("get ETH balance falied!");
-                  //     }
-                  //   });
-                  //   // update  erc20 balance
-                  //   for (let index = 1; index < this.object.length; index++) {
-                  //     const element = this.object[index];
-                  //     getErc20Balance(this.walletAddress, element.address).then((response) => {
-                  //       if (response.status) {
-                  //         console.log(element.token + " balance:" + String(response.balance));
-                  //         this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
-                  //       } else {
-                  //         console.log("get " + element.token + " balance falied!");
-                  //       }
-                  //     });
-                  //   }
-                  //   this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
-                  //   this.iconLoadingLimited = false;
-                  //   this.flagSpan = 1;
-                  // }, 15000);
-
-                  // setTimeout(() => {
-                  //   // alert(this.iconLoading);
-                  //   this.flagSpan = 1;
-                  // }, 1000);
-                }
-                if (response.data.code == 1003) {
-                  this.openNotifaction("info", "Swap error! error: " + response.data.data);
+                  // query order list
+                  axios.post('/api/v1/query_limit_orders', {
+                    sender: this.walletAddress
+                  })
+                    .then(response => {
+                      console.log(response);
+                      if (response.data.code == 1000) {
+                        this.orderData = [];
+                        // update order status
+                        if (response.data.data != null && response.data.data.length > 0) {
+                          response.data.data.forEach(element => {
+                            // console.log("order details: ", element);
+                            let tokenInSymbol = null;
+                            let tokenOutSymbol = null;
+                            this.contractAddrMap.forEach(function(value, key){
+                              if (value == element.TokenIn) {
+                                tokenInSymbol = key;
+                              }
+                              if (value == element.TokenOut) {
+                                tokenOutSymbol = key;
+                              }
+                            });
+                            // console.log("tokenInSymbol: ",tokenInSymbol);
+                            // console.log("tokenOutSymbol: ",tokenOutSymbol);
+                            let limitedOrderTmpObj = { orderNo: element.OrderNo, orderContent: { tokenIn: tokenInSymbol, tokenOut: tokenOutSymbol, tokenInAmount: element.TokenInAmount, tokenOutAmount: element.TokenOutAmount, status: element.Status, txHash: element.TxHash } };
+                            if (element.Status != "cancel") {
+                            this.orderData.push(limitedOrderTmpObj);
+                          }
+                          });
+                        }
+                        this.iconLoadingLimited = false;
+                      } else {
+                        console.log("error code: ", response.data.code);
+                        this.iconLoadingLimited = false;
+                      }
+                    })
+                    .catch(error => {
+                      console.log(error);
+                    });
+                  
+                }else {
+                  this.openNotifaction("info", "Swap error! error: " + response.data.message);
                   console.log("swap error!");
                   this.iconLoadingLimited = false;
                 }
@@ -1350,33 +1501,31 @@ export default {
           }
         });
       }
-      // start a schedule task to monitor limited order status
-
-      // update eth balance
-      getEthBalance(this.walletAddress).then((response) => {
-        if (response.status) {
-          this.object.forEach(element => {
-            if (element.token == "ETH") {
-              console.log("eth balance:" + String(response.balance));
-              element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
-            }
-          })
-        } else {
-          console.log("get ETH balance falied!");
-        }
-      });
-      // update  erc20 balance
-      for (let index = 1; index < this.object.length; index++) {
-        const element = this.object[index];
-        getErc20Balance(this.walletAddress, element.address).then((response) => {
-          if (response.status) {
-            console.log(element.token + " balance:" + String(response.balance));
-            this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
-          } else {
-            console.log("get " + element.token + " balance falied!");
-          }
-        });
-      }
+      // // update eth balance
+      // getEthBalance(this.walletAddress).then((response) => {
+      //   if (response.status) {
+      //     this.object.forEach(element => {
+      //       if (element.token == "ETH") {
+      //         console.log("eth balance:" + String(response.balance));
+      //         element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+      //       }
+      //     })
+      //   } else {
+      //     console.log("get ETH balance falied!");
+      //   }
+      // });
+      // // update  erc20 balance
+      // for (let index = 1; index < this.object.length; index++) {
+      //   const element = this.object[index];
+      //   getErc20Balance(this.walletAddress, element.address).then((response) => {
+      //     if (response.status) {
+      //       console.log(element.token + " balance:" + String(response.balance));
+      //       this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+      //     } else {
+      //       console.log("get " + element.token + " balance falied!");
+      //     }
+      //   });
+      // }
 
     },
     submitSwap() {
@@ -1462,7 +1611,7 @@ export default {
               if (response.data.code == 1000) {
                 // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
                 console.log("swap successfully!");
-
+                this.openNotifaction("success", "Swap successfully!");
 
                 setTimeout(() => {
                   // update eth balance
@@ -1470,7 +1619,7 @@ export default {
                     if (response.status) {
                       this.object.forEach(element => {
                         if (element.token == "ETH") {
-                          console.log("eth balance:" + String(response.balance));
+                          // console.log("eth balance:" + String(response.balance));
                           element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
                         }
                       })
@@ -1483,7 +1632,7 @@ export default {
                     const element = this.object[index];
                     getErc20Balance(this.walletAddress, element.address).then((response) => {
                       if (response.status) {
-                        console.log(element.token + " balance:" + String(response.balance));
+                        // console.log(element.token + " balance:" + String(response.balance));
                         this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
                       } else {
                         console.log("get " + element.token + " balance falied!");
@@ -1493,6 +1642,10 @@ export default {
                   this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
                   this.iconLoading = false;
                 }, 15000);
+              }else {
+                  this.openNotifaction("info", "Swap error! error: " + response.data.message);
+                  console.log("swap error!");
+                  this.iconLoading = false;
               }
             })
             .catch(error => {
@@ -1559,7 +1712,7 @@ export default {
               if (response.data.code == 1000) {
                 // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
                 console.log("swap successfully!");
-
+                this.openNotifaction("success", "Swap successfully!");
 
                 setTimeout(() => {
                   // update eth balance
@@ -1567,7 +1720,7 @@ export default {
                     if (response.status) {
                       this.object.forEach(element => {
                         if (element.token == "ETH") {
-                          console.log("eth balance:" + String(response.balance));
+                          // console.log("eth balance:" + String(response.balance));
                           element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
                         }
                       })
@@ -1580,7 +1733,7 @@ export default {
                     const element = this.object[index];
                     getErc20Balance(this.walletAddress, element.address).then((response) => {
                       if (response.status) {
-                        console.log(element.token + " balance:" + String(response.balance));
+                        // console.log(element.token + " balance:" + String(response.balance));
                         this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
                       } else {
                         console.log("get " + element.token + " balance falied!");
@@ -1590,6 +1743,10 @@ export default {
                   this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
                   this.iconLoading = false;
                 }, 15000);
+              }else {
+                  this.openNotifaction("info", "Swap error! error: " + response.data.message);
+                  console.log("swap error!");
+                  this.iconLoading = false;
               }
             })
             .catch(error => {
@@ -1609,7 +1766,7 @@ export default {
           if (response.status) {
             this.object.forEach(element => {
               if (element.token == "ETH") {
-                console.log("eth balance:" + String(response.balance));
+                // console.log("eth balance:" + String(response.balance));
                 element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
               }
             })
@@ -1622,7 +1779,7 @@ export default {
           const element = this.object[index];
           getErc20Balance(this.walletAddress, element.address).then((response) => {
             if (response.status) {
-              console.log(element.token + " balance:" + String(response.balance));
+              // console.log(element.token + " balance:" + String(response.balance));
               this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
             } else {
               console.log("get " + element.token + " balance falied!");
@@ -1766,7 +1923,7 @@ export default {
           const element = this.object[index];
           getErc20Balance(this.walletAddress, element.address).then((response) => {
             if (response.status) {
-              console.log(element.token + " balance:" + String(response.balance));
+              // console.log(element.token + " balance:" + String(response.balance));
               this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
             } else {
               console.log("get " + element.token + " balance falied!");
@@ -1815,7 +1972,7 @@ export default {
           if (response.status) {
             this.object.forEach(element => {
               if (element.token == "ETH") {
-                console.log("eth balance:" + String(response.balance));
+                // console.log("eth balance:" + String(response.balance));
                 element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
               }
             })
@@ -1878,7 +2035,7 @@ export default {
           const element = this.object[index];
           getErc20Balance(this.walletAddress, element.address).then((response) => {
             if (response.status) {
-              console.log(element.token + " balance:" + String(response.balance));
+              // console.log(element.token + " balance:" + String(response.balance));
               this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
             } else {
               console.log("get " + element.token + " balance falied!");
@@ -1970,7 +2127,7 @@ export default {
                 if (Number(element.Salt) == 0) {
                   this.walletAddress = element.Account;
 
-                  // add first account address into asset list
+                  // add first account address into asset list as ETH
                   if (this.object.length == 0) {
                     console.log("asset Address: ", element.Account);
                     console.log("asset symbol: ", "ETH");
@@ -1992,6 +2149,7 @@ export default {
     },
     onComplete(data) {
       console.log('data:', data);
+      this.scheduleTask();
       if (data.metaMaskAddress == "") {
         this.user = null;
         this.openNotifaction("info", "Log out.");
@@ -2076,7 +2234,7 @@ export default {
                       const element = this.object[index];
                       getErc20Balance(this.walletAddress, element.address).then((response) => {
                         if (response.status) {
-                          console.log(element.token + " balance:" + String(response.balance));
+                          // console.log(element.token + " balance:" + String(response.balance));
                           this.object[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
                         } else {
                           console.log("get " + element.token + " balance falied!");
@@ -2100,6 +2258,51 @@ export default {
                     console.log("get ETH balance falied!");
                   }
                 });
+
+                // query limited order status
+                axios.post('/api/v1/query_limit_orders', {
+                  sender: this.walletAddress
+                })
+                  .then(response => {
+                    console.log(response);
+                    if (response.data.code == 1000) {
+                      // update order status
+                      if (response.data.data != null && response.data.data.length > 0) {
+                        response.data.data.forEach(elementOut => {
+                          // console.log("order details: ", elementOut);
+
+                          let tokenInSymbol = null;
+                          let tokenOutSymbol = null;
+                          this.contractAddrMap.forEach(function (value, key) {
+                            if (value == elementOut.TokenIn) {
+                              tokenInSymbol = key;
+                            }
+                            if (value == elementOut.TokenOut) {
+                              tokenOutSymbol = key;
+                            }
+                          });
+                          // console.log("tokenInSymbol: ", tokenInSymbol);
+                          // console.log("tokenOutSymbol: ", tokenOutSymbol);
+                          let limitedOrderTmpObj = { orderNo: elementOut.OrderNo, orderContent: { tokenIn: tokenInSymbol, tokenOut: tokenOutSymbol, tokenInAmount: elementOut.TokenInAmount, tokenOutAmount: elementOut.TokenOutAmount, status: elementOut.Status, txHash: elementOut.TxHash } };
+                          if (elementOut.Status != "cancel") {
+                            this.orderData.push(limitedOrderTmpObj);
+                          }
+
+                          // this.orderData.forEach(elementIn => {
+                          //   if (elementOut.OrderNo == elementIn.orderNo && elementOut.Status == "complete") {
+                          //     elementIn.status = elementOut.Status;
+                          //     elementIn.txHash = elementOut.TxHash;
+                          //   }
+                          // });
+                        });
+                      }
+                    } else {
+                      console.log("error code: ", response.data);
+                    }
+                  })
+                  .catch(error => {
+                    console.log(error);
+                  });
               }
             }
           })
