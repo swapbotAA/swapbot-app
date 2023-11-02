@@ -808,7 +808,7 @@ export default {
     scheduleTask() {
       const scheduleCronstyle = () => {
         //: schedule task will be executed every 5 minutes
-        schedule.scheduleJob('*/2 * * * *', () => {
+        schedule.scheduleJob('*/1 * * * *', () => {
           // console.log('scheduleCronstyle:' + new Date());
           // query limited order status
           axios.post('/api/v1/query_limit_orders', {
