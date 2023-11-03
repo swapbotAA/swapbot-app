@@ -445,7 +445,7 @@
                     <span v-show="item.orderContent.status == 'complete'"  style="color:green; font-weight: 700;">{{ item.orderContent.status }}</span>
                     <br />
                     <span v-show="item.orderContent.status == 'complete'" style="font-weight: 700;">tx hash: </span>
-                    <span v-show="item.orderContent.status == 'complete'" style="font-weight: 700;">{{ item.orderContent.txHash }}</span>
+                    <span v-show="item.orderContent.status == 'complete'" style="font-weight: 700;"><a :href="'https://sepolia.etherscan.io/tx/'+item.orderContent.txHash" target="_blank">{{ item.orderContent.txHash }}</a></span>
                     <!-- <a-button  type="primary" style="height: 40px;width: 100px; margin-left: 30%;">Edit</a-button> -->
                     <!-- <a-button v-show="item.orderContent.status == 'complete'" danger type="disabled" shape="round"
                       style="height: 30px;width: 80px; margin-left: 270px;">
@@ -1242,7 +1242,7 @@ export default {
       if (this.changeLimitedPositionFlag == 0) {
         let walletSalt = 0;
         // update walletIndex
-        amountOutMinimum = String(this.erc20LimitedAmount * (1 - this.slipPoint / 100)).substring(0, 8);
+        // amountOutMinimum = String(this.erc20LimitedAmount * (1 - this.slipPoint / 100)).substring(0, 8);
         for (let index = 0; index < this.walletObj.length; index++) {
           const element = this.walletObj[index];
           if (element.address == this.walletAddress) {
@@ -1250,7 +1250,7 @@ export default {
             console.log("wallet info: ", element);
           }
         }
-        ethToErc20LimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeyLimitedSrc), this.contractAddrMap.get(this.subKeyLimitedDes), this.fee, this.routerAddress, this.ethLimitedAmount, amountOutMinimum, this.chainId).then(res => {
+        ethToErc20LimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeyLimitedSrc), this.contractAddrMap.get(this.subKeyLimitedDes), this.fee, this.routerAddress, this.ethLimitedAmount, this.erc20LimitedAmount, this.chainId).then(res => {
           if (res != undefined) {
             console.log("userOperation: ", res);
             let timeStamp = new Date().getTime();
@@ -1280,7 +1280,7 @@ export default {
                 amount_out: String(ethers.utils.parseUnits(this.erc20LimitedAmount)),
                 fee: 0,
                 sender: this.walletAddress,
-                amount_out_minimum: amountOutMinimum,//String(ethers.utils.parseUnits(this.erc20LimitedAmount))
+                amount_out_minimum: String(ethers.utils.parseUnits(this.erc20LimitedAmount)),//String(ethers.utils.parseUnits(this.erc20LimitedAmount))
               }
             };
             console.log("obj string:", JSON.stringify(obj));
@@ -1308,7 +1308,7 @@ export default {
                 amount_out: String(ethers.utils.parseUnits(this.erc20LimitedAmount)),
                 fee: 0,
                 sender: this.walletAddress,
-                amount_out_minimum: amountOutMinimum,//String(ethers.utils.parseUnits(this.erc20LimitedAmount))
+                amount_out_minimum: String(ethers.utils.parseUnits(this.erc20LimitedAmount)),//String(ethers.utils.parseUnits(this.erc20LimitedAmount))
               }
             })
               .then(response => {
@@ -1371,7 +1371,7 @@ export default {
       }
       if (this.changeLimitedPositionFlag == 1) {
         let walletSalt = 0;
-        amountOutMinimum = String(this.ethLimitedAmount * (1 - this.slipPoint / 100)).substring(0, 8);
+        // amountOutMinimum = String(this.ethLimitedAmount * (1 - this.slipPoint / 100)).substring(0, 8);
         // update walletIndex
         for (let index = 0; index < this.walletObj.length; index++) {
           const element = this.walletObj[index];
@@ -1380,8 +1380,7 @@ export default {
             console.log("wallet info: ", element);
           }
         }
-        // amountOutMinimum = String(this.ethLimitedAmount * (1 - this.slipPoint / 100)).substring(0, 8);
-        erc20ToEthLimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeyLimitedDes), this.contractAddrMap.get(this.subKeyLimitedSrc), this.fee, this.routerAddress, this.erc20LimitedAmount, amountOutMinimum, this.chainId).then(res => {
+        erc20ToEthLimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeyLimitedDes), this.contractAddrMap.get(this.subKeyLimitedSrc), this.fee, this.routerAddress, this.erc20LimitedAmount, this.ethLimitedAmount, this.chainId).then(res => {
           if (res != undefined) {
             console.log("userOperation: ", res);
             let timeStamp = new Date().getTime();
@@ -1411,7 +1410,7 @@ export default {
                 amount_out: String(ethers.utils.parseUnits(this.ethLimitedAmount)),
                 fee: 0,
                 sender: this.walletAddress,
-                amount_out_minimum: amountOutMinimum,//String(ethers.utils.parseUnits(this.ethLimitedAmount))
+                amount_out_minimum: String(ethers.utils.parseUnits(this.ethLimitedAmount)),//String(ethers.utils.parseUnits(this.ethLimitedAmount))
               }
             };
             console.log("obj string:", JSON.stringify(obj));
@@ -1438,7 +1437,7 @@ export default {
                 amount_out: String(ethers.utils.parseUnits(this.ethLimitedAmount)),
                 fee: 0,
                 sender: this.walletAddress,
-                amount_out_minimum: amountOutMinimum,//String(ethers.utils.parseUnits(this.ethLimitedAmount))
+                amount_out_minimum: String(ethers.utils.parseUnits(this.ethLimitedAmount)),//String(ethers.utils.parseUnits(this.ethLimitedAmount))
               }
             })
               .then(response => {
