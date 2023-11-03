@@ -1499,6 +1499,7 @@ export default {
                 this.iconLoadingLimited = false;
               });
           }
+          this.iconLoadingLimited = false;
         });
       }
       // // update eth balance
