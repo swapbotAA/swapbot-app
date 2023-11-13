@@ -5,4 +5,10 @@ import 'ant-design-vue/dist/reset.css';
 
 const app = createApp(App);
 
+app.directive('scroll', {
+        inserted(el) {
+            el.scrollIntoView()
+        }
+    })
+
 app.use(Antd).mount('#app');

@@ -39,7 +39,9 @@ async function initInstances(provider) {
         return false;
     }
     try {
-        
+        if (erc20InstanceList.length > 0) {
+            erc20InstanceList = [];
+        }
         walletInstance = new ethers.Contract(wallet_address, Wallet.abi, window.web3Provider.getSigner());
         uniswapRouterInstance = new ethers.Contract(uniswapRouter_address, UniswapRouter.abi, window.web3Provider.getSigner());
         entryPointInstance = new ethers.Contract(entryPoint_address, EntryPoint.abi, window.web3Provider.getSigner());
@@ -228,6 +230,7 @@ async function depositERC20(addr, erc20Address, rawAmount, callback){
 //withdraw ETH
 async function withdrawETH(user, addr, salt, wethAddr, amount, chainId, callback) {
     try {
+        let feeData = await GetEstimatedGasFee();
         let someEther = ethers.utils.parseEther(amount);
         // get tx nonce
         let nonce = await entryPointInstance.getNonce(addr, 0);
@@ -252,8 +255,8 @@ async function withdrawETH(user, addr, salt, wethAddr, amount, chainId, callback
             300000, // You can use this value temporarily, and then increase it
             300000, // You can use this value temporarily, and then increase it
             100000, // You can use this value temporarily, and then increase it
-            1000000000, // this is 10gwei，value can be adjusted according to the actual situation
-            1000000000,  // this is 5gwei
+            utils.formatUnits(feeData.maxFeePerGas, "wei"), // value can be adjusted according to the actual situation
+            utils.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address, // sparkyPaymaster address
         );
         // user sign 
@@ -300,8 +303,8 @@ async function withdrawERC20(user, addr, salt, uniAddr, rawAmount, chainId, call
             300000, // You can use this value temporarily, and then increase it
             300000, // You can use this value temporarily, and then increase it
             100000, // You can use this value temporarily, and then increase it
-            500000000000, // this is 10gwei，value can be adjusted according to the actual situation
-            5000000000,  // this is 5gwei
+            utils.formatUnits(feeData.maxFeePerGas, "wei"), // value can be adjusted according to the actual situation
+            utils.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address, // sparkyPaymaster address
         );
         // user sign 
@@ -357,8 +360,8 @@ async function erc20ToEthDataOperationWrapper(user, addr, salt, tokenIn, tokenOu
             300000,
             300000,
             100000,
-            500000000000,
-            5000000000,
+            utils.formatUnits(feeData.maxFeePerGas, "wei"), // value can be adjusted according to the actual situation
+            utils.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address,
         );
         let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
@@ -415,8 +418,8 @@ async function ethToErc20DataOperationWrapper(user, addr, salt, tokenIn, tokenOu
             300000,
             300000,
             100000,
-            1000000000,
-            1000000000,
+            utils.formatUnits(feeData.maxFeePerGas, "wei"), // value can be adjusted according to the actual situation
+            utils.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address,
         );
         let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
@@ -474,8 +477,8 @@ async function ethToErc20LimitedDataOperationWrapper(user, addr, salt, tokenIn, 
             300000,
             300000,
             100000,
-            1000000000,
-            1000000000,
+            utils.formatUnits(feeData.maxFeePerGas, "wei"), // value can be adjusted according to the actual situation
+            utils.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address,
         );
         let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
@@ -520,6 +523,7 @@ async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, 
             amountOutMinimum: amountOutMinimumBig,
             sqrtPriceLimitX96: 0
         };
+        console.log("params amountOutMinimum: ",String(params.amountOutMinimum));
         let func_swap = createCallData("exactInputSingle", [params]);
         // merge tx
         let calldata = createCallData("executeBatch", [[tokenIn, routerAddress], [0, 0], [func_approve, func_swap]]);
@@ -531,8 +535,8 @@ async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, 
             300000,
             300000,
             100000,
-            1000000000,
-            1000000000,
+            utils.formatUnits(feeData.maxFeePerGas, "wei"), // value can be adjusted according to the actual situation
+            utils.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address,
         );
         let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
@@ -558,6 +562,14 @@ async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, 
 //     for (var i = 0; i < e; i++) n += t.charAt(Math.floor(Math.random() * a));
 //     return n;
 // }
+
+
+async function GetEstimatedGasFee() {
+    let feeData = await window.web3Provider.getFeeData();
+    console.log(JSON.stringify(feeData));
+    // console.log(utils.formatUnits(feeData.maxFeePerGas, "wei"));
+    return feeData;//utils.formatUnits(feeData.maxFeePerGas, "gwei");
+}
 
 function createInitCode(
     factory,
@@ -712,7 +724,7 @@ export {
   ethToErc20LimitedDataOperationWrapper,
   erc20ToEthLimitedDataOperationWrapper,
   getWalletAddress,
-  // registerNFTSale,
+  GetEstimatedGasFee,
   // makeOfferWithETH,
   // confirmTrade
 }

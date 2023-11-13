@@ -1,0 +1,92 @@
+<div class="rightbar">
+      <div class="tabright">
+        <div class="content">
+          <div style="margin: auto;width: 90%;margin-top: -60px;position: absolute;text-align: left;">
+            <!--4个按钮-->
+            <button :class="indexr == numberr ? 'btnr1' : 'btnr'" @click="tabright(indexr)"
+              v-for="(itemr, indexr) in dataListRight" :key="indexr">{{ itemr.option }}
+            </button>
+          </div>
+          <!--4个div-->
+          <div id="contentRight0" v-show="numberr == 0">
+            <span>
+              <span v-for="value in walletObj">
+                <a-button :class="value.address == walletAddress ? 'btnwallet1' : 'btnwallet'" type="text"
+                  @click="changeWallet(value)">
+                  <span>smart contract account</span><span>:&nbsp</span><span>{{ value.address }}</span>
+                </a-button>
+              </span>
+            </span>
+            <!-- @click="openNotifaction('success')" -->
+            <a-button type="primary" shape="circle" @click="addWallet()">+</a-button>
+          </div>
+          <div id="contentRight1" v-show="numberr == 1">
+            <span ref="tokenList">
+              <span v-for="value in object">
+                <a-button type="text" style="text-align: left; width: 100%; height: 100px; border-radius: 15px;"
+                  @click="showOperateDrawer(value)">
+                  <span>{{ value.token }}</span><span>:&nbsp</span><span>{{ value.balance }}</span>
+                </a-button>
+              </span>
+            </span>
+            <!-- @click="openNotifaction('success')" -->
+            <a-button type="primary" shape="circle" @click="showAddErc20Drawer()">+</a-button>
+          </div>
+          <div id="contentRight2" v-show="numberr == 2">
+            <span>
+              <a-list size="large" bordered :data-source="orderData"
+                style="top: 5%; width: 90%; margin-left: 5%;text-align: left; background: #feecf9;">
+                <template #renderItem="{ item }">
+                  <a-list-item>
+                    <span style="font-weight: 700;">order number:&nbsp</span>{{ item.orderNo }}
+                    <br />
+                    <span style="font-weight: 700;">order details:&nbsp</span>
+                    <br />
+                    <span>token in:&nbsp</span>{{ item.orderContent.tokenIn }}<span>&nbsp
+                      amount:&nbsp</span>{{ item.orderContent.tokenInAmount }}
+                    <br />
+                    <span>token out:&nbsp</span>{{ item.orderContent.tokenOut }}<span>&nbsp
+                      amount:&nbsp</span>{{ item.orderContent.tokenOutAmount }}
+                    <br />
+                    <span v-show="item.orderContent.status == 'pending'" style="font-weight: 700;">status: </span>
+                    <span v-show="item.orderContent.status == 'pending'"  style="color:red; font-weight: 700;">{{ item.orderContent.status }}</span>
+                    <!-- <a-button  type="primary" style="height: 40px;width: 100px; margin-left: 30%;">Edit</a-button> -->
+                    <a-button v-show="item.orderContent.status == 'pending'" danger type="primary" shape="round"
+                      @click="cancelLimitedOrder(item.orderNo)" style="height: 30px;width: 80px; margin-left: 278px;">
+                      Cancel
+                    </a-button>
+
+                    <span v-show="item.orderContent.status == 'success'" style="font-weight: 700;">status: </span>
+                    <span v-show="item.orderContent.status == 'success'"  style="color:green; font-weight: 700;">{{ item.orderContent.status }}</span>
+                    <br />
+                    <span v-show="item.orderContent.status == 'success'" style="font-weight: 700;">tx hash: </span>
+                    <span v-show="item.orderContent.status == 'success'" style="font-weight: 700;"><a :href="'https://sepolia.etherscan.io/tx/'+item.orderContent.txHash" target="_blank">{{ item.orderContent.txHash }}</a></span>
+                    <!-- <a-button  type="primary" style="height: 40px;width: 100px; margin-left: 30%;">Edit</a-button> -->
+                    <!-- <a-button v-show="item.orderContent.status == 'complete'" danger type="disabled" shape="round"
+                      style="height: 30px;width: 80px; margin-left: 270px;">
+                      Cancel
+                    </a-button> -->
+                  </a-list-item>
+                </template>
+              </a-list>
+            </span>
+          </div>
+          <div id="contentRight3" v-show="numberr == 3" style="">
+            <span>
+              <a-list size="large" bordered :data-source="dataHistory"
+                style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
+                <template #renderItem="{ item }">
+                  <a-list-item>{{ item }}</a-list-item>
+                </template>
+                <template #footer>
+                  <div style="text-align: center;">....</div>
+                </template>
+              </a-list>
+            </span>
+          </div>
+          <div id="contentRight4" v-show="numberr == 4">
+            <span>Coming soon!</span>
+          </div>
+        </div>
+      </div>
+    </div>

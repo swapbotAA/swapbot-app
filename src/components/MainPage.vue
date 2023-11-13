@@ -18,14 +18,14 @@
 "custom"
         </vue-metamask> -->
     <particles-bg type="circle" :bg="true" />
-    <div class="header"><img src="../assets/robot.svg" style="height: 100px;width: 100px; padding-right: 10px;">
+    <!-- <div class="header"><img src="../assets/robot.svg" style="height: 100px;width: 100px; padding-right: 10px;">
       Sparky
       <vue-metamask ref="metamask" @onComplete="onComplete"></vue-metamask>
       <a-button type="primary" danger style="position: absolute; right: 10px; top: 10px;" @click="connect">
         <span v-if="this.user == null">Connect Wallet</span>
         <span v-else>{{ this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4) }}</span>
       </a-button>
-    </div>
+    </div> -->
     <div class="leftbar">
       <div class="tableft">
         <div class="content">
@@ -35,9 +35,9 @@
               v-for="(iteml, indexl) in dataListLeft" :key="indexl">{{ iteml.option }}
             </button>
 
-            <img src="../assets/setting-fill.svg"
+            <!-- <img src="../assets/setting-fill.svg"
               style="width: 40px; height: 40px; position: absolute;right: 10%;top: 25%;right: 10%;"
-              @click="showModal()" />
+              @click="showModal()" /> -->
 
           </div>
           <!--2个div-->
@@ -383,98 +383,7 @@
         </div>
       </div>
     </div>
-    <div class="rightbar">
-      <div class="tabright">
-        <div class="content">
-          <div style="margin: auto;width: 90%;margin-top: -60px;position: absolute;text-align: left;">
-            <!--4个按钮-->
-            <button :class="indexr == numberr ? 'btnr1' : 'btnr'" @click="tabright(indexr)"
-              v-for="(itemr, indexr) in dataListRight" :key="indexr">{{ itemr.option }}
-            </button>
-          </div>
-          <!--4个div-->
-          <div id="contentRight0" v-show="numberr == 0">
-            <span>
-              <span v-for="value in walletObj">
-                <a-button :class="value.address == walletAddress ? 'btnwallet1' : 'btnwallet'" type="text"
-                  @click="changeWallet(value)">
-                  <span>smart contract account</span><span>:&nbsp</span><span>{{ value.address }}</span>
-                </a-button>
-              </span>
-            </span>
-            <!-- @click="openNotifaction('success')" -->
-            <a-button type="primary" shape="circle" @click="addWallet()">+</a-button>
-          </div>
-          <div id="contentRight1" v-show="numberr == 1">
-            <span ref="tokenList">
-              <span v-for="value in object">
-                <a-button type="text" style="text-align: left; width: 100%; height: 100px; border-radius: 15px;"
-                  @click="showOperateDrawer(value)">
-                  <span>{{ value.token }}</span><span>:&nbsp</span><span>{{ value.balance }}</span>
-                </a-button>
-              </span>
-            </span>
-            <!-- @click="openNotifaction('success')" -->
-            <a-button type="primary" shape="circle" @click="showAddErc20Drawer()">+</a-button>
-          </div>
-          <div id="contentRight2" v-show="numberr == 2">
-            <span>
-              <a-list size="large" bordered :data-source="orderData"
-                style="top: 5%; width: 90%; margin-left: 5%;text-align: left; background: #feecf9;">
-                <template #renderItem="{ item }">
-                  <a-list-item>
-                    <span style="font-weight: 700;">order number:&nbsp</span>{{ item.orderNo }}
-                    <br />
-                    <span style="font-weight: 700;">order details:&nbsp</span>
-                    <br />
-                    <span>token in:&nbsp</span>{{ item.orderContent.tokenIn }}<span>&nbsp
-                      amount:&nbsp</span>{{ item.orderContent.tokenInAmount }}
-                    <br />
-                    <span>token out:&nbsp</span>{{ item.orderContent.tokenOut }}<span>&nbsp
-                      amount:&nbsp</span>{{ item.orderContent.tokenOutAmount }}
-                    <br />
-                    <span v-show="item.orderContent.status == 'pending'" style="font-weight: 700;">status: </span>
-                    <span v-show="item.orderContent.status == 'pending'"  style="color:red; font-weight: 700;">{{ item.orderContent.status }}</span>
-                    <!-- <a-button  type="primary" style="height: 40px;width: 100px; margin-left: 30%;">Edit</a-button> -->
-                    <a-button v-show="item.orderContent.status == 'pending'" danger type="primary" shape="round"
-                      @click="cancelLimitedOrder(item.orderNo)" style="height: 30px;width: 80px; margin-left: 278px;">
-                      Cancel
-                    </a-button>
-
-                    <span v-show="item.orderContent.status == 'complete'" style="font-weight: 700;">status: </span>
-                    <span v-show="item.orderContent.status == 'complete'"  style="color:green; font-weight: 700;">{{ item.orderContent.status }}</span>
-                    <br />
-                    <span v-show="item.orderContent.status == 'complete'" style="font-weight: 700;">tx hash: </span>
-                    <span v-show="item.orderContent.status == 'complete'" style="font-weight: 700;"><a :href="'https://sepolia.etherscan.io/tx/'+item.orderContent.txHash" target="_blank">{{ item.orderContent.txHash }}</a></span>
-                    <!-- <a-button  type="primary" style="height: 40px;width: 100px; margin-left: 30%;">Edit</a-button> -->
-                    <!-- <a-button v-show="item.orderContent.status == 'complete'" danger type="disabled" shape="round"
-                      style="height: 30px;width: 80px; margin-left: 270px;">
-                      Cancel
-                    </a-button> -->
-                  </a-list-item>
-                </template>
-              </a-list>
-            </span>
-          </div>
-          <div id="contentRight3" v-show="numberr == 3" style="">
-            <span>
-              <a-list size="large" bordered :data-source="dataHistory"
-                style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
-                <template #renderItem="{ item }">
-                  <a-list-item>{{ item }}</a-list-item>
-                </template>
-                <template #footer>
-                  <div style="text-align: center;">....</div>
-                </template>
-              </a-list>
-            </span>
-          </div>
-          <div id="contentRight4" v-show="numberr == 4">
-            <span>Coming soon!</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!--right bar-->
     <div class="bottom"></div><!--Designed by BlockModel-->
   </div>
 </template>
@@ -495,10 +404,10 @@
 /* left */
 .leftbar {
   position: absolute;
-  width: 45%;
-  top: 15%; //60px;
+  width: 95%;
+  top: 10%; //60px;
   /* 距离上面50像素 */
-  left: 4.5%;
+  left: 3%;
   bottom: 60px;
   overflow-y: auto;
   /* 当内容过多时y轴出现滚动条 */
@@ -1571,6 +1480,7 @@ export default {
           // console.log("222222:",res);  
           if (res == undefined) {
             this.iconLoading = false;
+            return;
           }
           // call exactInputSingle in relayer
           let obj = {
@@ -1670,8 +1580,10 @@ export default {
           }
         }
         erc20ToEthDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeyDes), this.contractAddrMap.get(this.subKeySrc), this.fee, this.routerAddress, this.erc20Amount, amountOutMinimum, this.chainId, this.submitSwapCallback).then(res => {
+          console.log(res);
           if (res == undefined) {
             this.iconLoading = false;
+            return;
           }
           // call exactInputSingle in relayer
           let obj = {
