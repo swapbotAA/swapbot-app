@@ -1,5 +1,5 @@
 <template>
-    <particles-bg type="circle" :bg="true" />
+    <particles-bg type="cobweb" :bg="true" />
     <div class="header"><img src="../assets/robot.svg" style="height: 100px;width: 100px; padding-right: 10px;">
         Sparky
         <vue-metamask ref="metamask" @onComplete="onComplete"></vue-metamask>
@@ -22,7 +22,7 @@
     <div class="body">
         <div class="leftbar">
             <div style="position:absolute; top: 3%;left: 5%;">
-                <label>Smart contract wallet</label>
+                <label style="font-weight: bolder;">Smart contract wallet</label>
                 <br/>
                 <label>
                     <a-select :size="size" :default-value=walletObj[0] style="position: absolute; width: 500px; left: 0%;" @select="changeWallet">
@@ -69,13 +69,39 @@
                 </div>
                 <div id="contentOperation" v-show="number == 1">
                     <span>
-                        <a-list size="large" bordered :data-source="opHistory"
-                            style="top: 5%; width: 90%; margin-left: 5%;text-align: left;">
+                        <a-list size="large" bordered :data-source="orderData"
+                            style="top: 5%; width: 90%; margin-left: 5%;text-align: left; background: #feecf9;">
                             <template #renderItem="{ item }">
-                            <a-list-item>{{ item }}</a-list-item>
-                            </template>
-                            <template #footer>
-                            <div style="text-align: center;">....</div>
+                            <a-list-item>
+                                <span style="font-weight: 700;">order number:&nbsp</span>{{ item.orderNo }}
+                                <br />
+                                <span style="font-weight: 700;">order details:&nbsp</span>
+                                <br />
+                                <span>token in:&nbsp</span>{{ item.orderContent.tokenIn }}<span>&nbsp
+                                amount:&nbsp</span>{{ item.orderContent.tokenInAmount }}
+                                <br />
+                                <span>token out:&nbsp</span>{{ item.orderContent.tokenOut }}<span>&nbsp
+                                amount:&nbsp</span>{{ item.orderContent.tokenOutAmount }}
+                                <br />
+                                <span v-show="item.orderContent.status == 'pending'" style="font-weight: 700;">status: </span>
+                                <span v-show="item.orderContent.status == 'pending'"  style="color:red; font-weight: 700;">{{ item.orderContent.status }}</span>
+                                <!-- <a-button  type="primary" style="height: 40px;width: 100px; margin-left: 30%;">Edit</a-button> -->
+                                <a-button v-show="item.orderContent.status == 'pending'" danger type="primary" shape="round"
+                                @click="cancelLimitedOrder(item.orderNo)" style="height: 30px;width: 80px; margin-left: 278px;">
+                                Cancel
+                                </a-button>
+
+                                <span v-show="item.orderContent.status == 'success'" style="font-weight: 700;">status: </span>
+                                <span v-show="item.orderContent.status == 'success'"  style="color:green; font-weight: 700;">{{ item.orderContent.status }}</span>
+                                <br />
+                                <span v-show="item.orderContent.status == 'success'" style="font-weight: 700;">tx hash: </span>
+                                <span v-show="item.orderContent.status == 'success'" style="font-weight: 700;"><a :href="'https://sepolia.etherscan.io/tx/' + item.orderContent.txHash" target="_blank">{{ item.orderContent.txHash }}</a></span>
+                                <!-- <a-button  type="primary" style="height: 40px;width: 100px; margin-left: 30%;">Edit</a-button> -->
+                                <!-- <a-button v-show="item.orderContent.status == 'complete'" danger type="disabled" shape="round"
+                            style="height: 30px;width: 80px; margin-left: 270px;">
+                            Cancel
+                            </a-button> -->
+                            </a-list-item>
                             </template>
                         </a-list>
                     </span>
@@ -154,8 +180,10 @@
             <!-- drawer list -->
             <!--drawer of ETH operating-->
             <a-drawer v-model:open="operateEthOpen" class="custom-class" root-class-name="root-class-name"
-                :root-style="{ color: 'blue' }" style="color: rgb(24, 18, 18)" title="ETH" placement="left"
-                @after-open-change="afterOpenChange">
+                :root-style="{ color: 'blue' }" style="color: rgb(24, 18, 18)," title="ETH" placement="left"
+                @after-open-change="afterOpenChange" 
+                :body-style="{background: ''}"
+                :header-style="{background: ''}">
                 <a-button type="primary" :loading="iconLoadingDepositEth" @click="showEthDeposit()"
                 style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 20px 3px;">
                 <template #icon>
@@ -311,6 +339,7 @@
     right: 0px;
     color: rgb(134, 50, 159);
     font-size: 60px;
+    font-weight: bolder;
     // background-color: #2d3a4b;
 }
 
@@ -525,9 +554,41 @@ export default {
             { label: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80A", value: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80A", disabled: false, salt: 0},
             { label: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80a", value: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80a", disabled: false, salt: 1}
             ],
+            orderData: [
+                { orderNo: "1",orderContent: { tokenIn: "eth", tokenOut: "uni", tokenInAmount: "0.0001", tokenOutAmount: "0.0003", status: "pending"}},
+                { orderNo: "2",orderContent: { tokenIn: "eth", tokenOut: "uni", tokenInAmount: "0.0001", tokenOutAmount: "0.0003", status: "pending"}},
+            ],
         }
     },
     methods: {
+        cancelLimitedOrder(orderNo) {
+            for (let index = 0; index < this.orderData.length; index++) {
+                const element = this.orderData[index];
+                if (element.orderNo == orderNo) {
+                    this.orderData.splice(index, 1);
+                }
+            }
+            this.openNotifaction("success", "cancel successfully!");
+            // delete order from limited order list
+            axios.post('/api/v1/cancel_limit_order', {
+                sender: this.walletAddress,
+                order_no: orderNo // timestamp
+            })
+                .then(response => {
+                    console.log(response);
+                    if (response.data.code == 1000) {
+                        console.log("Successfully remove order.");
+                    } else {
+                        console.log("error code: ", response.data.code);
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        },
+        browser() {
+            window.open('https://sepolia.etherscan.io/address/'+this.walletAddress);
+        },
         connect() {
             console.log("connect");
             if (this.user == null) {
@@ -543,6 +604,46 @@ export default {
                 this.user = this.$refs.metamask.MetaMaskAddress;
                 console.log('user address:', this.user);
                 this.openNotifaction("success", "Log in.");
+                // we need get user data from backend service
+                // 1. get user smart contract accounts
+                axios.post('/api/v1/query_contract_accounts', {
+                    user: this.user
+                })
+                    .then(response => {
+                        console.log(response);
+                        if (response.data.code == 1000) {
+                            consloe.log("Successfully obtained user smart contract account.");
+                            if (response.data.data != null && response.data.data.length > 0) {
+                                response.data.data.forEach(element => {
+                                    this.walletObj.push(
+                                        {
+                                            address: element.Account,
+                                            salt: element.Salt
+                                        }
+                                    );
+                                    // default select first address
+                                    if (Number(element.Salt) == 0) {
+                                        this.walletAddress = element.Account;
+
+                                        // add first account address into asset list as ETH
+                                        if (this.tokenObj.length == 0) {
+                                            console.log("asset Address: ", element.Account);
+                                            console.log("asset symbol: ", "ETH");
+                                            let tmpObj = { token: "ETH", address: element.Account, balance: 0 };
+                                            this.tokenObj.push(tmpObj);
+                                        }
+                                    }
+                                    if (Number(element.Salt) > this.walletSalt) {
+                                        // update user wallet salt
+                                        this.walletSalt = Number(element.Salt);
+                                    }
+                                })
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
             } else {
                 return;
             }
@@ -553,7 +654,7 @@ export default {
             if (data.metaMaskAddress == "") {
                 this.user = null;
                 this.openNotifaction("info", "Log out.");
-            }else {
+            } else {
                 this.user = data.metaMaskAddress;
                 // this.getTxHistory();
                 let provider = getWeb3Provider();
@@ -565,6 +666,145 @@ export default {
                         console.log("Init failed");
                     }
                 });
+
+                // we need get user data from backend service
+                // 1. get user smart contract accounts
+                axios.post('/api/v1/query_contract_accounts', {
+                    user: this.user
+                })
+                    .then(response => {
+                        console.log(response);
+                        if (response.data.code == 1000) {
+                            console.log("Successfully obtained user smart contract account.");
+                            if (response.data.data != null && response.data.data.length > 0) {
+                                response.data.data.forEach(element => {
+                                    this.walletObj.push(
+                                        {
+                                            address: element.Account,
+                                            salt: element.Salt
+                                        }
+                                    );
+                                    // default select first address
+                                    if (Number(element.Salt) == 0) {
+                                        this.walletAddress = element.Account;
+
+                                        // add first account address into asset list
+                                        if (this.tokenObj.length == 0) {
+                                            console.log("asset Address: ", element.Account);
+                                            console.log("asset symbol: ", "ETH");
+                                            let tmpObj = { token: "ETH", address: element.Account, balance: 0 };
+                                            this.tokenObj.push(tmpObj);
+                                        }
+                                    }
+                                    if (Number(element.Salt) > this.walletSalt) {
+                                        // update user wallet salt
+                                        this.walletSalt = Number(element.Salt);
+                                    }
+                                })
+                            }
+                            console.log("this wallet address:", this.walletAddress);
+                            console.log("this wallet salt:", this.walletSalt);
+
+                            if (this.walletAddress != null) {
+                                // before get balances, we need obtain asset list from backend service
+                                axios.post('/api/v1/query_account_assets', {
+                                    sender: this.walletAddress
+                                })
+                                    .then(response => {
+                                        console.log(response);
+                                        if (response.data.code == 1000) {
+                                            console.log("Successfully obtained user asset list.");
+                                            if (response.data.data != null && response.data.data.length > 0) {
+                                                response.data.data.forEach(element => {
+                                                    console.log("asset Address: ", element.Address);
+                                                    console.log("asset symbol: ", element.Token);
+                                                    let tmpObj = { token: element.Token, address: element.Address, balance: 0 };
+                                                    this.tokenObj.push(tmpObj);
+
+                                                })
+                                            }
+                                        }
+
+                                        // update erc20 balance
+                                        for (let index = 1; index < this.tokenObj.length; index++) {
+                                            const element = this.tokenObj[index];
+                                            getErc20Balance(this.walletAddress, element.address).then((response) => {
+                                                if (response.status) {
+                                                    // console.log(element.token + " balance:" + String(response.balance));
+                                                    this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                } else {
+                                                    console.log("get " + element.token + " balance falied!");
+                                                }
+                                            });
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.log(error);
+                                    });
+                                // update  eth balance
+                                getEthBalance(this.walletAddress).then((response) => {
+                                    if (response.status) {
+                                        // console.log(element.token + " balance:" + response.balance.toNumber());
+                                        this.tokenObj.forEach(element => {
+                                            if (element.token == "ETH") {
+                                                element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                            }
+                                        })
+                                    } else {
+                                        console.log("get ETH balance falied!");
+                                    }
+                                });
+
+                                // query limited order status
+                                axios.post('/api/v1/query_limit_orders', {
+                                    sender: this.walletAddress
+                                })
+                                    .then(response => {
+                                        console.log(response);
+                                        if (response.data.code == 1000) {
+                                            // update order status
+                                            if (response.data.data != null && response.data.data.length > 0) {
+                                                response.data.data.forEach(elementOut => {
+                                                    // console.log("order details: ", elementOut);
+
+                                                    let tokenInSymbol = null;
+                                                    let tokenOutSymbol = null;
+                                                    this.contractAddrMap.forEach(function (value, key) {
+                                                        if (value == elementOut.TokenIn) {
+                                                            tokenInSymbol = key;
+                                                        }
+                                                        if (value == elementOut.TokenOut) {
+                                                            tokenOutSymbol = key;
+                                                        }
+                                                    });
+                                                    // console.log("tokenInSymbol: ", tokenInSymbol);
+                                                    // console.log("tokenOutSymbol: ", tokenOutSymbol);
+                                                    let limitedOrderTmpObj = { orderNo: elementOut.OrderNo, orderContent: { tokenIn: tokenInSymbol, tokenOut: tokenOutSymbol, tokenInAmount: elementOut.TokenInAmount, tokenOutAmount: elementOut.TokenOutAmount, status: elementOut.Status, txHash: elementOut.TxHash } };
+                                                    if (elementOut.Status != "cancel") {
+                                                        this.orderData.push(limitedOrderTmpObj);
+                                                    }
+
+                                                    // this.orderData.forEach(elementIn => {
+                                                    //   if (elementOut.OrderNo == elementIn.orderNo && elementOut.Status == "complete") {
+                                                    //     elementIn.status = elementOut.Status;
+                                                    //     elementIn.txHash = elementOut.TxHash;
+                                                    //   }
+                                                    // });
+                                                });
+                                            }
+                                        } else {
+                                            console.log("error code: ", response.data);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.log(error);
+                                    });
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
             }
         },
         generateQR() {
@@ -1128,7 +1368,7 @@ export default {
             try {
                 await toClipboard(this.walletAddress);
                 // alert("c");
-                this.Notification("success","Copy success.");
+                this.openNotifaction("success","Copy success.");
             } catch (e) {
                 console.error(e);
             }
