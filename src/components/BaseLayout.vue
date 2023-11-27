@@ -25,14 +25,14 @@
                 <label style="font-weight: bolder;">Smart contract wallet</label>
                 <br/>
                 <label>
-                    <a-select :size="size" :default-value=walletObj[0] style="position: absolute; width: 500px; left: 0%;" @select="changeWallet">
+                    <a-select :size="size" :default-value=walletObj[0] :key={walletAddress} style="position: absolute; width: 500px; left: 0%;" @select="changeWallet">
                     <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
                         v-for="item in walletObj" :key="item.value">{{ item.label }}</a-select-option>
                     </a-select>
                     <!-- <buttom @click="copyWalletAdd('fmbb')" style="cursor:pointer,"><img src="../assets/copy.svg" style="position: absolute; height: 25px;width: 25px;" ></buttom> -->
                 </label>
                 <label>
-                    <buttom @click="addWallet()" style="cursor:pointer"><img src="../assets/add.svg" style="position: absolute; margin-left: 440px; top: 22px; height: 30px;width: 30px;" ></buttom>
+                    <buttom @click="addWalletHint()" style="cursor:pointer"><img src="../assets/add.svg" style="position: absolute; margin-left: 440px; top: 22px; height: 30px;width: 30px;" ></buttom>
                     <buttom @click="copyWalletAdd()" style="cursor:pointer"><img src="../assets/copy.svg" style="position: absolute; margin-left: 480px; top: 22px; height: 30px;width: 30px;" ></buttom>
                     <buttom @click="browser()" style="cursor:pointer"><img src="../assets/web.svg" style="position: absolute; margin-left: 520px; top: 22px; height: 28px;width: 28px;" ></buttom>
                 </label>
@@ -69,33 +69,77 @@
                 </div>
                 <div id="contentOperation" v-show="number == 1">
                     <span>
-                        <a-list size="large" bordered :data-source="orderData"
-                            style="top: 5%; width: 90%; margin-left: 5%;text-align: left; background: #feecf9;">
+                        <a-list size="large" bordered :data-source="operationHistory"
+                            style="top: 5%; margin-bottom:8%; width: 90%; margin-left: 5%;text-align: left; background: #feecf9;">
                             <template #renderItem="{ item }">
                             <a-list-item>
-                                <span style="font-weight: 700;">order number:&nbsp</span>{{ item.orderNo }}
-                                <br />
-                                <span style="font-weight: 700;">order details:&nbsp</span>
-                                <br />
-                                <span>token in:&nbsp</span>{{ item.orderContent.tokenIn }}<span>&nbsp
-                                amount:&nbsp</span>{{ item.orderContent.tokenInAmount }}
-                                <br />
-                                <span>token out:&nbsp</span>{{ item.orderContent.tokenOut }}<span>&nbsp
-                                amount:&nbsp</span>{{ item.orderContent.tokenOutAmount }}
-                                <br />
-                                <span v-show="item.orderContent.status == 'pending'" style="font-weight: 700;">status: </span>
-                                <span v-show="item.orderContent.status == 'pending'"  style="color:red; font-weight: 700;">{{ item.orderContent.status }}</span>
+                                <!--status.code: 0 pending 1 finish success-->
+                                <span v-show="item.action == 'Transfer'" style="font-weight: 700;">{{ item.action }}&nbsp
+                                    <!-- <span v-show="item.status.code == '0'">
+                                        <img style="width: 25px; height:25px;" src = "../assets/X.svg">
+                                        <span style="position: absolute;right: 20px; font-size: large; color: rgb(255 189 89);">Pending</span>
+                                    </span> -->
+                                    <span v-show="item.status.code == '1'">
+                                        <img style="width: 25px; height:25px; cursor:pointer" src = "../assets/jumpto.svg" @click="viewTx(item.txHash)">
+                                        <span style="position: absolute;right: 20px; font-size: large; color: green;">Finish</span>
+                                    </span>
+                                    <br />
+                                    <span style="font-size: smaller; font-weight:500;">
+                                        {{item.details.amount}}&nbsp{{ item.details.tokenSymbol }}
+                                        <span v-show="item.status.error != null" style="position: absolute;right: 20px; font-size: small; ">reason:&nbsp{{ item.status.error }}</span>
+                                    </span>
+                                </span>
+                                <span v-show="item.action == 'Swap'" style="font-weight: 700;">{{ item.action }}&nbsp
+                                    <!-- <span v-show="item.status.code == '0'">
+                                        <img style="width: 25px; height:25px;" src = "../assets/X.svg">
+                                        <span style="position: absolute;right: 20px; font-size: large; color: rgb(255 189 89);">Pending</span>
+                                    </span> -->
+                                    <span v-show="item.status.code == '1'">
+                                        <img style="width: 25px; height:25px; cursor:pointer" src = "../assets/jumpto.svg" @click="viewTx(item.txHash)">
+                                        <span style="position: absolute;right: 20px; font-size: large; color: green;">Finish</span>
+                                    </span>
+                                    <br />
+                                    <span style="font-size: smaller; font-weight:500;">
+                                        from&nbsp{{item.details.amountIn}}&nbsp{{ item.details.tokenIn }}&nbspfor&nbsp{{ item.details.tokenOut }}
+                                        <span v-show="item.status.error != null" style="position: absolute;right: 20px; font-size: small; ">reason:&nbsp{{ item.status.error }}</span>
+                                    </span>
+                                </span>
+                                <span v-show="item.action == 'Limit order'" style="font-weight: 700;">{{ item.action }}&nbsp
+                                    <span v-show="item.status.code == '0'">
+                                        <img style="width: 25px; height:20px;" src = "../assets/X.svg">
+                                        <span style="position: absolute;right: 20px; font-size: large; color: rgb(255 189 89);">Pending</span>
+                                    </span>
+                                    <span v-show="item.status.code == '1'">
+                                        <img style="width: 25px; height:25px; cursor:pointer" src = "../assets/jumpto.svg" @click="viewTx(item.txHash)">
+                                        <span style="position: absolute;right: 20px; font-size: large; color: green;">Finish</span>
+                                    </span>
+                                    <br />
+                                    <span style="font-size: smaller; font-weight:500;">
+                                        from&nbsp{{item.details.amountIn}}&nbsp{{ item.details.tokenIn }}&nbspfor&nbsp{{ item.details.amountOut }}&nbsp{{ item.details.tokenOut }}
+                                        <span v-show="item.status.error != null" style="position: absolute;right: 20px; font-size: small; ">reason:&nbsp{{ item.status.error }}</span>
+                                    </span>
+                                </span>
+                                <!-- <span style="font-weight: 700;">order details:&nbsp</span> -->
+                                <!-- <br /> -->
+                                <!-- <span>token in:&nbsp</span>{{ item.orderContent.tokenIn }}<span>&nbsp
+                                amount:&nbsp</span>{{ item.orderContent.tokenInAmount }} -->
+                                <!-- <br /> -->
+                                <!-- <span>token out:&nbsp</span>{{ item.orderContent.tokenOut }}<span>&nbsp
+                                amount:&nbsp</span>{{ item.orderContent.tokenOutAmount }} -->
+                                <!-- <br /> -->
+                                <!-- <span v-show="item.orderContent.status == 'pending'" style="font-weight: 700;">status: </span> -->
+                                <!-- <span v-show="item.orderContent.status == 'pending'"  style="color:red; font-weight: 700;">{{ item.orderContent.status }}</span> -->
                                 <!-- <a-button  type="primary" style="height: 40px;width: 100px; margin-left: 30%;">Edit</a-button> -->
-                                <a-button v-show="item.orderContent.status == 'pending'" danger type="primary" shape="round"
-                                @click="cancelLimitedOrder(item.orderNo)" style="height: 30px;width: 80px; margin-left: 278px;">
-                                Cancel
-                                </a-button>
+                                <!-- <a-button v-show="item.orderContent.status == 'pending'" danger type="primary" shape="round"
+                                @click="cancelLimitedOrder(item.orderNo)" style="height: 30px;width: 80px; margin-left: 278px;"> -->
+                                <!-- Cancel -->
+                                <!-- </a-button> -->
 
-                                <span v-show="item.orderContent.status == 'success'" style="font-weight: 700;">status: </span>
-                                <span v-show="item.orderContent.status == 'success'"  style="color:green; font-weight: 700;">{{ item.orderContent.status }}</span>
-                                <br />
-                                <span v-show="item.orderContent.status == 'success'" style="font-weight: 700;">tx hash: </span>
-                                <span v-show="item.orderContent.status == 'success'" style="font-weight: 700;"><a :href="'https://sepolia.etherscan.io/tx/' + item.orderContent.txHash" target="_blank">{{ item.orderContent.txHash }}</a></span>
+                                <!-- <span v-show="item.orderContent.status == 'success'" style="font-weight: 700;">status: </span> -->
+                                <!-- <span v-show="item.orderContent.status == 'success'"  style="color:green; font-weight: 700;">{{ item.orderContent.status }}</span> -->
+                                <!-- <br /> -->
+                                <!-- <span v-show="item.orderContent.status == 'success'" style="font-weight: 700;">tx hash: </span> -->
+                                <!-- <span v-show="item.orderContent.status == 'success'" style="font-weight: 700;"><a :href="'https://sepolia.etherscan.io/tx/' + item.orderContent.txHash" target="_blank">{{ item.orderContent.txHash }}</a></span> -->
                                 <!-- <a-button  type="primary" style="height: 40px;width: 100px; margin-left: 30%;">Edit</a-button> -->
                                 <!-- <a-button v-show="item.orderContent.status == 'complete'" danger type="disabled" shape="round"
                             style="height: 30px;width: 80px; margin-left: 270px;">
@@ -129,9 +173,13 @@
                         </span>
                     </span>
             </a-modal>
+            <!--Add wallet address hint modal windows-->
+            <a-modal v-model:open="openAddWalletHint" title="Tips" ok-text="OK" cancel-text="CX" @ok="addWallet()" :key=Math.random() style="width:250px;">
+                <span>Create a new wallet account?</span>
+            </a-modal>
             <!--QR code modal windows-->
             <a-modal v-model:open="openQR" title="" footer="" :key=Math.random() style="width:250px;">
-                <span>address: 0xab63c766c4ea5df59d61e36b28cdc6c1c6f197a6</span>
+                <span>address: {{walletAddress}}</span>
                 <buttom @click="copyWalletAdd()" style="cursor:pointer"><img src="../assets/copy.svg" style="margin-left:10px; height: 20px;width: 20px;" ></buttom>
                 <img :src="qrImgSrc" style="width:200px; height: 200px; border-radius: 20px;">
             </a-modal>
@@ -329,6 +377,7 @@
     margin-top: 0px;
     border-radius: 15px;
     width: 650px;
+    overflow-y: auto;
   }
 /* head */
 .header {
@@ -467,6 +516,7 @@ import {
   getEthBalance,
   GetEstimatedGasFee,
 } from "../api/contracts";
+import {responseParser} from "../api/apiChat";
 
 const { toClipboard } = useClipboard();
 const axios = require('axios');
@@ -484,6 +534,7 @@ export default {
         return {
             // setting params
             slipPoint: 100,
+            PriTxChecked: ref(false),
             // smart contract account params
             walletAddress: null,
             walletSalt: 0,//default 0
@@ -501,6 +552,7 @@ export default {
             openTransfer: ref(false),
             openReceive: ref(false),
             openQR: ref(false),
+            openAddWalletHint: ref(false),
             qrImgSrc: " data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNjkzMjg0MjA0Njk0IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjE5NTkiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PHBhdGggZD0iTTcwNS45MiA5MTUuODRIMzIwYy0yOC4xNiAwLTUxLjItMjMuMDQtNTEuMi01MS4yVjYzMC40YzAtMjguMTYgMjMuMDQtNTEuMiA1MS4yLTUxLjJoMzg1LjkyYzI4LjE2IDAgNTEuMiAyMy4wNCA1MS4yIDUxLjJ2MjM0Ljg4YzAgMjcuNTItMjMuMDQgNTAuNTYtNTEuMiA1MC41NnoiIGZpbGw9IiNFRUY2RkYiIHAtaWQ9IjE5NjAiPjwvcGF0aD48cGF0aCBkPSJNNzA1LjkyIDkyOC42NEgzMjBjLTM1LjIgMC02NC0yOC44LTY0LTY0VjYzMC40YzAtMzUuMiAyOC44LTY0IDY0LTY0aDM4NS45MmMzNS4yIDAgNjQgMjguOCA2NCA2NHYyMzQuODhjMCAzNS4yLTI4LjggNjMuMzYtNjQgNjMuMzZ6TTMyMCA1OTJjLTIxLjEyIDAtMzguNCAxNy4yOC0zOC40IDM4LjR2MjM0Ljg4YzAgMjEuMTIgMTcuMjggMzguNCAzOC40IDM4LjRoMzg1LjkyYzIxLjEyIDAgMzguNC0xNy4yOCAzOC40LTM4LjRWNjMwLjRjMC0yMS4xMi0xNy4yOC0zOC40LTM4LjQtMzguNEgzMjB6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTYxIj48L3BhdGg+PHBhdGggZD0iTTUxNS4yIDE2My4yQzQxOC41NiAxNjMuMiAzMzkuMiAyNDIuNTYgMzM5LjIgMzM4LjU2VjUxOC40aDM1MlYzMzguNTZjMC05Ni03OS4zNi0xNzUuMzYtMTc2LTE3NS4zNnoiIGZpbGw9IiNFOEU2RkYiIHAtaWQ9IjE5NjIiPjwvcGF0aD48cGF0aCBkPSJNNzA0IDUzMS4ySDMyNi40VjMzOC41NmMwLTEwMy42OCA4NC40OC0xODguMTYgMTg4LjgtMTg4LjE2UzcwNCAyMzQuODggNzA0IDMzOC41NlY1MzEuMnogbS0zNTItMjUuNmgzMjYuNFYzMzguNTZjMC04OS42LTcyLjk2LTE2Mi41Ni0xNjMuMi0xNjIuNTZTMzUyIDI0OC45NiAzNTIgMzM4LjU2VjUwNS42eiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk2MyI+PC9wYXRoPjxwYXRoIGQ9Ik00NTYuMzIgNTE4LjRoMTEydjYwLjhINDU2LjMyeiIgZmlsbD0iI0VFRjZGRiIgcC1pZD0iMTk2NCI+PC9wYXRoPjxwYXRoIGQ9Ik01ODEuNzYgNTkySDQ0My41MlY1MDUuNmgxMzcuNnY4Ni40eiBtLTExMi42NC0yNS42aDg2LjRWNTMxLjJINDY5LjEydjM1LjJ6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTY1Ij48L3BhdGg+PHBhdGggZD0iTTcxNC44OCA0MzEuMzZjLTEyLjggMC0yMy4wNC0xMC4yNC0yMy4wNC0yMy4wNHYtMzguNGMwLTEyLjggMTAuMjQtMjMuMDQgMjMuMDQtMjMuMDRzMjMuMDQgMTAuMjQgMjMuMDQgMjMuMDR2MzguNGMwIDEyLjgtMTAuMjQgMjMuMDQtMjMuMDQgMjMuMDR6IiBmaWxsPSIjRUVGNkZGIiBwLWlkPSIxOTY2Ij48L3BhdGg+PHBhdGggZD0iTTcxNC44OCA0NDQuMTZjLTE5Ljg0IDAtMzUuODQtMTYtMzUuODQtMzUuODR2LTM4LjRjMC0xOS44NCAxNi0zNS44NCAzNS44NC0zNS44NHMzNS44NCAxNiAzNS44NCAzNS44NHYzOC40YzAgMTkuODQtMTYgMzUuODQtMzUuODQgMzUuODR6IG0wLTgzLjg0Yy01Ljc2IDAtMTAuMjQgNC40OC0xMC4yNCAxMC4yNHYzOC40YzAgNS43NiA0LjQ4IDEwLjI0IDEwLjI0IDEwLjI0czEwLjI0LTQuNDggMTAuMjQtMTAuMjR2LTM4LjRjMC01Ljc2LTQuNDgtMTAuMjQtMTAuMjQtMTAuMjR6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTY3Ij48L3BhdGg+PHBhdGggZD0iTTMxMi4zMiA0MjEuMTJjLTEyLjggMC0yMy4wNC0xMC4yNC0yMy4wNC0yMy4wNHYtMzguNGMwLTEyLjggMTAuMjQtMjMuMDQgMjMuMDQtMjMuMDRzMjMuMDQgMTAuMjQgMjMuMDQgMjMuMDR2MzguNGMwIDEyLjgtMTAuODggMjMuMDQtMjMuMDQgMjMuMDR6IiBmaWxsPSIjRUVGNkZGIiBwLWlkPSIxOTY4Ij48L3BhdGg+PHBhdGggZD0iTTMxMi4zMiA0MzMuOTJjLTE5Ljg0IDAtMzUuODQtMTYtMzUuODQtMzUuODR2LTM4LjRjMC0xOS44NCAxNi0zNS44NCAzNS44NC0zNS44NHMzNS44NCAxNiAzNS44NCAzNS44NHYzOC40YzAgMTkuODQtMTYuNjQgMzUuODQtMzUuODQgMzUuODR6IG0wLTgzLjg0Yy01Ljc2IDAtMTAuMjQgNC40OC0xMC4yNCAxMC4yNHYzOC40YzAgNS43NiA0LjQ4IDEwLjI0IDEwLjI0IDEwLjI0czEwLjI0LTQuNDggMTAuMjQtMTAuMjR2LTM4LjRjMC01Ljc2LTUuMTItMTAuMjQtMTAuMjQtMTAuMjR6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTY5Ij48L3BhdGg+PHBhdGggZD0iTTc5NS41MiA3NjMuNTJoLTI1LjZjLTcuMDQgMC0xMi44LTUuNzYtMTIuOC0xMi44di00Ni4wOGMwLTE0LjA4LTIuNTYtMjUuNiAxMS41Mi0yNS42aDI2Ljg4YzE0LjA4IDAgMjUuNiAxMS41MiAyNS42IDI1LjZ2MzMuMjhjMCAxNC4wOC0xMS41MiAyNS42LTI1LjYgMjUuNnoiIGZpbGw9IiNFRUY2RkYiIHAtaWQ9IjE5NzAiPjwvcGF0aD48cGF0aCBkPSJNNzk1LjUyIDc3Ni4zMmgtMjUuNmMtMTQuMDggMC0yNS42LTExLjUyLTI1LjYtMjUuNnYtNDYuMDgtNS4xMmMwLTguOTYtMC42NC0xOS4yIDYuNC0yNi4yNCA0LjQ4LTQuNDggMTAuMjQtNi40IDE3LjkyLTYuNGgyNi44OGMyMS4xMiAwIDM4LjQgMTcuMjggMzguNCAzOC40djMzLjI4YzAgMjAuNDgtMTcuMjggMzcuNzYtMzguNCAzNy43NnogbS0yNi4yNC04NC40OHY1OC44OGgyNS42YzcuMDQgMCAxMi44LTUuNzYgMTIuOC0xMi44di0zMy4yOGMwLTcuMDQtNS43Ni0xMi44LTEyLjgtMTIuOGgtMjUuNnoiIGZpbGw9IiM3MDhEQjciIHAtaWQ9IjE5NzEiPjwvcGF0aD48cGF0aCBkPSJNODE2LjY0IDczNC4wOGwtMC42NC0yNS42djEyLjgtMTIuOGM1LjEyIDAgNDgtMy4yIDQ4LTU4LjI0VjQ1NC40aDI1LjZ2MTk2LjQ4YzAgODEuMjgtNzIuMzIgODMuMi03Mi45NiA4My4yeiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk3MiI+PC9wYXRoPjxwYXRoIGQ9Ik0yMjguNDggNzYzLjUyaDI1LjZjNy4wNCAwIDEyLjgtNS43NiAxMi44LTEyLjh2LTU4Ljg4YzAtNy4wNC01Ljc2LTEyLjgtMTIuOC0xMi44aC0yNS42Yy0xNC4wOCAwLTI1LjYgMTEuNTItMjUuNiAyNS42djMzLjI4YzAgMTQuMDggMTEuNTIgMjUuNiAyNS42IDI1LjZ6IiBmaWxsPSIjRUVGNkZGIiBwLWlkPSIxOTczIj48L3BhdGg+PHBhdGggZD0iTTI1NC4wOCA3NzYuMzJoLTI1LjZjLTIxLjEyIDAtMzguNC0xNy4yOC0zOC40LTM4LjR2LTMzLjI4YzAtMjEuMTIgMTcuMjgtMzguNCAzOC40LTM4LjRoMjUuNmMxNC4wOCAwIDI1LjYgMTEuNTIgMjUuNiAyNS42djU4Ljg4YzAgMTQuMDgtMTEuNTIgMjUuNi0yNS42IDI1LjZ6IG0tMjUuNi04NC40OGMtNy4wNCAwLTEyLjggNS43Ni0xMi44IDEyLjh2MzMuMjhjMCA3LjA0IDUuNzYgMTIuOCAxMi44IDEyLjhoMjUuNnYtNTguODhoLTI1LjZ6TTUxOS4wNCAxNDAuMTZjLTIzLjY4IDAtNDMuNTItMTkuMi00My41Mi00My41MnMxOS4yLTQzLjUyIDQzLjUyLTQzLjUyIDQzLjUyIDE5LjIgNDMuNTIgNDMuNTItMTkuODQgNDMuNTItNDMuNTIgNDMuNTJ6IG0wLTYxLjQ0Yy05LjYgMC0xNy45MiA4LjMyLTE3LjkyIDE3LjkyczguMzIgMTcuOTIgMTcuOTIgMTcuOTIgMTcuOTItOC4zMiAxNy45Mi0xNy45Mi04LjMyLTE3LjkyLTE3LjkyLTE3LjkyeiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk3NCI+PC9wYXRoPjxwYXRoIGQ9Ik01MDUuNiAxMzQuNGgyNS42djMyaC0yNS42eiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk3NSI+PC9wYXRoPjxwYXRoIGQ9Ik01MTIuNjQgMzA1LjkybS02OS4xMiAwYTY5LjEyIDY5LjEyIDAgMSAwIDEzOC4yNCAwIDY5LjEyIDY5LjEyIDAgMSAwLTEzOC4yNCAwWiIgZmlsbD0iI0ZGRjI3RCIgcC1pZD0iMTk3NiI+PC9wYXRoPjxwYXRoIGQ9Ik01MTIuNjQgMzg3Ljg0Yy00NC44IDAtODEuOTItMzYuNDgtODEuOTItODEuOTJTNDY3LjIgMjI0IDUxMi42NCAyMjRzODEuOTIgMzYuNDggODEuOTIgODEuOTItMzcuMTIgODEuOTItODEuOTIgODEuOTJ6IG0wLTEzOC4yNGMtMzAuNzIgMC01Ni4zMiAyNC45Ni01Ni4zMiA1Ni4zMnMyNC45NiA1Ni4zMiA1Ni4zMiA1Ni4zMiA1Ni4zMi0yNC45NiA1Ni4zMi01Ni4zMi0yNS42LTU2LjMyLTU2LjMyLTU2LjMyeiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk3NyI+PC9wYXRoPjxwYXRoIGQ9Ik02MDQuMTYgNDMzLjI4bS0xMC4yNCAwYTEwLjI0IDEwLjI0IDAgMSAwIDIwLjQ4IDAgMTAuMjQgMTAuMjQgMCAxIDAtMjAuNDggMFoiIGZpbGw9IiM3MDhEQjciIHAtaWQ9IjE5NzgiPjwvcGF0aD48cGF0aCBkPSJNNDIyLjQgNjU5LjJIMzM5LjJjLTcuMDQgMC0xMi44LTUuNzYtMTIuOC0xMi44czUuNzYtMTIuOCAxMi44LTEyLjhoODMuMmM3LjA0IDAgMTIuOCA1Ljc2IDEyLjggMTIuOHMtNS43NiAxMi44LTEyLjggMTIuOHoiIGZpbGw9IiM3MDhEQjciIHAtaWQ9IjE5NzkiPjwvcGF0aD48cGF0aCBkPSJNNTEyLjY0IDMwNS45Mm0tMTYgMGExNiAxNiAwIDEgMCAzMiAwIDE2IDE2IDAgMSAwLTMyIDBaIiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTgwIj48L3BhdGg+PHBhdGggZD0iTTg3Ni44IDQ3My42Yy0yNy41MiAwLTUxLjItMjEuNzYtNTEuMi00Ni43MiAwLTcuMDQgNS43Ni0xMi44IDEyLjgtMTIuOHMxMi44IDUuNzYgMTIuOCAxMi44YzAgMTAuODggMTIuMTYgMjEuMTIgMjUuNiAyMS4xMnMyNS42LTEwLjI0IDI1LjYtMjEuMTJjMC03LjA0IDUuNzYtMTIuOCAxMi44LTEyLjhzMTIuOCA1Ljc2IDEyLjggMTIuOGMwIDI0Ljk2LTIzLjY4IDQ2LjcyLTUxLjIgNDYuNzJ6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTgxIj48L3BhdGg+PHBhdGggZD0iTTE5NC41NiA3MzQuMDhjLTAuNjQgMC03Mi45Ni0yLjU2LTcyLjk2LTgzLjg0VjQ1NC40aDI1LjZ2MTk2LjQ4YzAgNTUuMDQgNDIuODggNTcuNiA0OCA1OC4yNGwtMC42NCAyNC45NnoiIGZpbGw9IiM3MDhEQjciIHAtaWQ9IjE5ODIiPjwvcGF0aD48cGF0aCBkPSJNMTMxLjIgNDczLjZjLTI3LjUyIDAtNTEuMi0yMS43Ni01MS4yLTQ2LjcyIDAtNy4wNCA1Ljc2LTEyLjggMTIuOC0xMi44czEyLjggNS43NiAxMi44IDEyLjhjMCAxMC44OCAxMi4xNiAyMS4xMiAyNS42IDIxLjEyczI1LjYtMTAuMjQgMjUuNi0yMS4xMmMwLTcuMDQgNS43Ni0xMi44IDEyLjgtMTIuOHMxMi44IDUuNzYgMTIuOCAxMi44YzAgMjQuOTYtMjMuMDQgNDYuNzItNTEuMiA0Ni43MnoiIGZpbGw9IiM3MDhEQjciIHAtaWQ9IjE5ODMiPjwvcGF0aD48cGF0aCBkPSJNNTgzLjA0IDgzNy4xMm0tMjMuNjggMGEyMy42OCAyMy42OCAwIDEgMCA0Ny4zNiAwIDIzLjY4IDIzLjY4IDAgMSAwLTQ3LjM2IDBaIiBmaWxsPSIjRkZGMjdEIiBwLWlkPSIxOTg0Ij48L3BhdGg+PHBhdGggZD0iTTU4My4wNCA4NzMuNmMtMTkuODQgMC0zNi40OC0xNi0zNi40OC0zNi40OHMxNi0zNi40OCAzNi40OC0zNi40OCAzNi40OCAxNiAzNi40OCAzNi40OC0xNi42NCAzNi40OC0zNi40OCAzNi40OHogbTAtNDYuNzJjLTUuNzYgMC0xMC44OCA0LjQ4LTEwLjg4IDEwLjg4czQuNDggMTAuODggMTAuODggMTAuODggMTAuODgtNC40OCAxMC44OC0xMC44OC01LjEyLTEwLjg4LTEwLjg4LTEwLjg4eiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk4NSI+PC9wYXRoPjxwYXRoIGQ9Ik02NzIuNjQgODM3LjEybS0yMy42OCAwYTIzLjY4IDIzLjY4IDAgMSAwIDQ3LjM2IDAgMjMuNjggMjMuNjggMCAxIDAtNDcuMzYgMFoiIGZpbGw9IiNGRjk3OTciIHAtaWQ9IjE5ODYiPjwvcGF0aD48cGF0aCBkPSJNNjcyLjY0IDg3My42Yy0xOS44NCAwLTM2LjQ4LTE2LTM2LjQ4LTM2LjQ4czE2LTM2LjQ4IDM2LjQ4LTM2LjQ4IDM2LjQ4IDE2IDM2LjQ4IDM2LjQ4LTE2LjY0IDM2LjQ4LTM2LjQ4IDM2LjQ4eiBtMC00Ni43MmMtNS43NiAwLTEwLjg4IDQuNDgtMTAuODggMTAuODhzNC40OCAxMC44OCAxMC44OCAxMC44OCAxMC44OC00LjQ4IDEwLjg4LTEwLjg4LTUuMTItMTAuODgtMTAuODgtMTAuODh6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTg3Ij48L3BhdGg+PC9zdmc+",
             // loading icon params
             iconLoadingDepositEth: ref(false),
@@ -545,22 +597,28 @@ export default {
                 me: false
             }],
             tokenObj : [
-            { token: "ETH", address: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80A", balance: 0 },
-            { token: "WETH", address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14", balance: 0 },
-            { token: "UNI", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
+            // { token: "ETH", address: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80A", balance: 0 },
+            // { token: "WETH", address: "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14", balance: 0 },
+            // { token: "UNI", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
             // { token: "USDC", address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", balance: 0 },
             ],
             walletObj:[
-            { label: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80A", value: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80A", disabled: false, salt: 0},
-            { label: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80a", value: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80a", disabled: false, salt: 1}
+            // { label: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80A", value: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80A", disabled: false, salt: 0},
+            // { label: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80a", value: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80a", disabled: false, salt: 1}
             ],
-            orderData: [
-                { orderNo: "1",orderContent: { tokenIn: "eth", tokenOut: "uni", tokenInAmount: "0.0001", tokenOutAmount: "0.0003", status: "pending"}},
-                { orderNo: "2",orderContent: { tokenIn: "eth", tokenOut: "uni", tokenInAmount: "0.0001", tokenOutAmount: "0.0003", status: "pending"}},
+            operationHistory: [
+                {action:"Transfer", details: {tokenSymbol: "ETH", amount: "100"}, status: {code: "1", error: "insufficient balance"}, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037"},
+                {action:"Swap", details: {tokenIn: "ETH", amountIn: "100", tokenOut: "UNI"}, status: {code: "1", error: "insufficient balance"}, txHash: ""},
+                {action:"Limit order", details: {tokenIn: "ETH", amountIn: "100", tokenOut: "UNI", amountOut: "1"}, status: {code: "0", error: null}, txHash: ""}
+            // { orderNo: "1",orderContent: { tokenIn: "eth", tokenOut: "uni", tokenInAmount: "0.0001", tokenOutAmount: "0.0003", status: "pending"}},
+            // { orderNo: "2",orderContent: { tokenIn: "eth", tokenOut: "uni", tokenInAmount: "0.0001", tokenOutAmount: "0.0003", status: "pending"}},
             ],
         }
     },
     methods: {
+        viewTx(txHash) {
+            window.open('https://sepolia.etherscan.io/tx/'+txHash);
+        },
         cancelLimitedOrder(orderNo) {
             for (let index = 0; index < this.orderData.length; index++) {
                 const element = this.orderData[index];
@@ -680,7 +738,9 @@ export default {
                                 response.data.data.forEach(element => {
                                     this.walletObj.push(
                                         {
-                                            address: element.Account,
+                                            label: element.Account,
+                                            value: element.Account,
+                                            disabled: false,
                                             salt: element.Salt
                                         }
                                     );
@@ -808,9 +868,9 @@ export default {
             }
         },
         generateQR() {
-            GetEstimatedGasFee().then(res=>{
-                console.log("gas fee: ",res+"gwei");
-            });
+            // GetEstimatedGasFee().then(res=>{
+            //     console.log("gas fee: ",JSON.stringify(res)+"gwei");
+            // });
             const qr = new EthereumQRPlugin();
             const qrCode = qr.toDataUrl({
                 to: '0xab63c766c4ea5df59d61e36b28cdc6c1c6f197a6',
@@ -846,7 +906,11 @@ export default {
         showDeleteButton() {
             this.showDeleteFlage = this.showDeleteFlage == false ? true : false;
         },
+        addWalletHint() {
+            this.openAddWalletHint = true;
+        },
         addWallet() {
+            this.openAddWalletHint = false;
             console.log("this function will add a wallet address!");
             // first create account
             if (this.walletObj.length == 0) {
@@ -1336,11 +1400,11 @@ export default {
                     content: this.text,
                     me: true
                 })
-                if (this.text === '图片') {
+                if (this.text == "nihao") {
                     this.msglist.push({
                         id: this.msglist[this.msglist.length - 1].id + 1,
                         type: 1,
-                        content: '/src/assets/usdc.svg',
+                        content: this.text,
                         me: false
                     })
                 } else {
@@ -1350,14 +1414,51 @@ export default {
             }
         },
         getResponse(text) {
-            getChatResponse(text).then(res => {
-                console.log(res)
-                this.msglist.push({
-                    id: this.msglist[this.msglist.length - 1].id + 1,
-                    type: 1,
-                    content: res.data.answer,
-                    me: false
-                })
+            axios.post('webhooks/rest/webhook', {
+                sender: this.walletAddress,
+                message: text
+            }).then(res => {
+                if (res != null) {
+                    console.log(res);
+                    this.msglist.push({
+                        id: this.msglist[this.msglist.length - 1].id + 1,
+                        type: 1,
+                        content: res.data[0].text,
+                        me: false
+                    });
+                    let data = res.data[0];
+                    let operation = responseParser(data);
+                    console.log("operation: ", operation);
+                    return;
+                    if (operation.handles.length != 0) {
+                        operation.handles.forEach(element => {
+                            if (element.action == "TRANSFER") {
+                                // call transfer function
+                                if (element.params.length != 0) {
+                                    element.params.forEach(elem => {
+                                        if (elem.token == "0x0000000000000000000000000000000000000000") {
+                                            // call ETH transfer
+                                        } else {
+                                            // call ERC20 transfer
+                                        }
+                                    });
+                                }
+                            }
+                            if (element.action == "SWAP") {
+                                // call swap function
+                                if (element.params.lenght != 0) {
+                                    element.params.forEach(elem => {
+                                        if (elem.minimalAmountOut == "0") {
+                                            // market order
+                                        } else {
+                                            // limited order
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                }
             })
         },
         changeMode() {
