@@ -19,9 +19,9 @@
         </vue-metamask> -->
     <particles-bg type="circle" :bg="true" />
     <!-- <div class="header"><img src="../assets/robot.svg" style="height: 100px;width: 100px; padding-right: 10px;">
-      Sparky
+      Sparky -->
       <vue-metamask ref="metamask" @onComplete="onComplete"></vue-metamask>
-      <a-button type="primary" danger style="position: absolute; right: 10px; top: 10px;" @click="connect">
+      <!-- <a-button type="primary" danger style="position: absolute; right: 10px; top: 10px;" @click="connect">
         <span v-if="this.user == null">Connect Wallet</span>
         <span v-else>{{ this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4) }}</span>
       </a-button>
@@ -617,7 +617,7 @@ let walletAddr = [
 let tokenName = "ERC20";
 
 export default {
-  name: "tableft",
+  // name: "tableft",
   components: {
     VueMetamask,
     ParticlesBg,
@@ -653,7 +653,7 @@ export default {
       withdrawEth: null,
       withdrawErc20: null,
       approveErc20: null,
-      user: null,
+      // user: null,
       registration: null,
       authorization: null,
       buyAddress: null,
@@ -1438,6 +1438,7 @@ export default {
 
     },
     submitSwap() {
+      // console.log("user: ",this.user);
       if (this.user == null) {
         this.openNotifaction("info", "Please connect wallet.");
         return;

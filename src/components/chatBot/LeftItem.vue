@@ -49,6 +49,8 @@
                 padding: 5px 5px;
                 font-size: 14px;
                 color: #fff;
+                white-space: pre-line;
+                text-align: left;
             }
 
             .img {

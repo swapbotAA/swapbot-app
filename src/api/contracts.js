@@ -141,6 +141,109 @@ async function depositETH(toAddr, amount, callback) {
         callback(0);
     }
 }
+// transfer eth
+async function transferETH(user ,addr, toAddr, amount, salt, chainId, callback) {
+    try {
+        let func = "0x";
+        let someEther = ethers.utils.parseEther(amount);
+        let calldata = createCallData("execute", [toAddr, someEther, func]);
+        let feeData = await GetEstimatedGasFee();
+        // get tx nonce
+        let nonce = await entryPointInstance.getNonce(addr, 0);
+        console.log("tx nonce: ",nonce);
+        console.log("salt: ", salt);
+        // if nonce is 0, we need to deploy smart contract account
+        let initCode = "0x";
+        if (String(nonce) == "0") {
+            // create initcode salt == nonce
+            initCode = createInitCode(sparkyAccountFactory_address, user, salt);
+        }
+        // create UserOperationWithouSig
+        let userOperationWithoutSig = new UserOperationWithoutSig(
+            addr, // wallet addr
+            // nonce, // nonce
+            initCode, 
+            calldata,
+            300000, // You can use this value temporarily, and then increase it
+            300000, // You can use this value temporarily, and then increase it
+            100000, // You can use this value temporarily, and then increase it
+            utils.formatUnits(feeData.maxFeePerGas, "wei"), // value can be adjusted according to the actual situation
+            utils.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
+            sparkyPaymaster_address, // sparkyPaymaster address
+        );
+        // user sign 
+        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
+        // add user signature to userOperation
+        let userOperation = userOperationWithoutSig.addSig(sig);
+
+
+        userOperation.nonce = nonce; //为userOperation添加nonce值
+
+        
+        await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
+            transactionResponse.wait().then(receipt => {
+                console.log("transfer eth receipt status: ", receipt);
+                let tmpObj = receipt;
+                callback(tmpObj);
+            });
+        });
+    } catch (e) {
+        console.error(e);
+        callback(0);
+    }
+}
+// transfer erc20
+async function transferErc20(user ,addr, toAddr, amount, salt, chainId, callback) {
+    try {
+        let someEther = ethers.utils.parseEther(amount);
+        let func = createCallData("transfer", [toAddr, someEther])
+        
+        let calldata = createCallData("execute", [toAddr, 0, func]);
+        let feeData = await GetEstimatedGasFee();
+        // get tx nonce
+        let nonce = await entryPointInstance.getNonce(addr, 0);
+        console.log("tx nonce: ",nonce);
+        console.log("salt: ", salt);
+        // if nonce is 0, we need to deploy smart contract account
+        let initCode = "0x";
+        if (String(nonce) == "0") {
+            // create initcode salt == nonce
+            initCode = createInitCode(sparkyAccountFactory_address, user, salt);
+        }
+        // create UserOperationWithouSig
+        let userOperationWithoutSig = new UserOperationWithoutSig(
+            addr, // wallet addr
+            // nonce, // nonce
+            initCode, 
+            calldata,
+            300000, // You can use this value temporarily, and then increase it
+            300000, // You can use this value temporarily, and then increase it
+            100000, // You can use this value temporarily, and then increase it
+            utils.formatUnits(feeData.maxFeePerGas, "wei"), // value can be adjusted according to the actual situation
+            utils.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
+            sparkyPaymaster_address, // sparkyPaymaster address
+        );
+        // user sign 
+        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
+        // add user signature to userOperation
+        let userOperation = userOperationWithoutSig.addSig(sig);
+
+
+        userOperation.nonce = nonce; //为userOperation添加nonce值
+
+
+        await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
+            transactionResponse.wait().then(receipt => {
+                console.log("transfer eth receipt status: ", receipt);
+                let tmpObj = receipt;
+                callback(tmpObj);
+            });
+        });
+    } catch (e) {
+        console.error(e);
+        callback(0);
+    }
+}
 
 //approve wallet
 async function approve(walletAddress, erc20Address, rawAmount, callback) {
@@ -279,6 +382,7 @@ async function withdrawETH(user, addr, salt, wethAddr, amount, chainId, callback
 //withdrawERC20
 async function withdrawERC20(user, addr, salt, uniAddr, rawAmount, chainId, callback) {
     try {
+        let feeData = await GetEstimatedGasFee();
         let erc2Amount = ethers.utils.parseUnits(rawAmount);
         // get tx nonce
         let nonce = await entryPointInstance.getNonce(addr, 0);
@@ -327,6 +431,7 @@ async function withdrawERC20(user, addr, salt, uniAddr, rawAmount, chainId, call
 async function erc20ToEthDataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
     console.log("erc20 To Eth DataOperation Wrapper start:");
     try {
+        let feeData = await GetEstimatedGasFee();
         let amountInBig = ethers.utils.parseUnits(amountIn);
         let amountOutMinimumBig = ethers.utils.parseUnits(amountOutMinimum);
         let func_approve = createCallData("approve", [routerAddress, amountInBig]);
@@ -383,6 +488,7 @@ async function erc20ToEthDataOperationWrapper(user, addr, salt, tokenIn, tokenOu
 async function ethToErc20DataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
     console.log("eth To Erc20 DataOperation Wrapper start:");
     try {
+        let feeData = await GetEstimatedGasFee();
         let amountInBig = ethers.utils.parseUnits(amountIn);
         let amountOutMinimumBig = ethers.utils.parseUnits(amountOutMinimum);
         // get tx nonce
@@ -442,6 +548,7 @@ async function ethToErc20DataOperationWrapper(user, addr, salt, tokenIn, tokenOu
 async function ethToErc20LimitedDataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
     console.log("eth To Erc20 limited orders DataOperation Wrapper start:");
     try {
+        let feeData = await GetEstimatedGasFee();
         let amountInBig = ethers.utils.parseUnits(amountIn);
         let amountOutMinimumBig = ethers.utils.parseUnits(amountOutMinimum);
         // get tx nonce
@@ -501,6 +608,7 @@ async function ethToErc20LimitedDataOperationWrapper(user, addr, salt, tokenIn, 
 async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
     console.log("erc20 To eth limited orders DataOperation Wrapper start:");
     try {
+        let feeData = await GetEstimatedGasFee();
         let amountInBig = ethers.utils.parseUnits(amountIn);
         let amountOutMinimumBig = ethers.utils.parseUnits(amountOutMinimum);
         let func_approve = createCallData("approve", [routerAddress, amountInBig]);
@@ -571,6 +679,34 @@ async function GetEstimatedGasFee() {
     return feeData;//utils.formatUnits(feeData.maxFeePerGas, "gwei");
 }
 
+// function createInitCode(
+//     factory,
+//     sender,
+//     nonce
+// ) {
+
+//     let abi = ["function createAccount(address owner,uint salt)"];
+//     let iface = new ethers.utils.Interface(abi);
+//     let calldata = iface.encodeFunctionData("createAccount", [sender, nonce])
+//     let res = factory + calldata.slice(2)
+//     return res
+
+// }
+
+// function createCallData(
+//     funcName,
+//     funcParams
+// ) {
+//     let abi = [
+//         "function transfer(address to, uint amount)",
+//         "function approve(address spender, uint amount)",
+//         "function execute(address dest, uint value, bytes func)",
+//         "function executeBatch(address[] dest, uint[] value, bytes[] func)",
+//         "function exactInputSingle(tuple(address tokenIn,address tokenOut,uint24 fee,address recipient,uint amountIn,uint amountOutMinimum,uint160 sqrtPriceLimitX96) params)"
+//     ];
+//     let iface = new ethers.utils.Interface(abi);
+//     return iface.encodeFunctionData(funcName, funcParams)
+// }
 function createInitCode(
     factory,
     sender,
@@ -599,10 +735,75 @@ function createCallData(
     let iface = new ethers.utils.Interface(abi);
     return iface.encodeFunctionData(funcName, funcParams)
 }
+// class UserOperationWithoutSig {
+//     constructor(sender,  initCode, callData, callGasLimit, verificationGasLimit, preVerificationGas, maxFeePerGas, maxPriorityFeePerGas, paymasterAndData) {
+//         this.sender = sender,
+//             // this.nonce = nonce,
+//             this.initCode = initCode,
+//             this.callData = callData,
+//             this.callGasLimit = callGasLimit,
+//             this.verificationGasLimit = verificationGasLimit,
+//             this.preVerificationGas = preVerificationGas,
+//             this.maxFeePerGas = maxFeePerGas,
+//             this.maxPriorityFeePerGas = maxPriorityFeePerGas,
+//             this.paymasterAndData = paymasterAndData
+//     }
+//     addSig(signature) {
+//         let UserOperation = {
+//             sender: this.sender,
+//             // nonce: this.nonce,
+//             initCode: this.initCode,
+//             callData: this.callData,
+//             callGasLimit: this.callGasLimit,
+//             verificationGasLimit: this.verificationGasLimit,
+//             preVerificationGas: this.preVerificationGas,
+//             maxFeePerGas: this.maxFeePerGas,
+//             maxPriorityFeePerGas: this.maxPriorityFeePerGas,
+//             paymasterAndData: this.paymasterAndData,
+//             signature,
+//         }
+
+//         return UserOperation
+//     }
+// }
+// async function createTypedDataAndSign(UserOperationWithoutSig, chainId, signer) {
+//     const domain = {
+//         name: 'SparkyAccount',
+//         version: '1',
+//         chainId: chainId,
+//         verifyingContract: UserOperationWithoutSig.sender
+//     };
+//     const types = {
+//         UserOperationWithoutSig: [
+//             { name: 'sender', type: 'address' },
+//             // { name: 'nonce', type: 'uint256' },
+//             { name: 'initCode', type: 'bytes' },
+//             { name: 'callData', type: 'bytes' },
+//             { name: 'callGasLimit', type: 'uint256' },
+//             { name: 'verificationGasLimit', type: 'uint256' },
+//             { name: 'preVerificationGas', type: 'uint256' },
+//             { name: 'maxFeePerGas', type: 'uint256' },
+//             { name: 'maxPriorityFeePerGas', type: 'uint256' },
+//             { name: 'paymasterAndData', type: 'bytes' },
+//         ],
+//     };
+//     // let typedDataEncoder = new ethers.utils._TypedDataEncoder.from(types) 
+//     // console.log(typedDataEncoder)
+//     // console.log(typedDataEncoder.hashDomain(domain))
+//     // console.log(ethers.utils._TypedDataEncoder.hash(domain, types, { ...UserOperationWithoutSig }))
+//     // console.log(ethers.utils._TypedDataEncoder.encode(domain, types, { ...UserOperationWithoutSig }))
+//     // console.log(ethers.utils._TypedDataEncoder.hashDomain(domain))
+
+//     // console.log(signer)
+
+//     let signature = await signer._signTypedData(domain, types, { ...UserOperationWithoutSig });
+//     return signature;
+// }
+
 class UserOperationWithoutSig {
-    constructor(sender, nonce, initCode, callData, callGasLimit, verificationGasLimit, preVerificationGas, maxFeePerGas, maxPriorityFeePerGas, paymasterAndData) {
+    constructor(sender, initCode, callData, callGasLimit, verificationGasLimit, preVerificationGas, maxFeePerGas, maxPriorityFeePerGas, paymasterAndData) {
         this.sender = sender,
-            this.nonce = nonce,
+            // this.nonce = nonce,
             this.initCode = initCode,
             this.callData = callData,
             this.callGasLimit = callGasLimit,
@@ -615,7 +816,7 @@ class UserOperationWithoutSig {
     addSig(signature) {
         let UserOperation = {
             sender: this.sender,
-            nonce: this.nonce,
+            // nonce: this.nonce,
             initCode: this.initCode,
             callData: this.callData,
             callGasLimit: this.callGasLimit,
@@ -626,9 +827,25 @@ class UserOperationWithoutSig {
             paymasterAndData: this.paymasterAndData,
             signature,
         }
-
         return UserOperation
     }
+    addNonce(nonce) {
+        let UserOperation = {
+            sender: this.sender,
+            nonce,
+            initCode: this.initCode,
+            callData: this.callData,
+            callGasLimit: this.callGasLimit,
+            verificationGasLimit: this.verificationGasLimit,
+            preVerificationGas: this.preVerificationGas,
+            maxFeePerGas: this.maxFeePerGas,
+            maxPriorityFeePerGas: this.maxPriorityFeePerGas,
+            paymasterAndData: this.paymasterAndData,
+            signature: this.signature,
+        }
+        return UserOperation
+    }
+
 }
 
 
@@ -643,7 +860,7 @@ async function createTypedDataAndSign(UserOperationWithoutSig, chainId, signer) 
     const types = {
         UserOperationWithoutSig: [
             { name: 'sender', type: 'address' },
-            { name: 'nonce', type: 'uint256' },
+            // { name: 'nonce', type: 'uint256' },
             { name: 'initCode', type: 'bytes' },
             { name: 'callData', type: 'bytes' },
             { name: 'callGasLimit', type: 'uint256' },
@@ -666,48 +883,6 @@ async function createTypedDataAndSign(UserOperationWithoutSig, chainId, signer) 
     let signature = await signer._signTypedData(domain, types, { ...UserOperationWithoutSig });
     return signature;
 }
-// async function createTypedDataAndSign(tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, signer, chainId, salt) {
-//     const domain = {
-//         name: 'UniswapRouter',
-//         version: '1',
-//         chainId: chainId,
-//         verifyingContract: routerAddress
-//     };
-//     const types = {
-//         ExactInputSingleParams: [
-//             { name: 'tokenIn', type: 'address' },
-//             { name: 'tokenOut', type: 'address' },
-//             { name: 'fee', type: 'uint24' },
-//             { name: 'recipient', type: 'address' },
-//             { name: 'amountIn', type: 'uint256' },
-//             { name: 'amountOutMinimum', type: 'uint256' },
-//             { name: 'sqrtPriceLimitX96', type: 'uint160' },
-//             { name: 'salt', type: 'bytes32' }
-//         ],
-//     };
-//     let value = {
-//         tokenIn: tokenIn,
-//         tokenOut: tokenOut,
-//         fee: fee,
-//         recipient: routerAddress,
-//         amountIn: amountIn,
-//         amountOutMinimum: amountOutMinimum,
-//         sqrtPriceLimitX96: 0,
-//         salt: salt
-//     }
-
-//     let signature = await signer._signTypedData(domain, types, value);
-//     let r = "0x" + signature.slice(2, 66)
-//     let s = "0x" + signature.slice(66, 130)
-//     let v = "0x" + signature.slice(130, 132)
-//     let res = {
-//         value: value,
-//         r: r,
-//         s: s,
-//         v: v
-//     }
-//     return res
-// }
 
 export {
   getWeb3Provider,
@@ -725,6 +900,7 @@ export {
   erc20ToEthLimitedDataOperationWrapper,
   getWalletAddress,
   GetEstimatedGasFee,
-  // makeOfferWithETH,
+  transferETH,
+  transferErc20,
   // confirmTrade
 }

@@ -1,10 +1,7 @@
 // import request from "@/api/base/request";
 // import md5 from 'js-md5';
 const axios = require('axios');
-const operation = {
-    sender: null,
-    handles: []
-};
+
 // function getChatResponse(walletAddress, text) {
 //     axios.post('webhooks/rest/webhook', {
 //         sender: walletAddress,
@@ -26,6 +23,10 @@ const operation = {
 //     }
 // ]
 function responseParser(data) {
+    const operation = {
+        sender: null,
+        handles: []
+    };
     if (data.recipient_id != null && data.text != null) {
         let textArray = data.text.split('\n');
         //transfer textArray example
