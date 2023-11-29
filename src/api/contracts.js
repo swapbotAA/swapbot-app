@@ -177,16 +177,18 @@ async function transferETH(user ,addr, toAddr, amount, salt, chainId, callback) 
         let userOperation = userOperationWithoutSig.addSig(sig);
 
 
-        userOperation.nonce = nonce; //为userOperation添加nonce值
+        // userOperation.nonce = nonce; //为userOperation添加nonce值
 
         
-        await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
-            transactionResponse.wait().then(receipt => {
-                console.log("transfer eth receipt status: ", receipt);
-                let tmpObj = receipt;
-                callback(tmpObj);
-            });
-        });
+        // await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
+        //     transactionResponse.wait().then(receipt => {
+        //         console.log("transfer eth receipt status: ", receipt);
+        //         let tmpObj = receipt;
+        //         callback(tmpObj);
+        //     });
+        // });
+
+        return userOperation;
     } catch (e) {
         console.error(e);
         callback(0);
@@ -229,16 +231,17 @@ async function transferErc20(user ,addr, toAddr, amount, salt, chainId, callback
         let userOperation = userOperationWithoutSig.addSig(sig);
 
 
-        userOperation.nonce = nonce; //为userOperation添加nonce值
+        // userOperation.nonce = nonce; //为userOperation添加nonce值
 
 
-        await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
-            transactionResponse.wait().then(receipt => {
-                console.log("transfer eth receipt status: ", receipt);
-                let tmpObj = receipt;
-                callback(tmpObj);
-            });
-        });
+        // await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
+        //     transactionResponse.wait().then(receipt => {
+        //         console.log("transfer eth receipt status: ", receipt);
+        //         let tmpObj = receipt;
+        //         callback(tmpObj);
+        //     });
+        // });
+        return userOperation;
     } catch (e) {
         console.error(e);
         callback(0);
@@ -530,6 +533,8 @@ async function ethToErc20DataOperationWrapper(user, addr, salt, tokenIn, tokenOu
         );
         let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, window.web3Provider.getSigner());
         let userOperation = userOperationWithoutSig.addSig(sig);
+
+        // userOperation.nonce = nonce; //为userOperation添加nonce值
 
         // await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
         //     transactionResponse.wait().then(receipt => {
