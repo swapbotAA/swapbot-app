@@ -1746,6 +1746,9 @@ export default {
             // log out
             if (data.metaMaskAddress == "") {
                 this.user = null;
+                this.operationHistory = [];
+                this.walletObj = [];
+                this.tokenObj = [];
                 this.openNotifaction("info", "Log out.");
             } else {
                 this.user = data.metaMaskAddress;
