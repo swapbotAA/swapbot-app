@@ -916,13 +916,8 @@ export default {
         }
     },
     methods: {
-        scheduleTask() {
-            const scheduleCronstyle = () => {
-                //: schedule task will be executed every 5 minutes
-                schedule.scheduleJob('*/1 * * * *', () => {
-                // console.log('scheduleCronstyle:' + new Date());
-                // query limited order status
-                axios.post('/api/v1/query_op_orders', {
+        quertOpAndOrders () {
+            axios.post('/api/v1/query_op_orders', {
                     sender: this.walletAddress
                 })
                     .then(response => {
@@ -1061,6 +1056,14 @@ export default {
                     .catch(error => {
                     console.log(error);
                     });
+        },
+        scheduleTask() {
+            const scheduleCronstyle = () => {
+                //: schedule task will be executed every 5 minutes
+                schedule.scheduleJob('*/1 * * * *', () => {
+                // console.log('scheduleCronstyle:' + new Date());
+                // query limited order status
+                this.quertOpAndOrders();
                 });
             }
             scheduleCronstyle();
@@ -2030,6 +2033,8 @@ export default {
                     console.log("get ETH balance falied!");
                 }
             });
+            // get operation history
+            this.quertOpAndOrders();
         },
         showEthTransfer() {
             this.depositEthOpen = true;
