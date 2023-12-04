@@ -86,7 +86,7 @@ async function getWalletAddress(signerAddr, salt, callback) {
 // get account balance ETH-Hangzhou
 async function getEthBalance(addr) {
     let amount = await window.web3Provider.getBalance(addr);
-    console.log("eth amount: ",amount);
+    // console.log("eth amount: ",amount);
     if (amount != "") {
         return { status: true, balance: amount };
     } else {
@@ -107,7 +107,7 @@ async function getErc20Balance(addr, erc20Address) {
             return;
         }
     let amount = await erc20InstanceList[flag].balanceOf(addr);
-    console.log("erc20 amount: ",amount);
+    // console.log("erc20 amount: ",amount);
     if (amount != "") {
         return { status: true, balance: amount };
     } else {
@@ -195,12 +195,12 @@ async function transferETH(user ,addr, toAddr, amount, salt, chainId, callback) 
     }
 }
 // transfer erc20
-async function transferErc20(user ,addr, toAddr, amount, salt, chainId, callback) {
+async function transferErc20(user ,addr, toAddr, tokenAddr, amount, salt, chainId, callback) {
     try {
         let someEther = ethers.utils.parseEther(amount);
         let func = createCallData("transfer", [toAddr, someEther])
         
-        let calldata = createCallData("execute", [toAddr, 0, func]);
+        let calldata = createCallData("execute", [tokenAddr, 0, func]);
         let feeData = await GetEstimatedGasFee();
         // get tx nonce
         let nonce = await entryPointInstance.getNonce(addr, 0);
@@ -244,7 +244,7 @@ async function transferErc20(user ,addr, toAddr, amount, salt, chainId, callback
         return userOperation;
     } catch (e) {
         console.error(e);
-        callback(0);
+        // callback(0);
     }
 }
 
