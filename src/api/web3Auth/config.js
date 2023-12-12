@@ -1,10 +1,7 @@
-import { createApp } from 'vue';
-import Antd from 'ant-design-vue';
-import App from './App';
-import 'ant-design-vue/dist/reset.css';
-
 import { Web3Auth } from "@web3auth/modal";
 import { Web3AuthMPCCoreKit, WEB3AUTH_NETWORK } from "@web3auth/mpc-core-kit";
+
+
 
 const coreKitInstance = new Web3AuthMPCCoreKit({
     web3AuthClientId: "BOhofQ2t3prR53hQgQEA_Z-Y0TlYo7uHOOn1aYtewWFh5WvPzQ2UWZce7_2IfkRMe1inPtCLKe_6oH2OSD7RegY",
@@ -21,7 +18,7 @@ const coreKitInstance = new Web3AuthMPCCoreKit({
     },
   });
 
-// await coreKitInstance.init();
+await coreKitInstance.init();
 
 
 
@@ -43,13 +40,3 @@ const web3auth = new Web3Auth({
 await web3auth.initModal();
 
 export { web3auth, coreKitInstance }
-
-const app = createApp(App);
-
-app.directive('scroll', {
-        inserted(el) {
-            el.scrollIntoView()
-        }
-    })
-
-app.use(Antd).mount('#app');

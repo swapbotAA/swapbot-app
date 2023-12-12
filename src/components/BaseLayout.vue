@@ -2,11 +2,17 @@
     <particles-bg type="cobweb" :bg="true" />
     <div class="header"><img src="../assets/logo.svg" style="height: 100px;width: 100px; padding-right: 10px;">
         Sparky
-        <vue-metamask ref="metamask" @onComplete="onComplete"></vue-metamask>
+        <!-- <vue-metamask ref="metamask" @onComplete="onComplete"></vue-metamask> -->
         <span>
-            <label>
+            <!-- <label>
                 <a-button type="primary" danger style="position: absolute; right: 10px; top: 10px;" @click="connect">
                     <span v-if="this.user == null">Connect Wallet</span>
+                    <span v-else>{{ this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4) }}</span>
+                </a-button>
+            </label> -->
+            <label>
+                <a-button type="primary" danger style="position: absolute; right: 10px; top: 10px;" @click="showLogin()">
+                    <span v-if="this.user == null">Login</span>
                     <span v-else>{{ this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4) }}</span>
                 </a-button>
             </label>
@@ -76,10 +82,10 @@
                                 <a-list-item>
                                     <!--status.code: 0 pending 1 finish success-->
                                     <span v-show="item.action == 'TRANSFER'" style="font-weight: 700;">{{ item.action }}&nbsp
-                                        <!-- <span v-show="item.status.code == '0'">
+                                        <span v-show="item.status.code == 'pending'">
                                         <img style="width: 25px; height:25px;" src = "../assets/X.svg">
                                         <span style="position: absolute;right: 20px; font-size: large; color: rgb(255 189 89);">Pending</span>
-                                        </span> -->
+                                        </span>
                                         <span v-show="item.status.code == 'success' || item.status.code == 'failed'">
                                             <img style="width: 25px; height:25px; cursor:pointer" src="../assets/jumpto.svg"
                                                 @click="viewTx(item.txHash)">
@@ -95,10 +101,10 @@
                                         </span>
                                     </span>
                                     <span v-show="item.action == 'SWAP'" style="font-weight: 700;">{{ item.action }}&nbsp
-                                        <!-- <span v-show="item.status.code == '0'">
+                                        <span v-show="item.status.code == 'pending'">
                                         <img style="width: 25px; height:25px;" src = "../assets/X.svg">
                                         <span style="position: absolute;right: 20px; font-size: large; color: rgb(255 189 89);">Pending</span>
-                                        </span> -->
+                                        </span>
                                         <span v-show="item.status.code == 'success' || item.status.code == 'failed'">
                                             <img style="width: 25px; height:25px; cursor:pointer" src="../assets/jumpto.svg"
                                                 @click="viewTx(item.txHash)">
@@ -243,6 +249,17 @@
                 @ok="hideErc20Receive()" @cancel="cancelErc20Receive()">
                 <p style="font-size: medium;">{{ this.tokenName }}<a-input oninput="value=value.replace(/[^0-9.]/g,'')"
                         v-model:value="withdrawErc20" placeholder="0" suffix="" style="height: 60px;" /></p>
+            </a-modal>
+            <!--Login modal windows-->
+            <a-modal v-model:open="openLogin" title="Login" footer="" :key=Math.random() style="width:250px; text-align: center;">
+                <label><a-button type="primary" class="login" @click="">Google</a-button></label>
+                <br/>
+                <label><a-button type="primary" class="login" @click="connect()">Metamask</a-button></label>
+            </a-modal>
+            <!--Log out hint modal windows-->
+            <a-modal v-model:open="openLogoutHint" title="Tips" ok-text="OK" cancel-text="CX" @ok="logOut()"
+                :key=Math.random() style="width:250px;">
+                <span>Log out?</span>
             </a-modal>
             <!-- drawer list -->
             <!--drawer of ETH operating-->
@@ -723,7 +740,13 @@
     }
 
 }
-
+.login {
+    width: 80%;
+    height: 40px;
+    background-color: #cd7e9b;
+    border-radius: 30px;
+    margin-top: 10px;
+}
 .feet {
     position: absolute;
     width: 100%;
@@ -735,7 +758,7 @@
 
 <script>
 import { Modal, notification } from 'ant-design-vue';
-import { ethers, utils, BigNumber } from 'ethers';
+import { ethers, utils, BigNumber } from 'ethers5';
 import { ParticlesBg } from "particles-bg-vue";
 import { ref } from "vue";
 import useClipboard from "vue-clipboard3";
@@ -764,6 +787,7 @@ import {
     transferETH,
     transferErc20
 } from "../api/contracts";
+import { login, logout, sign } from "../api/web3Auth/web3Auth";
 import { responseParser } from "../api/apiChat";
 
 const schedule = require('node-schedule');
@@ -829,6 +853,8 @@ export default {
             openQR: ref(false),
             openAddWalletHint: ref(false),
             qrImgSrc: " data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNjkzMjg0MjA0Njk0IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjE5NTkiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PHBhdGggZD0iTTcwNS45MiA5MTUuODRIMzIwYy0yOC4xNiAwLTUxLjItMjMuMDQtNTEuMi01MS4yVjYzMC40YzAtMjguMTYgMjMuMDQtNTEuMiA1MS4yLTUxLjJoMzg1LjkyYzI4LjE2IDAgNTEuMiAyMy4wNCA1MS4yIDUxLjJ2MjM0Ljg4YzAgMjcuNTItMjMuMDQgNTAuNTYtNTEuMiA1MC41NnoiIGZpbGw9IiNFRUY2RkYiIHAtaWQ9IjE5NjAiPjwvcGF0aD48cGF0aCBkPSJNNzA1LjkyIDkyOC42NEgzMjBjLTM1LjIgMC02NC0yOC44LTY0LTY0VjYzMC40YzAtMzUuMiAyOC44LTY0IDY0LTY0aDM4NS45MmMzNS4yIDAgNjQgMjguOCA2NCA2NHYyMzQuODhjMCAzNS4yLTI4LjggNjMuMzYtNjQgNjMuMzZ6TTMyMCA1OTJjLTIxLjEyIDAtMzguNCAxNy4yOC0zOC40IDM4LjR2MjM0Ljg4YzAgMjEuMTIgMTcuMjggMzguNCAzOC40IDM4LjRoMzg1LjkyYzIxLjEyIDAgMzguNC0xNy4yOCAzOC40LTM4LjRWNjMwLjRjMC0yMS4xMi0xNy4yOC0zOC40LTM4LjQtMzguNEgzMjB6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTYxIj48L3BhdGg+PHBhdGggZD0iTTUxNS4yIDE2My4yQzQxOC41NiAxNjMuMiAzMzkuMiAyNDIuNTYgMzM5LjIgMzM4LjU2VjUxOC40aDM1MlYzMzguNTZjMC05Ni03OS4zNi0xNzUuMzYtMTc2LTE3NS4zNnoiIGZpbGw9IiNFOEU2RkYiIHAtaWQ9IjE5NjIiPjwvcGF0aD48cGF0aCBkPSJNNzA0IDUzMS4ySDMyNi40VjMzOC41NmMwLTEwMy42OCA4NC40OC0xODguMTYgMTg4LjgtMTg4LjE2UzcwNCAyMzQuODggNzA0IDMzOC41NlY1MzEuMnogbS0zNTItMjUuNmgzMjYuNFYzMzguNTZjMC04OS42LTcyLjk2LTE2Mi41Ni0xNjMuMi0xNjIuNTZTMzUyIDI0OC45NiAzNTIgMzM4LjU2VjUwNS42eiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk2MyI+PC9wYXRoPjxwYXRoIGQ9Ik00NTYuMzIgNTE4LjRoMTEydjYwLjhINDU2LjMyeiIgZmlsbD0iI0VFRjZGRiIgcC1pZD0iMTk2NCI+PC9wYXRoPjxwYXRoIGQ9Ik01ODEuNzYgNTkySDQ0My41MlY1MDUuNmgxMzcuNnY4Ni40eiBtLTExMi42NC0yNS42aDg2LjRWNTMxLjJINDY5LjEydjM1LjJ6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTY1Ij48L3BhdGg+PHBhdGggZD0iTTcxNC44OCA0MzEuMzZjLTEyLjggMC0yMy4wNC0xMC4yNC0yMy4wNC0yMy4wNHYtMzguNGMwLTEyLjggMTAuMjQtMjMuMDQgMjMuMDQtMjMuMDRzMjMuMDQgMTAuMjQgMjMuMDQgMjMuMDR2MzguNGMwIDEyLjgtMTAuMjQgMjMuMDQtMjMuMDQgMjMuMDR6IiBmaWxsPSIjRUVGNkZGIiBwLWlkPSIxOTY2Ij48L3BhdGg+PHBhdGggZD0iTTcxNC44OCA0NDQuMTZjLTE5Ljg0IDAtMzUuODQtMTYtMzUuODQtMzUuODR2LTM4LjRjMC0xOS44NCAxNi0zNS44NCAzNS44NC0zNS44NHMzNS44NCAxNiAzNS44NCAzNS44NHYzOC40YzAgMTkuODQtMTYgMzUuODQtMzUuODQgMzUuODR6IG0wLTgzLjg0Yy01Ljc2IDAtMTAuMjQgNC40OC0xMC4yNCAxMC4yNHYzOC40YzAgNS43NiA0LjQ4IDEwLjI0IDEwLjI0IDEwLjI0czEwLjI0LTQuNDggMTAuMjQtMTAuMjR2LTM4LjRjMC01Ljc2LTQuNDgtMTAuMjQtMTAuMjQtMTAuMjR6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTY3Ij48L3BhdGg+PHBhdGggZD0iTTMxMi4zMiA0MjEuMTJjLTEyLjggMC0yMy4wNC0xMC4yNC0yMy4wNC0yMy4wNHYtMzguNGMwLTEyLjggMTAuMjQtMjMuMDQgMjMuMDQtMjMuMDRzMjMuMDQgMTAuMjQgMjMuMDQgMjMuMDR2MzguNGMwIDEyLjgtMTAuODggMjMuMDQtMjMuMDQgMjMuMDR6IiBmaWxsPSIjRUVGNkZGIiBwLWlkPSIxOTY4Ij48L3BhdGg+PHBhdGggZD0iTTMxMi4zMiA0MzMuOTJjLTE5Ljg0IDAtMzUuODQtMTYtMzUuODQtMzUuODR2LTM4LjRjMC0xOS44NCAxNi0zNS44NCAzNS44NC0zNS44NHMzNS44NCAxNiAzNS44NCAzNS44NHYzOC40YzAgMTkuODQtMTYuNjQgMzUuODQtMzUuODQgMzUuODR6IG0wLTgzLjg0Yy01Ljc2IDAtMTAuMjQgNC40OC0xMC4yNCAxMC4yNHYzOC40YzAgNS43NiA0LjQ4IDEwLjI0IDEwLjI0IDEwLjI0czEwLjI0LTQuNDggMTAuMjQtMTAuMjR2LTM4LjRjMC01Ljc2LTUuMTItMTAuMjQtMTAuMjQtMTAuMjR6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTY5Ij48L3BhdGg+PHBhdGggZD0iTTc5NS41MiA3NjMuNTJoLTI1LjZjLTcuMDQgMC0xMi44LTUuNzYtMTIuOC0xMi44di00Ni4wOGMwLTE0LjA4LTIuNTYtMjUuNiAxMS41Mi0yNS42aDI2Ljg4YzE0LjA4IDAgMjUuNiAxMS41MiAyNS42IDI1LjZ2MzMuMjhjMCAxNC4wOC0xMS41MiAyNS42LTI1LjYgMjUuNnoiIGZpbGw9IiNFRUY2RkYiIHAtaWQ9IjE5NzAiPjwvcGF0aD48cGF0aCBkPSJNNzk1LjUyIDc3Ni4zMmgtMjUuNmMtMTQuMDggMC0yNS42LTExLjUyLTI1LjYtMjUuNnYtNDYuMDgtNS4xMmMwLTguOTYtMC42NC0xOS4yIDYuNC0yNi4yNCA0LjQ4LTQuNDggMTAuMjQtNi40IDE3LjkyLTYuNGgyNi44OGMyMS4xMiAwIDM4LjQgMTcuMjggMzguNCAzOC40djMzLjI4YzAgMjAuNDgtMTcuMjggMzcuNzYtMzguNCAzNy43NnogbS0yNi4yNC04NC40OHY1OC44OGgyNS42YzcuMDQgMCAxMi44LTUuNzYgMTIuOC0xMi44di0zMy4yOGMwLTcuMDQtNS43Ni0xMi44LTEyLjgtMTIuOGgtMjUuNnoiIGZpbGw9IiM3MDhEQjciIHAtaWQ9IjE5NzEiPjwvcGF0aD48cGF0aCBkPSJNODE2LjY0IDczNC4wOGwtMC42NC0yNS42djEyLjgtMTIuOGM1LjEyIDAgNDgtMy4yIDQ4LTU4LjI0VjQ1NC40aDI1LjZ2MTk2LjQ4YzAgODEuMjgtNzIuMzIgODMuMi03Mi45NiA4My4yeiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk3MiI+PC9wYXRoPjxwYXRoIGQ9Ik0yMjguNDggNzYzLjUyaDI1LjZjNy4wNCAwIDEyLjgtNS43NiAxMi44LTEyLjh2LTU4Ljg4YzAtNy4wNC01Ljc2LTEyLjgtMTIuOC0xMi44aC0yNS42Yy0xNC4wOCAwLTI1LjYgMTEuNTItMjUuNiAyNS42djMzLjI4YzAgMTQuMDggMTEuNTIgMjUuNiAyNS42IDI1LjZ6IiBmaWxsPSIjRUVGNkZGIiBwLWlkPSIxOTczIj48L3BhdGg+PHBhdGggZD0iTTI1NC4wOCA3NzYuMzJoLTI1LjZjLTIxLjEyIDAtMzguNC0xNy4yOC0zOC40LTM4LjR2LTMzLjI4YzAtMjEuMTIgMTcuMjgtMzguNCAzOC40LTM4LjRoMjUuNmMxNC4wOCAwIDI1LjYgMTEuNTIgMjUuNiAyNS42djU4Ljg4YzAgMTQuMDgtMTEuNTIgMjUuNi0yNS42IDI1LjZ6IG0tMjUuNi04NC40OGMtNy4wNCAwLTEyLjggNS43Ni0xMi44IDEyLjh2MzMuMjhjMCA3LjA0IDUuNzYgMTIuOCAxMi44IDEyLjhoMjUuNnYtNTguODhoLTI1LjZ6TTUxOS4wNCAxNDAuMTZjLTIzLjY4IDAtNDMuNTItMTkuMi00My41Mi00My41MnMxOS4yLTQzLjUyIDQzLjUyLTQzLjUyIDQzLjUyIDE5LjIgNDMuNTIgNDMuNTItMTkuODQgNDMuNTItNDMuNTIgNDMuNTJ6IG0wLTYxLjQ0Yy05LjYgMC0xNy45MiA4LjMyLTE3LjkyIDE3LjkyczguMzIgMTcuOTIgMTcuOTIgMTcuOTIgMTcuOTItOC4zMiAxNy45Mi0xNy45Mi04LjMyLTE3LjkyLTE3LjkyLTE3LjkyeiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk3NCI+PC9wYXRoPjxwYXRoIGQ9Ik01MDUuNiAxMzQuNGgyNS42djMyaC0yNS42eiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk3NSI+PC9wYXRoPjxwYXRoIGQ9Ik01MTIuNjQgMzA1LjkybS02OS4xMiAwYTY5LjEyIDY5LjEyIDAgMSAwIDEzOC4yNCAwIDY5LjEyIDY5LjEyIDAgMSAwLTEzOC4yNCAwWiIgZmlsbD0iI0ZGRjI3RCIgcC1pZD0iMTk3NiI+PC9wYXRoPjxwYXRoIGQ9Ik01MTIuNjQgMzg3Ljg0Yy00NC44IDAtODEuOTItMzYuNDgtODEuOTItODEuOTJTNDY3LjIgMjI0IDUxMi42NCAyMjRzODEuOTIgMzYuNDggODEuOTIgODEuOTItMzcuMTIgODEuOTItODEuOTIgODEuOTJ6IG0wLTEzOC4yNGMtMzAuNzIgMC01Ni4zMiAyNC45Ni01Ni4zMiA1Ni4zMnMyNC45NiA1Ni4zMiA1Ni4zMiA1Ni4zMiA1Ni4zMi0yNC45NiA1Ni4zMi01Ni4zMi0yNS42LTU2LjMyLTU2LjMyLTU2LjMyeiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk3NyI+PC9wYXRoPjxwYXRoIGQ9Ik02MDQuMTYgNDMzLjI4bS0xMC4yNCAwYTEwLjI0IDEwLjI0IDAgMSAwIDIwLjQ4IDAgMTAuMjQgMTAuMjQgMCAxIDAtMjAuNDggMFoiIGZpbGw9IiM3MDhEQjciIHAtaWQ9IjE5NzgiPjwvcGF0aD48cGF0aCBkPSJNNDIyLjQgNjU5LjJIMzM5LjJjLTcuMDQgMC0xMi44LTUuNzYtMTIuOC0xMi44czUuNzYtMTIuOCAxMi44LTEyLjhoODMuMmM3LjA0IDAgMTIuOCA1Ljc2IDEyLjggMTIuOHMtNS43NiAxMi44LTEyLjggMTIuOHoiIGZpbGw9IiM3MDhEQjciIHAtaWQ9IjE5NzkiPjwvcGF0aD48cGF0aCBkPSJNNTEyLjY0IDMwNS45Mm0tMTYgMGExNiAxNiAwIDEgMCAzMiAwIDE2IDE2IDAgMSAwLTMyIDBaIiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTgwIj48L3BhdGg+PHBhdGggZD0iTTg3Ni44IDQ3My42Yy0yNy41MiAwLTUxLjItMjEuNzYtNTEuMi00Ni43MiAwLTcuMDQgNS43Ni0xMi44IDEyLjgtMTIuOHMxMi44IDUuNzYgMTIuOCAxMi44YzAgMTAuODggMTIuMTYgMjEuMTIgMjUuNiAyMS4xMnMyNS42LTEwLjI0IDI1LjYtMjEuMTJjMC03LjA0IDUuNzYtMTIuOCAxMi44LTEyLjhzMTIuOCA1Ljc2IDEyLjggMTIuOGMwIDI0Ljk2LTIzLjY4IDQ2LjcyLTUxLjIgNDYuNzJ6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTgxIj48L3BhdGg+PHBhdGggZD0iTTE5NC41NiA3MzQuMDhjLTAuNjQgMC03Mi45Ni0yLjU2LTcyLjk2LTgzLjg0VjQ1NC40aDI1LjZ2MTk2LjQ4YzAgNTUuMDQgNDIuODggNTcuNiA0OCA1OC4yNGwtMC42NCAyNC45NnoiIGZpbGw9IiM3MDhEQjciIHAtaWQ9IjE5ODIiPjwvcGF0aD48cGF0aCBkPSJNMTMxLjIgNDczLjZjLTI3LjUyIDAtNTEuMi0yMS43Ni01MS4yLTQ2LjcyIDAtNy4wNCA1Ljc2LTEyLjggMTIuOC0xMi44czEyLjggNS43NiAxMi44IDEyLjhjMCAxMC44OCAxMi4xNiAyMS4xMiAyNS42IDIxLjEyczI1LjYtMTAuMjQgMjUuNi0yMS4xMmMwLTcuMDQgNS43Ni0xMi44IDEyLjgtMTIuOHMxMi44IDUuNzYgMTIuOCAxMi44YzAgMjQuOTYtMjMuMDQgNDYuNzItNTEuMiA0Ni43MnoiIGZpbGw9IiM3MDhEQjciIHAtaWQ9IjE5ODMiPjwvcGF0aD48cGF0aCBkPSJNNTgzLjA0IDgzNy4xMm0tMjMuNjggMGEyMy42OCAyMy42OCAwIDEgMCA0Ny4zNiAwIDIzLjY4IDIzLjY4IDAgMSAwLTQ3LjM2IDBaIiBmaWxsPSIjRkZGMjdEIiBwLWlkPSIxOTg0Ij48L3BhdGg+PHBhdGggZD0iTTU4My4wNCA4NzMuNmMtMTkuODQgMC0zNi40OC0xNi0zNi40OC0zNi40OHMxNi0zNi40OCAzNi40OC0zNi40OCAzNi40OCAxNiAzNi40OCAzNi40OC0xNi42NCAzNi40OC0zNi40OCAzNi40OHogbTAtNDYuNzJjLTUuNzYgMC0xMC44OCA0LjQ4LTEwLjg4IDEwLjg4czQuNDggMTAuODggMTAuODggMTAuODggMTAuODgtNC40OCAxMC44OC0xMC44OC01LjEyLTEwLjg4LTEwLjg4LTEwLjg4eiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk4NSI+PC9wYXRoPjxwYXRoIGQ9Ik02NzIuNjQgODM3LjEybS0yMy42OCAwYTIzLjY4IDIzLjY4IDAgMSAwIDQ3LjM2IDAgMjMuNjggMjMuNjggMCAxIDAtNDcuMzYgMFoiIGZpbGw9IiNGRjk3OTciIHAtaWQ9IjE5ODYiPjwvcGF0aD48cGF0aCBkPSJNNjcyLjY0IDg3My42Yy0xOS44NCAwLTM2LjQ4LTE2LTM2LjQ4LTM2LjQ4czE2LTM2LjQ4IDM2LjQ4LTM2LjQ4IDM2LjQ4IDE2IDM2LjQ4IDM2LjQ4LTE2LjY0IDM2LjQ4LTM2LjQ4IDM2LjQ4eiBtMC00Ni43MmMtNS43NiAwLTEwLjg4IDQuNDgtMTAuODggMTAuODhzNC40OCAxMC44OCAxMC44OCAxMC44OCAxMC44OC00LjQ4IDEwLjg4LTEwLjg4LTUuMTItMTAuODgtMTAuODgtMTAuODh6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTg3Ij48L3BhdGg+PC9zdmc+",
+            openLogin: ref(false),
+            openLogoutHint: ref(false),
             // loading icon params
             iconLoadingDepositEth: ref(false),
             iconLoadingWithdrawEth: ref(false),
@@ -916,6 +942,139 @@ export default {
         }
     },
     methods: {
+        showLogin () {
+            console.log("user: ", this.user);
+            if (this.user != null) {
+                this.openLogoutHint = true;
+                sign();
+            }else {
+                // this.openLogin = true;
+                login().then(response => {
+                    console.log("userAccounts: ", response);
+                    this.user = response[0];
+
+                    let provider = getWeb3Provider();
+                    initInstances(provider).then((response) => {
+                        if (response.status) {
+                            console.log("Init success");
+
+                        } else {
+                            console.log("Init failed");
+                        }
+                    });
+
+                    // we need get user data from backend service
+                    // 1. get user smart contract accounts
+                    // return;
+                    axios.post('/api/v1/query_contract_accounts', {
+                        user: this.user
+                    })
+                    .then(response => {
+                        console.log(response);
+                        if (response.data.code == 1000) {
+                            console.log("Successfully obtained user smart contract account.");
+                            if (response.data.data != null && response.data.data.length > 0) {
+                                response.data.data.forEach(element => {
+                                    this.walletObj.push(
+                                        {
+                                            label: element.Account,
+                                            value: element.Account,
+                                            disabled: false,
+                                            salt: element.Salt
+                                        }
+                                    );
+                                    // default select first address
+                                    if (Number(element.Salt) == 0) {
+                                        this.walletAddress = element.Account;
+
+                                        // add first account address into asset list
+                                        if (this.tokenObj.length == 0) {
+                                            console.log("asset Address: ", element.Account);
+                                            console.log("asset symbol: ", "ETH");
+                                            let tmpObj = { token: "ETH", address: element.Account, balance: 0 };
+                                            this.tokenObj.push(tmpObj);
+                                        }
+                                    }
+                                    if (Number(element.Salt) > this.walletSalt) {
+                                        // update user wallet salt
+                                        this.walletSalt = Number(element.Salt);
+                                    }
+                                })
+                            }
+                            console.log("this wallet address:", this.walletAddress);
+                            console.log("this wallet salt:", this.walletSalt);
+
+                            if (this.walletAddress != null) {
+                                // before get balances, we need obtain asset list from backend service
+                                axios.post('/api/v1/query_account_assets', {
+                                    sender: this.walletAddress
+                                })
+                                    .then(response => {
+                                        console.log(response);
+                                        if (response.data.code == 1000) {
+                                            console.log("Successfully obtained user asset list.");
+                                            if (response.data.data != null && response.data.data.length > 0) {
+                                                response.data.data.forEach(element => {
+                                                    console.log("asset Address: ", element.Address);
+                                                    console.log("asset symbol: ", element.Token);
+                                                    let tmpObj = { token: element.Token, address: element.Address, balance: 0 };
+                                                    this.tokenObj.push(tmpObj);
+
+                                                })
+                                            }
+                                        }
+
+                                        // update erc20 balance
+                                        for (let index = 1; index < this.tokenObj.length; index++) {
+                                            const element = this.tokenObj[index];
+                                            getErc20Balance(this.walletAddress, element.address).then((response) => {
+                                                if (response.status) {
+                                                    // console.log(element.token + " balance:" + String(response.balance));
+                                                    this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                } else {
+                                                    console.log("get " + element.token + " balance falied!");
+                                                }
+                                            });
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.log(error);
+                                    });
+                                // update  eth balance
+                                getEthBalance(this.walletAddress).then((response) => {
+                                    if (response.status) {
+                                        // console.log(element.token + " balance:" + response.balance.toNumber());
+                                        this.tokenObj.forEach(element => {
+                                            if (element.token == "ETH") {
+                                                element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                            }
+                                        })
+                                    } else {
+                                        console.log("get ETH balance falied!");
+                                    }
+                                });
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+                });
+            }
+            // login();
+            
+        },
+        logOut() {
+            logout().then(response => {
+                console.log("log out: ",response);
+                this.user = null;
+                this.operationHistory = [];
+                this.walletObj = [];
+                this.tokenObj = [];
+                this.openNotifaction("info", "Log out.");
+                this.openLogoutHint = false;
+            });  
+        },
         quertOpAndOrders () {
             axios.post('/api/v1/query_op_orders', {
                     sender: this.walletAddress
@@ -1152,44 +1311,8 @@ export default {
                                     // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
                                     console.log("successfully submit!");
 
-
-                                    // query order list
-                                    // axios.post('/api/v1/query_limit_orders', {
-                                    //     sender: this.walletAddress
-                                    // })
-                                    //     .then(response => {
-                                    //     console.log(response);
-                                    //     if (response.data.code == 1000) {
-                                    //         this.orderData = [];
-                                    //         // update order status
-                                    //         if (response.data.data != null && response.data.data.length > 0) {
-                                    //         response.data.data.forEach(element => {
-                                    //             // console.log("order details: ", element);
-                                    //             let tokenInSymbol = null;
-                                    //             let tokenOutSymbol = null;
-                                    //             this.contractAddrMap.forEach(function(value, key){
-                                    //             if (value == element.TokenIn) {
-                                    //                 tokenInSymbol = key;
-                                    //             }
-                                    //             if (value == element.TokenOut) {
-                                    //                 tokenOutSymbol = key;
-                                    //             }
-                                    //             });
-                                    //             // console.log("tokenInSymbol: ",tokenInSymbol);
-                                    //             // console.log("tokenOutSymbol: ",tokenOutSymbol);
-                                    //             let limitedOrderTmpObj = { orderNo: element.OrderNo, orderContent: { tokenIn: tokenInSymbol, tokenOut: tokenOutSymbol, tokenInAmount: element.TokenInAmount, tokenOutAmount: element.TokenOutAmount, status: element.Status, txHash: element.TxHash } };
-                                    //             if (element.Status != "cancel") {
-                                    //             this.orderData.push(limitedOrderTmpObj);
-                                    //         }
-                                    //         });
-                                    //         }
-                                    //     } else {
-                                    //         console.log("error code: ", response.data.code);
-                                    //     }
-                                    //     })
-                                    //     .catch(error => {
-                                    //     console.log(error);
-                                    //     });
+                                    // query op record
+                                    this.quertOpAndOrders();
                                 } else {
                                     this.openNotifaction("info", "Swap error! error: " + response.data.message);
                                     console.log("swap error!");
@@ -1218,8 +1341,8 @@ export default {
                 erc20ToEthLimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeyLimitedDes), this.contractAddrMap.get(this.subKeyLimitedSrc), this.fee, this.routerAddress, this.erc20LimitedAmount, this.ethLimitedAmount, this.chainId).then(res => {
                     if (res != undefined) {
                         console.log("userOperation: ", res);
-                        let timeStamp = new Date().getTime();
-                        console.log("current timestamp: ", timeStamp);
+                        // let timeStamp = new Date().getTime();
+                        // console.log("current timestamp: ", timeStamp);
                         // let limitedOrderTmpObj = { orderNo: timeStamp, orderContent: { tokenIn: this.subKeyLimitedDes, tokenOut: this.subKeyLimitedDes, tokenInAmount: this.erc20LimitedAmount, tokenOutAmount: this.ethLimitedAmount } };
                         // this.orderData.push(limitedOrderTmpObj);
 
@@ -1258,46 +1381,8 @@ export default {
                                     // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
                                     console.log("successfully submit!");
 
-                                    // query order list
-                                    // axios.post('/api/v1/query_limit_orders', {
-                                    //     sender: this.walletAddress
-                                    // })
-                                    //     .then(response => {
-                                    //     console.log(response);
-                                    //     if (response.data.code == 1000) {
-                                    //         this.orderData = [];
-                                    //         // update order status
-                                    //         if (response.data.data != null && response.data.data.length > 0) {
-                                    //         response.data.data.forEach(element => {
-                                    //             // console.log("order details: ", element);
-                                    //             let tokenInSymbol = null;
-                                    //             let tokenOutSymbol = null;
-                                    //             this.contractAddrMap.forEach(function(value, key){
-                                    //             if (value == element.TokenIn) {
-                                    //                 tokenInSymbol = key;
-                                    //             }
-                                    //             if (value == element.TokenOut) {
-                                    //                 tokenOutSymbol = key;
-                                    //             }
-                                    //             });
-                                    //             // console.log("tokenInSymbol: ",tokenInSymbol);
-                                    //             // console.log("tokenOutSymbol: ",tokenOutSymbol);
-                                    //             let limitedOrderTmpObj = { orderNo: element.OrderNo, orderContent: { tokenIn: tokenInSymbol, tokenOut: tokenOutSymbol, tokenInAmount: element.TokenInAmount, tokenOutAmount: element.TokenOutAmount, status: element.Status, txHash: element.TxHash } };
-                                    //             if (element.Status != "cancel") {
-                                    //             this.orderData.push(limitedOrderTmpObj);
-                                    //         }
-                                    //         });
-                                    //         }
-                                    //         this.iconLoadingLimited = false;
-                                    //     } else {
-                                    //         console.log("error code: ", response.data.code);
-                                    //         this.iconLoadingLimited = false;
-                                    //     }
-                                    //     })
-                                    //     .catch(error => {
-                                    //     console.log(error);
-                                    //     });
-
+                                    // query op record
+                                    this.quertOpAndOrders();
                                 } else {
                                     this.openNotifaction("info", "Swap error! error: " + response.data.message);
                                     console.log("swap error!");
@@ -1394,6 +1479,9 @@ export default {
                                 // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
                                 console.log("swap successfully!");
                                 this.openNotifaction("success", "Swap successfully!");
+
+                                // query op record
+                                this.quertOpAndOrders();
 
                                 setTimeout(() => {
                                     // update eth balance
@@ -1492,6 +1580,9 @@ export default {
                                 // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
                                 console.log("swap successfully!");
                                 this.openNotifaction("success", "Swap successfully!");
+
+                                // query op record
+                                this.quertOpAndOrders();
 
                                 setTimeout(() => {
                                     // update eth balance
@@ -1693,6 +1784,7 @@ export default {
                 this.user = this.$refs.metamask.MetaMaskAddress;
                 MainPage.user = this.user;
                 console.log('user address:', this.user);
+                this.openLogin = false;
                 this.openNotifaction("success", "Log in.");
                 // we need get user data from backend service
                 // 1. get user smart contract accounts
@@ -1749,7 +1841,7 @@ export default {
                 this.operationHistory = [];
                 this.walletObj = [];
                 this.tokenObj = [];
-                this.openNotifaction("info", "Log out.");
+                // this.openNotifaction("info", "Log out.");
             } else {
                 this.user = data.metaMaskAddress;
                 // this.getTxHistory();
@@ -2099,6 +2191,10 @@ export default {
                             if (response.data.code == 1000) {
                                 console.log("transfer successfully!");
                                 this.openNotifaction("success", "Transfer successfully!");
+
+                                // query op record
+                                this.quertOpAndOrders();
+
                                 setTimeout(() => {
                                     // update eth balance
                                     getEthBalance(this.walletAddress).then((response) => {
@@ -2252,6 +2348,9 @@ export default {
                                 if (response.data.code == 1000) {
                                     console.log("transfer successfully!");
                                     this.openNotifaction("success", "Transfer successfully!");
+
+                                    // query op record
+                                    this.quertOpAndOrders();
 
                                     setTimeout(() => {
                                         // update  erc20 balance
@@ -2650,6 +2749,9 @@ export default {
                                                             console.log("transfer successfully!");
                                                             this.openNotifaction("success", "Transfer successfully!");
 
+                                                            // query op record
+                                                            this.quertOpAndOrders();
+
                                                             setTimeout(() => {
                                                                 // update eth balance
                                                                 getEthBalance(this.walletAddress).then((response) => {
@@ -2752,6 +2854,9 @@ export default {
                                                         if (response.data.code == 1000) {
                                                             console.log("transfer successfully!");
                                                             this.openNotifaction("success", "Transfer successfully!");
+
+                                                            // query op record
+                                                            this.quertOpAndOrders();
 
                                                             setTimeout(() => {
                                                                 // update  erc20 balance
@@ -2869,6 +2974,9 @@ export default {
                                                                 console.log("swap successfully!");
                                                                 this.openNotifaction("success", "Swap successfully!");
 
+                                                                // query op record
+                                                                this.quertOpAndOrders();
+
                                                                 setTimeout(() => {
                                                                     // update eth balance
                                                                     getEthBalance(this.walletAddress).then((response) => {
@@ -2978,6 +3086,9 @@ export default {
                                                                 console.log("swap successfully!");
                                                                 this.openNotifaction("success", "Swap successfully!");
 
+                                                                // query op record
+                                                                this.quertOpAndOrders();
+
                                                                 setTimeout(() => {
                                                                     // update eth balance
                                                                     getEthBalance(this.walletAddress).then((response) => {
@@ -3043,16 +3154,16 @@ export default {
                                                     }
                                                 }
 
-                                                let tokenInSymbol = null;
-                                                let tokenOutSymbol = null;
-                                                this.contractAddrMap.forEach(function (value, key) {
-                                                    if (value == elem.TokenIn) {
-                                                        tokenInSymbol = key;
-                                                    }
-                                                    if (value == elem.TokenOut) {
-                                                        tokenOutSymbol = key;
-                                                    }
-                                                });
+                                                // let tokenInSymbol = null;
+                                                // let tokenOutSymbol = null;
+                                                // this.contractAddrMap.forEach(function (value, key) {
+                                                //     if (value == elem.TokenIn) {
+                                                //         tokenInSymbol = key;
+                                                //     }
+                                                //     if (value == elem.TokenOut) {
+                                                //         tokenOutSymbol = key;
+                                                //     }
+                                                // });
 
                                                 ethToErc20LimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get("eth"), elem.tokenOut, this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId).then(res => {
 
@@ -3068,7 +3179,7 @@ export default {
                                                                 init_code: res.initCode,
                                                                 max_fee_per_gas: String(res.maxFeePerGas),
                                                                 max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
-                                                                // nonce: String(res.nonce),
+                                                                nonce: null,
                                                                 paymaster_and_data: res.paymasterAndData,
                                                                 pre_verification_gas: String(res.preVerificationGas),
                                                                 sender: res.sender,
@@ -3088,7 +3199,7 @@ export default {
                                                         };
 
                                                         console.log("obj string:", JSON.stringify(obj));
-                                                        return;
+                                                        // return;
                                                         axios.post('/api/v1/add_limit_order', obj)
                                                             .then(response => {
                                                                 console.log(response);
@@ -3097,59 +3208,8 @@ export default {
                                                                     // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
                                                                     console.log("successfully submit!");
 
-                                                                    // add operation
-                                                                    axios.post('/api/v1/add_operation', {
-                                                                        sender: this.walletAddress,
-                                                                        //number: "generated by backend",//number是操作编号，后端生成
-                                                                        operation: {
-                                                                            action: "Limit order",
-                                                                            details: { tokenIn: tokenInSymbol, amountIn: elem.amountIn, tokenOut: tokenOutSymbol, amountOut: elem.minimalAmountOut },
-                                                                            status: { code: "0", error: null },
-                                                                            txHash: null
-                                                                        }
-                                                                    }).then(res => {
-                                                                        console.log("add operation res: ", res);
-                                                                    }).catch(error => {
-                                                                        console.log(error);
-                                                                    });
-
-                                                                    // query order list
-                                                                    // axios.post('/api/v1/query_limit_orders', {
-                                                                    //     sender: this.walletAddress
-                                                                    // })
-                                                                    //     .then(response => {
-                                                                    //     console.log(response);
-                                                                    //     if (response.data.code == 1000) {
-                                                                    //         this.orderData = [];
-                                                                    //         // update order status
-                                                                    //         if (response.data.data != null && response.data.data.length > 0) {
-                                                                    //         response.data.data.forEach(element => {
-                                                                    //             // console.log("order details: ", element);
-                                                                    //             let tokenInSymbol = null;
-                                                                    //             let tokenOutSymbol = null;
-                                                                    //             this.contractAddrMap.forEach(function(value, key){
-                                                                    //             if (value == element.TokenIn) {
-                                                                    //                 tokenInSymbol = key;
-                                                                    //             }
-                                                                    //             if (value == element.TokenOut) {
-                                                                    //                 tokenOutSymbol = key;
-                                                                    //             }
-                                                                    //             });
-                                                                    //             // console.log("tokenInSymbol: ",tokenInSymbol);
-                                                                    //             // console.log("tokenOutSymbol: ",tokenOutSymbol);
-                                                                    //             let limitedOrderTmpObj = { orderNo: element.OrderNo, orderContent: { tokenIn: tokenInSymbol, tokenOut: tokenOutSymbol, tokenInAmount: element.TokenInAmount, tokenOutAmount: element.TokenOutAmount, status: element.Status, txHash: element.TxHash } };
-                                                                    //             if (element.Status != "cancel") {
-                                                                    //             this.orderData.push(limitedOrderTmpObj);
-                                                                    //         }
-                                                                    //         });
-                                                                    //         }
-                                                                    //     } else {
-                                                                    //         console.log("error code: ", response.data.code);
-                                                                    //     }
-                                                                    //     })
-                                                                    //     .catch(error => {
-                                                                    //     console.log(error);
-                                                                    //     });
+                                                                    // query op record
+                                                                    this.quertOpAndOrders();
                                                                 } else {
                                                                     this.openNotifaction("info", "Swap error! error: " + response.data.message);
                                                                     console.log("swap error!");
@@ -3175,16 +3235,16 @@ export default {
                                                     }
                                                 }
 
-                                                let tokenInSymbol = null;
-                                                let tokenOutSymbol = null;
-                                                this.contractAddrMap.forEach(function (value, key) {
-                                                    if (value == elem.TokenIn) {
-                                                        tokenInSymbol = key;
-                                                    }
-                                                    if (value == elem.TokenOut) {
-                                                        tokenOutSymbol = key;
-                                                    }
-                                                });
+                                                // let tokenInSymbol = null;
+                                                // let tokenOutSymbol = null;
+                                                // this.contractAddrMap.forEach(function (value, key) {
+                                                //     if (value == elem.TokenIn) {
+                                                //         tokenInSymbol = key;
+                                                //     }
+                                                //     if (value == elem.TokenOut) {
+                                                //         tokenOutSymbol = key;
+                                                //     }
+                                                // });
 
                                                 erc20ToEthLimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, elem.tokenIn, this.contractAddrMap.get("eth"), this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId).then(res => {
                                                     if (res != undefined) {
@@ -3216,7 +3276,7 @@ export default {
                                                             }
                                                         };
                                                         console.log("obj string:", JSON.stringify(obj));
-                                                        return;
+                                                        // return;
                                                         axios.post('/api/v1/add_limit_order', obj)
                                                             .then(response => {
                                                                 console.log(response);
@@ -3225,74 +3285,17 @@ export default {
                                                                     // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
                                                                     console.log("successfully submit!");
 
-                                                                    // add operation
-                                                                    axios.post('/api/v1/add_operation', {
-                                                                        sender: this.walletAddress,
-                                                                        //number: "generated by backend",//number是操作编号，后端生成
-                                                                        operation: {
-                                                                            action: "Limit order",
-                                                                            details: { tokenIn: tokenInSymbol, amountIn: elem.amountIn, tokenOut: tokenOutSymbol, amountOut: elem.minimalAmountOut },
-                                                                            status: { code: "0", error: null },
-                                                                            txHash: null
-                                                                        }
-                                                                    }).then(res => {
-                                                                        console.log("add operation res: ", res);
-                                                                    }).catch(error => {
-                                                                        console.log(error);
-                                                                    });
-
-                                                                    // query order list
-                                                                    // axios.post('/api/v1/query_limit_orders', {
-                                                                    //     sender: this.walletAddress
-                                                                    // })
-                                                                    //     .then(response => {
-                                                                    //     console.log(response);
-                                                                    //     if (response.data.code == 1000) {
-                                                                    //         this.orderData = [];
-                                                                    //         // update order status
-                                                                    //         if (response.data.data != null && response.data.data.length > 0) {
-                                                                    //         response.data.data.forEach(element => {
-                                                                    //             // console.log("order details: ", element);
-                                                                    //             let tokenInSymbol = null;
-                                                                    //             let tokenOutSymbol = null;
-                                                                    //             this.contractAddrMap.forEach(function(value, key){
-                                                                    //             if (value == element.TokenIn) {
-                                                                    //                 tokenInSymbol = key;
-                                                                    //             }
-                                                                    //             if (value == element.TokenOut) {
-                                                                    //                 tokenOutSymbol = key;
-                                                                    //             }
-                                                                    //             });
-                                                                    //             // console.log("tokenInSymbol: ",tokenInSymbol);
-                                                                    //             // console.log("tokenOutSymbol: ",tokenOutSymbol);
-                                                                    //             let limitedOrderTmpObj = { orderNo: element.OrderNo, orderContent: { tokenIn: tokenInSymbol, tokenOut: tokenOutSymbol, tokenInAmount: element.TokenInAmount, tokenOutAmount: element.TokenOutAmount, status: element.Status, txHash: element.TxHash } };
-                                                                    //             if (element.Status != "cancel") {
-                                                                    //             this.orderData.push(limitedOrderTmpObj);
-                                                                    //         }
-                                                                    //         });
-                                                                    //         }
-                                                                    //         // this.iconLoadingLimited = false;
-                                                                    //     } else {
-                                                                    //         console.log("error code: ", response.data.code);
-                                                                    //         // this.iconLoadingLimited = false;
-                                                                    //     }
-                                                                    //     })
-                                                                    //     .catch(error => {
-                                                                    //     console.log(error);
-                                                                    //     });
-
+                                                                    // query op record
+                                                                    this.quertOpAndOrders();
                                                                 } else {
                                                                     this.openNotifaction("info", "Swap error! error: " + response.data.message);
                                                                     console.log("swap error!");
-                                                                    // this.iconLoadingLimited = false;
                                                                 }
                                                             })
                                                             .catch(error => {
                                                                 console.log(error);
-                                                                // this.iconLoadingLimited = false;
                                                             });
                                                     }
-                                                    // this.iconLoadingLimited = false;
                                                 });
 
                                             }
