@@ -555,7 +555,7 @@
 import { ref, createVNode } from 'vue';
 import { Modal, notification } from 'ant-design-vue';
 import VueMetamask from 'vue-metamask';
-import { ethers, utils, BigNumber } from 'ethers';
+import { ethers, utils, BigNumber } from 'ethers5';
 import { ParticlesBg } from "particles-bg-vue";
 import Wallet from '../api/abis/Wallet.json';
 import UniswapRouter from "../api/abis/UniswapRouter.json";

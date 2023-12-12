@@ -1,4 +1,4 @@
-import { ethers, utils, BigNumber} from 'ethers';
+import { ethers, utils, BigNumber} from 'ethers5';
 import  Wallet from './abis/Wallet.json';
 import UniswapRouter from "./abis/UniswapRouter.json";
 import Uni from "./abis/Uni.json";
@@ -680,6 +680,10 @@ async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, 
 async function GetEstimatedGasFee() {
     let feeData = await window.web3Provider.getFeeData();
     console.log(JSON.stringify(feeData));
+    console.log("gasPrice: ",utils.formatUnits(feeData.gasPrice, "wei"));
+    console.log("lastBaseFeePerGas: ",utils.formatUnits(feeData.lastBaseFeePerGas, "wei"));
+    console.log("maxFeePerGas: ",utils.formatUnits(feeData.maxFeePerGas, "wei"));
+    console.log("maxPriorityFeePerGas: ",utils.formatUnits(feeData.maxPriorityFeePerGas, "wei"));
     // console.log(utils.formatUnits(feeData.maxFeePerGas, "wei"));
     return feeData;//utils.formatUnits(feeData.maxFeePerGas, "gwei");
 }

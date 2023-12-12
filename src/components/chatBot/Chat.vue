@@ -26,7 +26,7 @@
 // import Vue from 'vue';
 import LeftItem from "./LeftItem";
 import RightItem from "./RightItem";
-import {getChatResponse} from "../../api/apiChat";
+// import {getChatResponse} from "../../api/apiChat";
 import { ParticlesBg } from "particles-bg-vue";
 
 // Vue.directive('scroll', {
