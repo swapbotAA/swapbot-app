@@ -8,19 +8,30 @@ import { ethers } from "ethers6";
 async function login() {
 
     // alert('Button cliked!');
-    const web3authProvider = await web3auth.connect();
+    let web3authProvider = await web3auth.connect();
 
-    const web3 = new Web3(web3authProvider);
-    const user = await web3auth.getUserInfo();
-    console.log(user);
+    let web3 = new Web3(web3authProvider);
+    let user = await web3auth.getUserInfo();
+    console.log(JSON.stringify(user));
 
-    const userAccounts = await web3.eth.getAccounts();
+    let userAccounts = await web3.eth.getAccounts();
     console.log(userAccounts);
     // const privateKey = await web3auth.provider.request({
     //     method: "eth_private_key"
     // });
     // console.log(privateKey);
-    return userAccounts;
+
+    let ethersProvider = new ethers.BrowserProvider(web3authProvider); 
+    let platform = 0;// 0 represent normal platform, such as google
+    if (JSON.stringify(user) == "{}") {
+        // alert("metamask");
+        platform = 1;//1 represent web3 platform, such as metamask
+    }
+    return {
+        userAccounts: userAccounts, 
+        provider: ethersProvider,
+        platform: platform
+    };
 
 
 }

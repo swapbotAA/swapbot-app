@@ -769,7 +769,7 @@ import MainPage from "./MainPage.vue";
 import EthereumQRPlugin from 'ethereum-qr-code';
 import VueMetamask from 'vue-metamask';
 import {
-    getWeb3Provider,
+    // getWeb3Provider,
     initInstances,
     getErc20Balance,
     depositETH,
@@ -785,9 +785,11 @@ import {
     getEthBalance,
     GetEstimatedGasFee,
     transferETH,
-    transferErc20
+    transferErc20,
+    login,
+    logout
 } from "../api/contracts";
-import { login, logout, sign } from "../api/web3Auth/web3Auth";
+
 import { responseParser } from "../api/apiChat";
 
 const schedule = require('node-schedule');
@@ -939,22 +941,30 @@ export default {
             optionSrc: optionSrc,
             optionDes: optionDes,
             rateMap: rateMap,
+            provider: null,
+            platform: null,//1 represent web3 platform, such as metamask; 0 represent normal platform, such as google
         }
     },
     methods: {
         showLogin () {
-            console.log("user: ", this.user);
+            // console.log("user: ", this.user);
             if (this.user != null) {
                 this.openLogoutHint = true;
-                sign();
+                // sign();
             }else {
                 // this.openLogin = true;
                 login().then(response => {
-                    console.log("userAccounts: ", response);
-                    this.user = response[0];
-
-                    let provider = getWeb3Provider();
-                    initInstances(provider).then((response) => {
+                    console.log("userAccounts: ", response.userAccounts);
+                    
+                    console.log("platform: ", response.platform);
+                    if (response.userAccounts != null) {
+                        this.user = response.userAccounts[0];
+                    }
+                
+                    if (response.platform != null) {
+                        this.platform = response.platform;
+                    }
+                    initInstances().then((response) => {
                         if (response.status) {
                             console.log("Init success");
 
@@ -962,7 +972,7 @@ export default {
                             console.log("Init failed");
                         }
                     });
-
+                    // return;
                     // we need get user data from backend service
                     // 1. get user smart contract accounts
                     // return;
@@ -1050,7 +1060,7 @@ export default {
                                             }
                                         })
                                     } else {
-                                        console.log("get ETH balance falied!");
+                                        console.log("get ETH balance failed!");
                                     }
                                 });
                             }
@@ -1773,8 +1783,8 @@ export default {
             console.log("connect");
             if (this.user == null) {
                 this.$refs.metamask.init();
-                let provider = getWeb3Provider();
-                initInstances(provider).then((response) => {
+                // let provider = getWeb3Provider();
+                initInstances().then((response) => {
                     if (response.status) {
                         console.log("Init success");
                     } else {
@@ -1845,8 +1855,8 @@ export default {
             } else {
                 this.user = data.metaMaskAddress;
                 // this.getTxHistory();
-                let provider = getWeb3Provider();
-                initInstances(provider).then((response) => {
+                // let provider = getWeb3Provider();
+                initInstances().then((response) => {
                     if (response.status) {
                         console.log("Init success");
 
@@ -2151,7 +2161,7 @@ export default {
                     }
                 }
 
-                transferETH(this.user, this.walletAddress, this.depositEthAdd, this.depositEth, walletSalt, this.chainId, this.hideEthTransferCallback).then(res => {
+                transferETH(this.user, this.walletAddress, this.depositEthAdd, this.depositEth, walletSalt, this.chainId, this.platform, this.hideEthTransferCallback).then(res => {
                     if (res == undefined) {
                         this.iconLoadingDepositEth = false;
                         return;

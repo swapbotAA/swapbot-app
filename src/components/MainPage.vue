@@ -560,7 +560,7 @@ import { ParticlesBg } from "particles-bg-vue";
 import Wallet from '../api/abis/Wallet.json';
 import UniswapRouter from "../api/abis/UniswapRouter.json";
 import {
-  getWeb3Provider,
+  // getWeb3Provider,
   initInstances,
   getErc20Balance,
   depositETH,
@@ -2015,8 +2015,8 @@ export default {
     },
     connect() {
       this.$refs.metamask.init();
-      let provider = getWeb3Provider();
-      initInstances(provider).then((response) => {
+      // let provider = getWeb3Provider();
+      initInstances().then((response) => {
         if (response.status) {
           console.log("Init success");
 
@@ -2082,8 +2082,8 @@ export default {
       } else {
         this.user = data.metaMaskAddress;
         // this.getTxHistory();
-        let provider = getWeb3Provider();
-        initInstances(provider).then((response) => {
+        // let provider = getWeb3Provider();
+        initInstances().then((response) => {
           if (response.status) {
             console.log("Init success");
 
