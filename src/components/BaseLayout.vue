@@ -11,9 +11,14 @@
                 </a-button>
             </label> -->
             <label>
-                <a-button type="primary" danger style="position: absolute; right: 10px; top: 10px;" @click="showLogin()">
-                    <span v-if="this.user == null">Login</span>
-                    <span v-else>{{ this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4) }}</span>
+                <a-button v-if="this.user == null" type="primary" danger style="position: absolute; right: 10px; top: 10px;" @click="showLogin()">Login
+                    <!-- <span v-if="this.user == null">Login</span>
+                    <span v-else>{{ this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4) }}</span> -->
+                </a-button>
+                <a-button v-if="this.user != null" type="primary" danger style="position: absolute; right: 10px; top: 10px;" @click="showLogin()">
+                    {{ this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4) }}
+                    <!-- <span v-if="this.user == null">Login</span>
+                    <span v-else>{{ this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4) }}</span> -->
                 </a-button>
             </label>
             <img @click="changeMode()" src="../assets/transform.svg"
@@ -947,11 +952,9 @@ export default {
     },
     methods: {
         showLogin () {
-            // console.log("user: ", this.user);
-            if (this.user != null) {
-                this.openLogoutHint = true;
-                // sign();
-            }else {
+            // alert("user: ", this.user);
+            console.log(this.user);
+            if (this.user == null) {
                 // this.openLogin = true;
                 login().then(response => {
                     console.log("userAccounts: ", response.userAccounts);
@@ -1070,6 +1073,9 @@ export default {
                         console.log(error);
                     });
                 });
+            }else {
+                this.openLogoutHint = true;
+                // sign();
             }
             // login();
             
