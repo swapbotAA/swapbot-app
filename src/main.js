@@ -7,7 +7,7 @@ import { Web3Auth } from "@web3auth/modal";
 import { Web3AuthMPCCoreKit, WEB3AUTH_NETWORK } from "@web3auth/mpc-core-kit";
 
 const coreKitInstance = new Web3AuthMPCCoreKit({
-    web3AuthClientId: "BOhofQ2t3prR53hQgQEA_Z-Y0TlYo7uHOOn1aYtewWFh5WvPzQ2UWZce7_2IfkRMe1inPtCLKe_6oH2OSD7RegY",
+    web3AuthClientId: "BCYR7_dZTbqDreDE1MHniuCP8AMN441M_A-bRnMUrqjIGaeERgaYZ6IyobbjdNvjaG6-cp-b3lbso9VIXyRYF7Y",
     web3AuthNetwork: WEB3AUTH_NETWORK.DEVNET,
     uxMode: "popup",
     chainConfig: {
@@ -20,14 +20,14 @@ const coreKitInstance = new Web3AuthMPCCoreKit({
         tickerName: "Ethereum",
     },
   });
-
-// await coreKitInstance.init();
+// console.log("coreKitInstance: ",coreKitInstance);
+await coreKitInstance.init();
 
 
 
 // Initialize within setup()
 const web3auth = new Web3Auth({
-    clientId: "BOhofQ2t3prR53hQgQEA_Z-Y0TlYo7uHOOn1aYtewWFh5WvPzQ2UWZce7_2IfkRMe1inPtCLKe_6oH2OSD7RegY", // Get your Client ID from the Web3Auth Dashboard
+    clientId: "BCYR7_dZTbqDreDE1MHniuCP8AMN441M_A-bRnMUrqjIGaeERgaYZ6IyobbjdNvjaG6-cp-b3lbso9VIXyRYF7Y", // Get your Client ID from the Web3Auth Dashboard
     web3AuthNetwork: WEB3AUTH_NETWORK.DEVNET, // Web3Auth Network
     chainConfig: {
         chainNamespace: "eip155",
@@ -39,7 +39,7 @@ const web3auth = new Web3Auth({
         tickerName: "Ethereum",
     },
 });
-
+// console.log("web3auth: ",web3auth);
 await web3auth.initModal();
 
 export { web3auth, coreKitInstance }

@@ -17,6 +17,7 @@ module.exports = defineConfig({
   },
   configureWebpack:{
     plugins: [
-      new NodePolyfillPlugin()]
+      new NodePolyfillPlugin()
+    ]
   }
 })

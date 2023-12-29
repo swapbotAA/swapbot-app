@@ -2,7 +2,7 @@
     <particles-bg type="cobweb" :bg="true" />
     <div class="header"><img src="../assets/logo.svg" style="height: 100px;width: 100px; padding-right: 10px;">
         Sparky
-        <!-- <vue-metamask ref="metamask" @onComplete="onComplete"></vue-metamask> -->
+        <vue-metamask ref="metamask" @onComplete="onComplete"></vue-metamask>
         <span>
             <!-- <label>
                 <a-button type="primary" danger style="position: absolute; right: 10px; top: 10px;" @click="connect">
@@ -23,6 +23,8 @@
             </label>
             <img @click="changeMode()" src="../assets/transform.svg"
                 style="cursor:pointer; position: absolute; right: 20px; top: 70px; height: 25px;width: 20px;">
+            <a-button type="primary" shape="circle" danger style="position: absolute; right: 50px; top: 60px;" @click="addDeviceKey()">+</a-button>
+            <a-button type="primary" shape="circle" danger style="position: absolute; right: 100px; top: 60px;" @click="approveBundler()">✓</a-button>
         </span>
     </div>
     <div class="body">
@@ -257,7 +259,7 @@
             </a-modal>
             <!--Login modal windows-->
             <a-modal v-model:open="openLogin" title="Login" footer="" :key=Math.random() style="width:250px; text-align: center;">
-                <label><a-button type="primary" class="login" @click="">Google</a-button></label>
+                <label><a-button type="primary" class="login" @click="googleLogin()">Google</a-button></label>
                 <br/>
                 <label><a-button type="primary" class="login" @click="connect()">Metamask</a-button></label>
             </a-modal>
@@ -265,6 +267,12 @@
             <a-modal v-model:open="openLogoutHint" title="Tips" ok-text="OK" cancel-text="CX" @ok="logOut()"
                 :key=Math.random() style="width:250px;">
                 <span>Log out?</span>
+            </a-modal>
+            <!--addDeviceKey modal windows -->
+            <a-modal v-model:open="openaddDeviceKey" title="addDeviceKey" :key=Math.random() ok-text="OK" cancel-text="CX"
+                @ok="hideAddDeviceKey()">
+                <p style="font-size: medium;">Device key<a-input oninput="value=value.replace(/[\W]/g,'')"
+                        v-model:value="DeviceKey" placeholder="0" suffix="" style="height: 60px;" /></p>
             </a-modal>
             <!-- drawer list -->
             <!--drawer of ETH operating-->
@@ -774,7 +782,7 @@ import MainPage from "./MainPage.vue";
 import EthereumQRPlugin from 'ethereum-qr-code';
 import VueMetamask from 'vue-metamask';
 import {
-    // getWeb3Provider,
+    getWeb3Provider,
     initInstances,
     getErc20Balance,
     depositETH,
@@ -792,7 +800,9 @@ import {
     transferETH,
     transferErc20,
     login,
-    logout
+    logout,
+    addDeviceKey,
+    delegate
 } from "../api/contracts";
 
 import { responseParser } from "../api/apiChat";
@@ -862,6 +872,8 @@ export default {
             qrImgSrc: " data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNjkzMjg0MjA0Njk0IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjE5NTkiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PHBhdGggZD0iTTcwNS45MiA5MTUuODRIMzIwYy0yOC4xNiAwLTUxLjItMjMuMDQtNTEuMi01MS4yVjYzMC40YzAtMjguMTYgMjMuMDQtNTEuMiA1MS4yLTUxLjJoMzg1LjkyYzI4LjE2IDAgNTEuMiAyMy4wNCA1MS4yIDUxLjJ2MjM0Ljg4YzAgMjcuNTItMjMuMDQgNTAuNTYtNTEuMiA1MC41NnoiIGZpbGw9IiNFRUY2RkYiIHAtaWQ9IjE5NjAiPjwvcGF0aD48cGF0aCBkPSJNNzA1LjkyIDkyOC42NEgzMjBjLTM1LjIgMC02NC0yOC44LTY0LTY0VjYzMC40YzAtMzUuMiAyOC44LTY0IDY0LTY0aDM4NS45MmMzNS4yIDAgNjQgMjguOCA2NCA2NHYyMzQuODhjMCAzNS4yLTI4LjggNjMuMzYtNjQgNjMuMzZ6TTMyMCA1OTJjLTIxLjEyIDAtMzguNCAxNy4yOC0zOC40IDM4LjR2MjM0Ljg4YzAgMjEuMTIgMTcuMjggMzguNCAzOC40IDM4LjRoMzg1LjkyYzIxLjEyIDAgMzguNC0xNy4yOCAzOC40LTM4LjRWNjMwLjRjMC0yMS4xMi0xNy4yOC0zOC40LTM4LjQtMzguNEgzMjB6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTYxIj48L3BhdGg+PHBhdGggZD0iTTUxNS4yIDE2My4yQzQxOC41NiAxNjMuMiAzMzkuMiAyNDIuNTYgMzM5LjIgMzM4LjU2VjUxOC40aDM1MlYzMzguNTZjMC05Ni03OS4zNi0xNzUuMzYtMTc2LTE3NS4zNnoiIGZpbGw9IiNFOEU2RkYiIHAtaWQ9IjE5NjIiPjwvcGF0aD48cGF0aCBkPSJNNzA0IDUzMS4ySDMyNi40VjMzOC41NmMwLTEwMy42OCA4NC40OC0xODguMTYgMTg4LjgtMTg4LjE2UzcwNCAyMzQuODggNzA0IDMzOC41NlY1MzEuMnogbS0zNTItMjUuNmgzMjYuNFYzMzguNTZjMC04OS42LTcyLjk2LTE2Mi41Ni0xNjMuMi0xNjIuNTZTMzUyIDI0OC45NiAzNTIgMzM4LjU2VjUwNS42eiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk2MyI+PC9wYXRoPjxwYXRoIGQ9Ik00NTYuMzIgNTE4LjRoMTEydjYwLjhINDU2LjMyeiIgZmlsbD0iI0VFRjZGRiIgcC1pZD0iMTk2NCI+PC9wYXRoPjxwYXRoIGQ9Ik01ODEuNzYgNTkySDQ0My41MlY1MDUuNmgxMzcuNnY4Ni40eiBtLTExMi42NC0yNS42aDg2LjRWNTMxLjJINDY5LjEydjM1LjJ6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTY1Ij48L3BhdGg+PHBhdGggZD0iTTcxNC44OCA0MzEuMzZjLTEyLjggMC0yMy4wNC0xMC4yNC0yMy4wNC0yMy4wNHYtMzguNGMwLTEyLjggMTAuMjQtMjMuMDQgMjMuMDQtMjMuMDRzMjMuMDQgMTAuMjQgMjMuMDQgMjMuMDR2MzguNGMwIDEyLjgtMTAuMjQgMjMuMDQtMjMuMDQgMjMuMDR6IiBmaWxsPSIjRUVGNkZGIiBwLWlkPSIxOTY2Ij48L3BhdGg+PHBhdGggZD0iTTcxNC44OCA0NDQuMTZjLTE5Ljg0IDAtMzUuODQtMTYtMzUuODQtMzUuODR2LTM4LjRjMC0xOS44NCAxNi0zNS44NCAzNS44NC0zNS44NHMzNS44NCAxNiAzNS44NCAzNS44NHYzOC40YzAgMTkuODQtMTYgMzUuODQtMzUuODQgMzUuODR6IG0wLTgzLjg0Yy01Ljc2IDAtMTAuMjQgNC40OC0xMC4yNCAxMC4yNHYzOC40YzAgNS43NiA0LjQ4IDEwLjI0IDEwLjI0IDEwLjI0czEwLjI0LTQuNDggMTAuMjQtMTAuMjR2LTM4LjRjMC01Ljc2LTQuNDgtMTAuMjQtMTAuMjQtMTAuMjR6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTY3Ij48L3BhdGg+PHBhdGggZD0iTTMxMi4zMiA0MjEuMTJjLTEyLjggMC0yMy4wNC0xMC4yNC0yMy4wNC0yMy4wNHYtMzguNGMwLTEyLjggMTAuMjQtMjMuMDQgMjMuMDQtMjMuMDRzMjMuMDQgMTAuMjQgMjMuMDQgMjMuMDR2MzguNGMwIDEyLjgtMTAuODggMjMuMDQtMjMuMDQgMjMuMDR6IiBmaWxsPSIjRUVGNkZGIiBwLWlkPSIxOTY4Ij48L3BhdGg+PHBhdGggZD0iTTMxMi4zMiA0MzMuOTJjLTE5Ljg0IDAtMzUuODQtMTYtMzUuODQtMzUuODR2LTM4LjRjMC0xOS44NCAxNi0zNS44NCAzNS44NC0zNS44NHMzNS44NCAxNiAzNS44NCAzNS44NHYzOC40YzAgMTkuODQtMTYuNjQgMzUuODQtMzUuODQgMzUuODR6IG0wLTgzLjg0Yy01Ljc2IDAtMTAuMjQgNC40OC0xMC4yNCAxMC4yNHYzOC40YzAgNS43NiA0LjQ4IDEwLjI0IDEwLjI0IDEwLjI0czEwLjI0LTQuNDggMTAuMjQtMTAuMjR2LTM4LjRjMC01Ljc2LTUuMTItMTAuMjQtMTAuMjQtMTAuMjR6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTY5Ij48L3BhdGg+PHBhdGggZD0iTTc5NS41MiA3NjMuNTJoLTI1LjZjLTcuMDQgMC0xMi44LTUuNzYtMTIuOC0xMi44di00Ni4wOGMwLTE0LjA4LTIuNTYtMjUuNiAxMS41Mi0yNS42aDI2Ljg4YzE0LjA4IDAgMjUuNiAxMS41MiAyNS42IDI1LjZ2MzMuMjhjMCAxNC4wOC0xMS41MiAyNS42LTI1LjYgMjUuNnoiIGZpbGw9IiNFRUY2RkYiIHAtaWQ9IjE5NzAiPjwvcGF0aD48cGF0aCBkPSJNNzk1LjUyIDc3Ni4zMmgtMjUuNmMtMTQuMDggMC0yNS42LTExLjUyLTI1LjYtMjUuNnYtNDYuMDgtNS4xMmMwLTguOTYtMC42NC0xOS4yIDYuNC0yNi4yNCA0LjQ4LTQuNDggMTAuMjQtNi40IDE3LjkyLTYuNGgyNi44OGMyMS4xMiAwIDM4LjQgMTcuMjggMzguNCAzOC40djMzLjI4YzAgMjAuNDgtMTcuMjggMzcuNzYtMzguNCAzNy43NnogbS0yNi4yNC04NC40OHY1OC44OGgyNS42YzcuMDQgMCAxMi44LTUuNzYgMTIuOC0xMi44di0zMy4yOGMwLTcuMDQtNS43Ni0xMi44LTEyLjgtMTIuOGgtMjUuNnoiIGZpbGw9IiM3MDhEQjciIHAtaWQ9IjE5NzEiPjwvcGF0aD48cGF0aCBkPSJNODE2LjY0IDczNC4wOGwtMC42NC0yNS42djEyLjgtMTIuOGM1LjEyIDAgNDgtMy4yIDQ4LTU4LjI0VjQ1NC40aDI1LjZ2MTk2LjQ4YzAgODEuMjgtNzIuMzIgODMuMi03Mi45NiA4My4yeiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk3MiI+PC9wYXRoPjxwYXRoIGQ9Ik0yMjguNDggNzYzLjUyaDI1LjZjNy4wNCAwIDEyLjgtNS43NiAxMi44LTEyLjh2LTU4Ljg4YzAtNy4wNC01Ljc2LTEyLjgtMTIuOC0xMi44aC0yNS42Yy0xNC4wOCAwLTI1LjYgMTEuNTItMjUuNiAyNS42djMzLjI4YzAgMTQuMDggMTEuNTIgMjUuNiAyNS42IDI1LjZ6IiBmaWxsPSIjRUVGNkZGIiBwLWlkPSIxOTczIj48L3BhdGg+PHBhdGggZD0iTTI1NC4wOCA3NzYuMzJoLTI1LjZjLTIxLjEyIDAtMzguNC0xNy4yOC0zOC40LTM4LjR2LTMzLjI4YzAtMjEuMTIgMTcuMjgtMzguNCAzOC40LTM4LjRoMjUuNmMxNC4wOCAwIDI1LjYgMTEuNTIgMjUuNiAyNS42djU4Ljg4YzAgMTQuMDgtMTEuNTIgMjUuNi0yNS42IDI1LjZ6IG0tMjUuNi04NC40OGMtNy4wNCAwLTEyLjggNS43Ni0xMi44IDEyLjh2MzMuMjhjMCA3LjA0IDUuNzYgMTIuOCAxMi44IDEyLjhoMjUuNnYtNTguODhoLTI1LjZ6TTUxOS4wNCAxNDAuMTZjLTIzLjY4IDAtNDMuNTItMTkuMi00My41Mi00My41MnMxOS4yLTQzLjUyIDQzLjUyLTQzLjUyIDQzLjUyIDE5LjIgNDMuNTIgNDMuNTItMTkuODQgNDMuNTItNDMuNTIgNDMuNTJ6IG0wLTYxLjQ0Yy05LjYgMC0xNy45MiA4LjMyLTE3LjkyIDE3LjkyczguMzIgMTcuOTIgMTcuOTIgMTcuOTIgMTcuOTItOC4zMiAxNy45Mi0xNy45Mi04LjMyLTE3LjkyLTE3LjkyLTE3LjkyeiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk3NCI+PC9wYXRoPjxwYXRoIGQ9Ik01MDUuNiAxMzQuNGgyNS42djMyaC0yNS42eiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk3NSI+PC9wYXRoPjxwYXRoIGQ9Ik01MTIuNjQgMzA1LjkybS02OS4xMiAwYTY5LjEyIDY5LjEyIDAgMSAwIDEzOC4yNCAwIDY5LjEyIDY5LjEyIDAgMSAwLTEzOC4yNCAwWiIgZmlsbD0iI0ZGRjI3RCIgcC1pZD0iMTk3NiI+PC9wYXRoPjxwYXRoIGQ9Ik01MTIuNjQgMzg3Ljg0Yy00NC44IDAtODEuOTItMzYuNDgtODEuOTItODEuOTJTNDY3LjIgMjI0IDUxMi42NCAyMjRzODEuOTIgMzYuNDggODEuOTIgODEuOTItMzcuMTIgODEuOTItODEuOTIgODEuOTJ6IG0wLTEzOC4yNGMtMzAuNzIgMC01Ni4zMiAyNC45Ni01Ni4zMiA1Ni4zMnMyNC45NiA1Ni4zMiA1Ni4zMiA1Ni4zMiA1Ni4zMi0yNC45NiA1Ni4zMi01Ni4zMi0yNS42LTU2LjMyLTU2LjMyLTU2LjMyeiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk3NyI+PC9wYXRoPjxwYXRoIGQ9Ik02MDQuMTYgNDMzLjI4bS0xMC4yNCAwYTEwLjI0IDEwLjI0IDAgMSAwIDIwLjQ4IDAgMTAuMjQgMTAuMjQgMCAxIDAtMjAuNDggMFoiIGZpbGw9IiM3MDhEQjciIHAtaWQ9IjE5NzgiPjwvcGF0aD48cGF0aCBkPSJNNDIyLjQgNjU5LjJIMzM5LjJjLTcuMDQgMC0xMi44LTUuNzYtMTIuOC0xMi44czUuNzYtMTIuOCAxMi44LTEyLjhoODMuMmM3LjA0IDAgMTIuOCA1Ljc2IDEyLjggMTIuOHMtNS43NiAxMi44LTEyLjggMTIuOHoiIGZpbGw9IiM3MDhEQjciIHAtaWQ9IjE5NzkiPjwvcGF0aD48cGF0aCBkPSJNNTEyLjY0IDMwNS45Mm0tMTYgMGExNiAxNiAwIDEgMCAzMiAwIDE2IDE2IDAgMSAwLTMyIDBaIiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTgwIj48L3BhdGg+PHBhdGggZD0iTTg3Ni44IDQ3My42Yy0yNy41MiAwLTUxLjItMjEuNzYtNTEuMi00Ni43MiAwLTcuMDQgNS43Ni0xMi44IDEyLjgtMTIuOHMxMi44IDUuNzYgMTIuOCAxMi44YzAgMTAuODggMTIuMTYgMjEuMTIgMjUuNiAyMS4xMnMyNS42LTEwLjI0IDI1LjYtMjEuMTJjMC03LjA0IDUuNzYtMTIuOCAxMi44LTEyLjhzMTIuOCA1Ljc2IDEyLjggMTIuOGMwIDI0Ljk2LTIzLjY4IDQ2LjcyLTUxLjIgNDYuNzJ6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTgxIj48L3BhdGg+PHBhdGggZD0iTTE5NC41NiA3MzQuMDhjLTAuNjQgMC03Mi45Ni0yLjU2LTcyLjk2LTgzLjg0VjQ1NC40aDI1LjZ2MTk2LjQ4YzAgNTUuMDQgNDIuODggNTcuNiA0OCA1OC4yNGwtMC42NCAyNC45NnoiIGZpbGw9IiM3MDhEQjciIHAtaWQ9IjE5ODIiPjwvcGF0aD48cGF0aCBkPSJNMTMxLjIgNDczLjZjLTI3LjUyIDAtNTEuMi0yMS43Ni01MS4yLTQ2LjcyIDAtNy4wNCA1Ljc2LTEyLjggMTIuOC0xMi44czEyLjggNS43NiAxMi44IDEyLjhjMCAxMC44OCAxMi4xNiAyMS4xMiAyNS42IDIxLjEyczI1LjYtMTAuMjQgMjUuNi0yMS4xMmMwLTcuMDQgNS43Ni0xMi44IDEyLjgtMTIuOHMxMi44IDUuNzYgMTIuOCAxMi44YzAgMjQuOTYtMjMuMDQgNDYuNzItNTEuMiA0Ni43MnoiIGZpbGw9IiM3MDhEQjciIHAtaWQ9IjE5ODMiPjwvcGF0aD48cGF0aCBkPSJNNTgzLjA0IDgzNy4xMm0tMjMuNjggMGEyMy42OCAyMy42OCAwIDEgMCA0Ny4zNiAwIDIzLjY4IDIzLjY4IDAgMSAwLTQ3LjM2IDBaIiBmaWxsPSIjRkZGMjdEIiBwLWlkPSIxOTg0Ij48L3BhdGg+PHBhdGggZD0iTTU4My4wNCA4NzMuNmMtMTkuODQgMC0zNi40OC0xNi0zNi40OC0zNi40OHMxNi0zNi40OCAzNi40OC0zNi40OCAzNi40OCAxNiAzNi40OCAzNi40OC0xNi42NCAzNi40OC0zNi40OCAzNi40OHogbTAtNDYuNzJjLTUuNzYgMC0xMC44OCA0LjQ4LTEwLjg4IDEwLjg4czQuNDggMTAuODggMTAuODggMTAuODggMTAuODgtNC40OCAxMC44OC0xMC44OC01LjEyLTEwLjg4LTEwLjg4LTEwLjg4eiIgZmlsbD0iIzcwOERCNyIgcC1pZD0iMTk4NSI+PC9wYXRoPjxwYXRoIGQ9Ik02NzIuNjQgODM3LjEybS0yMy42OCAwYTIzLjY4IDIzLjY4IDAgMSAwIDQ3LjM2IDAgMjMuNjggMjMuNjggMCAxIDAtNDcuMzYgMFoiIGZpbGw9IiNGRjk3OTciIHAtaWQ9IjE5ODYiPjwvcGF0aD48cGF0aCBkPSJNNjcyLjY0IDg3My42Yy0xOS44NCAwLTM2LjQ4LTE2LTM2LjQ4LTM2LjQ4czE2LTM2LjQ4IDM2LjQ4LTM2LjQ4IDM2LjQ4IDE2IDM2LjQ4IDM2LjQ4LTE2LjY0IDM2LjQ4LTM2LjQ4IDM2LjQ4eiBtMC00Ni43MmMtNS43NiAwLTEwLjg4IDQuNDgtMTAuODggMTAuODhzNC40OCAxMC44OCAxMC44OCAxMC44OCAxMC44OC00LjQ4IDEwLjg4LTEwLjg4LTUuMTItMTAuODgtMTAuODgtMTAuODh6IiBmaWxsPSIjNzA4REI3IiBwLWlkPSIxOTg3Ij48L3BhdGg+PC9zdmc+",
             openLogin: ref(false),
             openLogoutHint: ref(false),
+            DeviceKey: null,
+            openaddDeviceKey: ref(false),
             // loading icon params
             iconLoadingDepositEth: ref(false),
             iconLoadingWithdrawEth: ref(false),
@@ -951,17 +963,83 @@ export default {
         }
     },
     methods: {
-        showLogin () {
-            // alert("user: ", this.user);
-            console.log(this.user);
-            if (this.user == null) {
-                // this.openLogin = true;
-                login().then(response => {
+        approveBundler() {
+            let walletSalt = 0;
+                // update walletIndex
+                console.log("this.walletObj: ", this.walletObj);
+                for (let index = 0; index < this.walletObj.length; index++) {
+                    const element = this.walletObj[index];
+                    if (element.value == this.walletAddress) {
+                        walletSalt = element.salt;
+                        console.log("wallet info: ", element);
+                    }
+                }
+            delegate(this.user, this.walletAddress, this.chainId, this.platform, walletSalt).then(res => {
+                if (res != undefined) {
+                    console.log("userOperation: ", res);
+
+                    // add order to limited order list
+                    let obj = {
+                        beneficiary_addr: this.user,
+                        user_op: {
+                            call_data: res.callData,
+                            call_gas_limit: String(res.callGasLimit),
+                            init_code: res.initCode,
+                            max_fee_per_gas: String(res.maxFeePerGas),
+                            max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
+                            nonce: null,
+                            paymaster_and_data: res.paymasterAndData,
+                            pre_verification_gas: String(res.preVerificationGas),
+                            sender: res.sender,
+                            signature: res.signature,
+                            verification_gas_limit: String(res.verificationGasLimit)
+                        },
+                        order_details: {
+                            limitAmountIn: null,
+                            sender: res.sender,
+                            targetAddr: null
+                        }
+                    };
+                    console.log("obj string:", JSON.stringify(obj));
+                    // return;
+                    axios.post('/api/v1/add_copy_order', obj)
+                        .then(response => {
+                            console.log(response);
+                            if (response.data.code == 1000) {
+                                this.openNotifaction("success", "Add copy order successfully!");
+                                // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                console.log("Add copy order successfully!");
+
+                                // query op record
+                                this.quertOpAndOrders();
+                            } else {
+                                this.openNotifaction("info", "Add copy order error! error: " + response.data.message);
+                                console.log("Add copy order error!");
+                                // this.iconLoadingLimited = false;
+                            }
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
+                    }
+
+            });
+        },
+        addDeviceKey() {
+            this.openaddDeviceKey = true;
+        },
+        hideAddDeviceKey() {
+            addDeviceKey(this.DeviceKey);
+            this.openaddDeviceKey = false;
+            this.DeviceKey = null;
+        },
+        googleLogin () {
+            login().then(response => {
+                    this.openLogin = false;
                     console.log("userAccounts: ", response.userAccounts);
-                    
                     console.log("platform: ", response.platform);
                     if (response.userAccounts != null) {
-                        this.user = response.userAccounts[0];
+                        this.user = response.userAccounts;
                     }
                 
                     if (response.platform != null) {
@@ -978,7 +1056,6 @@ export default {
                     // return;
                     // we need get user data from backend service
                     // 1. get user smart contract accounts
-                    // return;
                     axios.post('/api/v1/query_contract_accounts', {
                         user: this.user
                     })
@@ -1073,12 +1150,17 @@ export default {
                         console.log(error);
                     });
                 });
+        },
+        showLogin () {
+            console.log(this.user);
+            if (this.user == null) {
+                this.openLogin = true;
+                return;    
             }else {
                 this.openLogoutHint = true;
                 // sign();
             }
-            // login();
-            
+            // login();    
         },
         logOut() {
             logout().then(response => {
@@ -1789,7 +1871,8 @@ export default {
             console.log("connect");
             if (this.user == null) {
                 this.$refs.metamask.init();
-                // let provider = getWeb3Provider();
+                getWeb3Provider();
+                this.platform = 1; //1 represent web3 platform, such as metamask
                 initInstances().then((response) => {
                     if (response.status) {
                         console.log("Init success");
@@ -1850,7 +1933,7 @@ export default {
         },
         onComplete(data) {
             console.log("on complete:", data);
-            this.scheduleTask();
+            // this.scheduleTask();
             // log out
             if (data.metaMaskAddress == "") {
                 this.user = null;
@@ -1861,7 +1944,8 @@ export default {
             } else {
                 this.user = data.metaMaskAddress;
                 // this.getTxHistory();
-                // let provider = getWeb3Provider();
+                getWeb3Provider();
+                this.platform = 1; //1 represent web3 platform, such as metamask
                 initInstances().then((response) => {
                     if (response.status) {
                         console.log("Init success");
@@ -1870,7 +1954,6 @@ export default {
                         console.log("Init failed");
                     }
                 });
-
                 // we need get user data from backend service
                 // 1. get user smart contract accounts
                 // return;
