@@ -35,12 +35,24 @@ function responseParser(data) {
         // textArray[2] = "You Send: 100 ETH(contract address: 0x0000000000000000000000000000000000000000)";
         // textArray[3] = "Recepient: 0x0000000000000000000000000000000000000000";
 
-        //swap textArray example
+        // swap market price textArray example
+        // textArray[0] = "Operation submitted: [SWAP]";
+        // textArray[1] = "----------------------------------------------------------";
+        // textArray[2] = "You Pay: 0.01 ETH (contract address: 0x0000000000000000000000000000000000000000)";
+        // textArray[3] = "You Ask: UNI (contract address: 0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984)";
+
+        // swap limit order textArray example
         // textArray[0] = "Operation submitted: [SWAP]";
         // textArray[1] = "---------------------------------------------------------- ";
         // textArray[2] = "You Pay: 100 ETH(contract address: 0x0000000000000000000000000000000000000000)";
-        // textArray[3] = "You Ask: at least 20000 USDC(contract address: 0x55979784068d1BEf37B49F41cAC8040A4b79C4a7)";
-        // textArray[3] = "(Asking for a higher price than market rate will turn this into a limit order)";
+        // textArray[3] = "You Ask: 0.05 UNI (contract address: 0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984)";
+        
+        // copy transactions example
+        // textArray[0] = "Operation submitted: [COPY]";
+        // textArray[1] = "----------------------------------------------------------";
+        // textArray[2] = "You Copy Transactions from: 0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80A";
+        // textArray[3] = "Cap amount of paid ETH in each transaction: 0.002";
+
         let handle = {
             action: null,
             params: []
@@ -49,6 +61,21 @@ function responseParser(data) {
         let start = textArray[0].indexOf("[")+1;
         let end = textArray[0].indexOf("]");
         handle.action = textArray[0].substring(start, end);
+        if (handle.action == "COPY") {
+            let param = {
+                limitAmountIn: null,
+                targetAddr: null
+            };
+            let textArray2 = textArray[2].split(" ");
+            let targetAddr = textArray2[4];
+            let textArray3 = textArray[3].split(" ");
+            let limitAmountIn = textArray3[8];
+
+            param.limitAmountIn = limitAmountIn;
+            param.targetAddr = targetAddr;
+
+            handle.params.push(param);
+        }
         if (handle.action == "TRANSFER") {
             let param = {
                 sender: null,
@@ -88,17 +115,26 @@ function responseParser(data) {
             console.log("amountIn: ", amountIn);
             let start = 0;
             let tokenIn = null;
-            start = textArray2[5].indexOf(")");
-            tokenIn = textArray2[5].substring(0, start);
+            start = textArray2[6].indexOf(")");
+            tokenIn = textArray2[6].substring(0, start);
+            // tokenIn = textArray[2].match("\b0x[0-9a-fA-F]{40}\b");
             console.log("tokenIn ", tokenIn);
 
             let textArray3 = textArray[3].split(" ");
-            let minimalAmountOut = textArray3[4];
+            let minimalAmountOut = 0;
+            if (textArray3.length == 6) {
+                minimalAmountOut = 0;
+            }
+            if (textArray3.length == 7) {
+                minimalAmountOut = textArray3[2];
+            }
             console.log("amountOut: ", minimalAmountOut);
             let tokenOut = null;
-            start = textArray3[7].indexOf(")");
-            tokenOut = textArray3[7].substring(0, start);
+            start = textArray3[6].indexOf(")");
+            tokenOut = textArray3[6].substring(0, start);
+            // tokenOut = textArray[3].match("\b0x[0-9a-fA-F]{40}\b");
             console.log("tokenOut: ", tokenOut);
+
             param.amountIn = amountIn;
             param.tokenIn = tokenIn;
             param.minimalAmountOut = minimalAmountOut;

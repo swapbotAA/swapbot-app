@@ -10,7 +10,7 @@ module.exports = defineConfig({
         changeOrigin: true,
       },
       "/webhooks":{
-        target:"http://47.94.103.61:5005/",
+        target:"http://18.142.253.142:5005/",
         changeOrigin: true,
       }
     }

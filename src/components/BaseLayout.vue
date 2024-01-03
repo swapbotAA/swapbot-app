@@ -2736,6 +2736,10 @@ export default {
                     content: this.text,
                     me: true
                 })
+                // make user chat content at the bottom of chatwindow
+                this.$nextTick(() => {
+                        this.$refs.list.scrollTop = this.$refs.list.scrollHeight;
+                    });
                 if (this.text == "nihao") {
                     this.msglist.push({
                         id: this.msglist[this.msglist.length - 1].id + 1,
@@ -2752,8 +2756,8 @@ export default {
         getResponse(text) {
             console.log("wallet address: ", this.walletAddress);
             axios.post('webhooks/rest/webhook', {
-                sender: this.walletAddress,
-                message: text
+                "sender": this.walletAddress,
+                "message": text
             }).then(res => {
                 if (res != null) {
                     console.log(res);
@@ -2782,6 +2786,72 @@ export default {
                     // return;
                     if (operation.handles.length != 0) {
                         operation.handles.forEach(element => {
+                            if (element.action == "COPY") {
+                                // call delegate function
+                                if (element.params.lenght != 0) {
+                                    element.params.forEach(elem => {
+                                        let walletSalt = 0;
+                                        // update walletIndex
+                                        console.log("this.walletObj: ", this.walletObj);
+                                        for (let index = 0; index < this.walletObj.length; index++) {
+                                            const element = this.walletObj[index];
+                                            if (element.value == this.walletAddress) {
+                                                walletSalt = element.salt;
+                                                console.log("wallet info: ", element);
+                                            }
+                                        }
+                                        delegate(this.user, this.walletAddress, this.chainId, this.platform, walletSalt).then(res => {
+                                            if (res != undefined) {
+                                                console.log("userOperation: ", res);
+
+                                                // add order to limited order list
+                                                let obj = {
+                                                    beneficiary_addr: this.user,
+                                                    user_op: {
+                                                        call_data: res.callData,
+                                                        call_gas_limit: String(res.callGasLimit),
+                                                        init_code: res.initCode,
+                                                        max_fee_per_gas: String(res.maxFeePerGas),
+                                                        max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
+                                                        nonce: null,
+                                                        paymaster_and_data: res.paymasterAndData,
+                                                        pre_verification_gas: String(res.preVerificationGas),
+                                                        sender: res.sender,
+                                                        signature: res.signature,
+                                                        verification_gas_limit: String(res.verificationGasLimit)
+                                                    },
+                                                    order_details: {
+                                                        limitAmountIn: elem.limitAmountIn,
+                                                        sender: res.sender,
+                                                        targetAddr: elem.targetAddr
+                                                    }
+                                                };
+                                                console.log("obj string:", JSON.stringify(obj));
+                                                // return;
+                                                axios.post('/api/v1/add_copy_order', obj)
+                                                    .then(response => {
+                                                        console.log(response);
+                                                        if (response.data.code == 1000) {
+                                                            this.openNotifaction("success", "Add copy order successfully!");
+                                                            // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                                            console.log("Add copy order successfully!");
+
+                                                            // query op record
+                                                            this.quertOpAndOrders();
+                                                        } else {
+                                                            this.openNotifaction("info", "Add copy order error! error: " + response.data.message);
+                                                            console.log("Add copy order error!");
+                                                            // this.iconLoadingLimited = false;
+                                                        }
+                                                    })
+                                                    .catch(error => {
+                                                        console.log(error);
+                                                    });
+                                                }
+                                        });
+                                    });
+                                }
+                            }
                             if (element.action == "TRANSFER") {
                                 // call transfer function
                                 if (element.params.length != 0) {
