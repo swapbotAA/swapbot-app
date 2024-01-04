@@ -90,7 +90,7 @@ async function login() {
         subVerifierDetails: {
             typeOfLogin: "google",
             verifier: "sparky-test-verifier", // you verifier name
-            clientId: "569830411778-tutvh3j7r8ddnvqij0r25r1fc0f6jm8f.apps.googleusercontent.com", // your client id recieved from google
+            clientId: process.env.VUE_APP_VERIFIER_ID, // your client id recieved from google
         },
     });
     console.log("Login succeed");
@@ -105,8 +105,6 @@ async function login() {
     const userAccounts = await signer.getAddress();
     console.log("userAccounts: ",userAccounts);
     let platform = 0;// 0 represent normal platform, such as google
-    
-    
 
     return {
         userAccounts: userAccounts, 
