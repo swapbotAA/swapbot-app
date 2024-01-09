@@ -121,11 +121,10 @@ function responseParser(data) {
             console.log("tokenIn ", tokenIn);
 
             let textArray3 = textArray[3].split(" ");
-            let minimalAmountOut = 0;
-            if (textArray3.length == 6) {
-                minimalAmountOut = 0;
-            }
-            if (textArray3.length == 7) {
+            let minimalAmountOut = "0";
+            console.log("textArray3: ",textArray3);
+            
+            if (textArray3[2] != "") {
                 minimalAmountOut = textArray3[2];
             }
             console.log("amountOut: ", minimalAmountOut);

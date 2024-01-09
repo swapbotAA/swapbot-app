@@ -24,7 +24,7 @@
             <img @click="changeMode()" src="../assets/transform.svg"
                 style="cursor:pointer; position: absolute; right: 20px; top: 70px; height: 25px;width: 20px;">
             <a-button type="primary" shape="circle" danger style="position: absolute; right: 50px; top: 60px;" @click="addDeviceKey()">+</a-button>
-            <a-button type="primary" shape="circle" danger style="position: absolute; right: 100px; top: 60px;" @click="approveBundler()">✓</a-button>
+            <!-- <a-button type="primary" shape="circle" danger style="position: absolute; right: 100px; top: 60px;" @click="approveBundler()">✓</a-button> -->
         </span>
     </div>
     <div class="body">
@@ -147,6 +147,32 @@
                                                 style="position: absolute;right: 20px; font-size: small; ">reason:&nbsp{{
                                                     item.status.error }}</span>
                                         </span>
+                                    </span>
+                                    <span v-show="item.action == 'COPY_ORDER'" style="font-weight: 700;">{{ item.action }}&nbsp
+                                        <span v-show="item.status.code == 'active'">
+                                            <img style="width: 25px; height:25px;" src = "../assets/X.svg">
+                                            <span style="position: absolute;right: 20px; font-size: large; color: rgb(255 189 89);">Active</span>
+                                        </span>
+                                        <span v-show="item.status.code == 'failed'">
+                                            <!-- <img style="width: 25px; height:25px;" src = "../assets/X.svg"> -->
+                                            <span style="position: absolute;right: 20px; font-size: large; color: rgb(227, 91, 17);">Failed</span>
+                                        </span>
+                                        <!-- <a-collapse v-model:activeKey="activeKey" accordion>
+                                            <a-collapse-panel key="1" header="copy order list">
+                                                <p>
+                                                    100 eth
+                                                </p>
+                                                <p>
+                                                    20 uni
+                                                </p>
+                                                <p>
+                                                    50 usdc
+                                                </p>
+                                            </a-collapse-panel>
+                                        </a-collapse> -->
+                                        
+                                        <br />
+                                        
                                     </span>
                                     <!-- <span style="font-weight: 700;">order details:&nbsp</span> -->
                                     <!-- <br /> -->
@@ -942,7 +968,8 @@ export default {
                 // { label: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80a", value: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80a", disabled: false, salt: 1}
             ],
             operationHistory: [
-                // { action: "Transfer", details: { tokenSymbol: "ETH", amount: "100" }, status: { code: "1", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+                // { action: "COPY_ORDER", details: { tokenSymbol: "", amount: "" }, status: { code: "active", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+                // { action: "TRANSFER", details: { tokenSymbol: "ETH", amount: "100" }, status: { code: "1", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
                 // { action: "Swap", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI" }, status: { code: "1", error: "insufficient balance" }, txHash: "" },
                 // { action: "Limit order", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI", amountOut: "1" }, status: { code: "0", error: null }, txHash: "" }
                 // { orderNo: "1",orderContent: { tokenIn: "eth", tokenOut: "uni", tokenInAmount: "0.0001", tokenOutAmount: "0.0003", status: "pending"}},
@@ -1143,6 +1170,8 @@ export default {
                                         console.log("get ETH balance failed!");
                                     }
                                 });
+                                // get operation history
+                                this.quertOpAndOrders();
                             }
                         }
                     })
@@ -1277,6 +1306,18 @@ export default {
                                     operation.txHash = txHash;
                                     this.operationHistory.push(operation);
                                 }
+                                // if (element.Action == "COPY_ORDER") {
+                                    // let symbolIn = null;
+                                    // let symbolOut = null;
+                                    operation.action = element.Action;
+                                    let details = {tokenIn: "", amountIn: "", tokenOut: "", amountOut: ""};
+                                    
+                                    let status = {code: element.Status.Stat, error: element.Status.RevertReason};
+                                    operation.status = status;
+                                    operation.details = details;
+                                    this.operationHistory.push(operation);
+                                
+                                // }
                             });
                         }
                         console.log("operationHistory: ",this.operationHistory);
@@ -1366,7 +1407,7 @@ export default {
                         console.log("wallet info: ", element);
                     }
                 }
-                ethToErc20LimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeyLimitedSrc), this.contractAddrMap.get(this.subKeyLimitedDes), this.fee, this.routerAddress, this.ethLimitedAmount, this.erc20LimitedAmount, this.chainId).then(res => {
+                ethToErc20LimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeyLimitedSrc), this.contractAddrMap.get(this.subKeyLimitedDes), this.fee, this.routerAddress, this.ethLimitedAmount, this.erc20LimitedAmount, this.chainId, this.platform).then(res => {
                     if (res != undefined) {
                         console.log("userOperation: ", res);
                         let timeStamp = new Date().getTime();
@@ -1436,7 +1477,7 @@ export default {
                         console.log("wallet info: ", element);
                     }
                 }
-                erc20ToEthLimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeyLimitedDes), this.contractAddrMap.get(this.subKeyLimitedSrc), this.fee, this.routerAddress, this.erc20LimitedAmount, this.ethLimitedAmount, this.chainId).then(res => {
+                erc20ToEthLimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeyLimitedDes), this.contractAddrMap.get(this.subKeyLimitedSrc), this.fee, this.routerAddress, this.erc20LimitedAmount, this.ethLimitedAmount, this.chainId, this.platform).then(res => {
                     if (res != undefined) {
                         console.log("userOperation: ", res);
                         // let timeStamp = new Date().getTime();
@@ -1535,7 +1576,7 @@ export default {
                         console.log("wallet info: ", element);
                     }
                 }
-                ethToErc20DataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeySrc), this.contractAddrMap.get(this.subKeyDes), this.fee, this.routerAddress, this.ethAmount, amountOutMinimum, this.chainId, this.submitSwapCallback).then(res => {
+                ethToErc20DataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeySrc), this.contractAddrMap.get(this.subKeyDes), this.fee, this.routerAddress, this.ethAmount, amountOutMinimum, this.chainId, this.platform,this.submitSwapCallback).then(res => {
                     console.log("res:",res);  
                     if (res == undefined) {
                         this.iconLoading = false;
@@ -1637,7 +1678,7 @@ export default {
                         console.log("wallet info: ", element);
                     }
                 }
-                erc20ToEthDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeyDes), this.contractAddrMap.get(this.subKeySrc), this.fee, this.routerAddress, this.erc20Amount, amountOutMinimum, this.chainId, this.submitSwapCallback).then(res => {
+                erc20ToEthDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get(this.subKeyDes), this.contractAddrMap.get(this.subKeySrc), this.fee, this.routerAddress, this.erc20Amount, amountOutMinimum, this.chainId, this.platform,this.submitSwapCallback).then(res => {
                     if (res == undefined) {
                         this.iconLoading = false;
                         return;
@@ -2044,6 +2085,9 @@ export default {
                                         console.log("get ETH balance falied!");
                                     }
                                 });
+
+                                // get operation history
+                                this.quertOpAndOrders();
                             }
                         }
                     })
@@ -2099,6 +2143,7 @@ export default {
             console.log("this function will add a wallet address!");
             // first create account
             if (this.walletObj.length == 0) {
+                console.log("this.walletSalt:",this.walletSalt);
                 getWalletAddress(this.user, this.walletSalt, this.addWalletCallback);
             } else {
                 this.walletSalt = this.walletSalt + 1;
@@ -2877,7 +2922,7 @@ export default {
                                                 }
                                             }
                                             
-                                            transferETH(this.user, elem.sender, elem.receiver, elem.amount, walletSalt, this.chainId, this.transferEthCallback).then(res => {
+                                            transferETH(this.user, elem.sender, elem.receiver, elem.amount, walletSalt, this.chainId, this.platform,this.transferEthCallback).then(res => {
                                                 if (res == undefined) {
                                                     this.iconLoadingDepositEth = false;
                                                     return;
@@ -2983,7 +3028,7 @@ export default {
                                                 return;
                                             }
                                             
-                                            transferErc20(this.user, elem.sender, elem.receiver, elem.token, elem.amount, walletSalt, this.chainId, this.transferErc20Callback).then(res => {
+                                            transferErc20(this.user, elem.sender, elem.receiver, elem.token, elem.amount, walletSalt, this.chainId, this.platform,this.transferErc20Callback).then(res => {
                                                 if (res == undefined) {
                                                     this.iconLoadingDepositErc20 = false;
                                                     return;
@@ -3100,7 +3145,7 @@ export default {
                                                     this.openNotifaction("info", "You don't have this asset.");
                                                     return;
                                                 }
-                                                ethToErc20DataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get("eth"), elem.tokenOut, this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId).then(res => {
+                                                ethToErc20DataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get("eth"), elem.tokenOut, this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId, this.platform).then(res => {
                                                     console.log("===res===:", res);
                                                     if (res == undefined) {
                                                         this.iconLoading = false;
@@ -3212,7 +3257,7 @@ export default {
                                                     this.openNotifaction("info", "You don't have this asset.");
                                                     return;
                                                 }
-                                                erc20ToEthDataOperationWrapper(this.user, this.walletAddress, walletSalt, elem.tokenIn, this.contractAddrMap.get("eth"), this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId).then(res => {
+                                                erc20ToEthDataOperationWrapper(this.user, this.walletAddress, walletSalt, elem.tokenIn, this.contractAddrMap.get("eth"), this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId, this.platform).then(res => {
                                                     console.log("===res===:", res);
                                                     if (res == undefined) {
                                                         this.iconLoading = false;
@@ -3334,7 +3379,7 @@ export default {
                                                 //     }
                                                 // });
 
-                                                ethToErc20LimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get("eth"), elem.tokenOut, this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId).then(res => {
+                                                ethToErc20LimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get("eth"), elem.tokenOut, this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId, this.platform).then(res => {
 
                                                     if (res != undefined) {
                                                         console.log("userOperation: ", res);
@@ -3415,7 +3460,7 @@ export default {
                                                 //     }
                                                 // });
 
-                                                erc20ToEthLimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, elem.tokenIn, this.contractAddrMap.get("eth"), this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId).then(res => {
+                                                erc20ToEthLimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, elem.tokenIn, this.contractAddrMap.get("eth"), this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId, this.platform).then(res => {
                                                     if (res != undefined) {
                                                         console.log("userOperation: ", res);
 
