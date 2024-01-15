@@ -21,10 +21,11 @@ const coreKitInstance = new Web3AuthMPCCoreKit({
     },
   });
 // console.log("coreKitInstance: ",process.env.VUE_APP_RPC_TARGET);
+console.log("##0##");
 await coreKitInstance.init();
 
 
-
+console.log("##1##");
 // Initialize within setup()
 const web3auth = new Web3Auth({
     clientId: process.env.VUE_APP_CLIENT_ID, // Get your Client ID from the Web3Auth Dashboard

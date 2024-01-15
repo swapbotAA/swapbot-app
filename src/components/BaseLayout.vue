@@ -1306,7 +1306,7 @@ export default {
                                     operation.txHash = txHash;
                                     this.operationHistory.push(operation);
                                 }
-                                // if (element.Action == "COPY_ORDER") {
+                                if (element.Action == "COPY_ORDER") {
                                     // let symbolIn = null;
                                     // let symbolOut = null;
                                     operation.action = element.Action;
@@ -1317,7 +1317,7 @@ export default {
                                     operation.details = details;
                                     this.operationHistory.push(operation);
                                 
-                                // }
+                                }
                             });
                         }
                         console.log("operationHistory: ",this.operationHistory);
