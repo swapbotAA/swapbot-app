@@ -1205,7 +1205,12 @@ export default {
                 this.operationHistory = [];
                 this.walletObj = [];
                 this.tokenObj = [];
-                this.msglist = [];
+                this.msglist = [{
+                    id: 1,
+                    type: 1,
+                    content: 'Welcome！',
+                    me: false
+                }];
                 this.openNotifaction("info", "Log out.");
                 this.openLogoutHint = false;
             });  
@@ -3565,7 +3570,7 @@ export default {
             try {
                 await toClipboard(this.walletAddress);
                 // alert("c");
-                this.openNotifaction("success", "Copy success.");
+                this.openNotifaction("success", "Address copyed.");
             } catch (e) {
                 console.error(e);
             }
