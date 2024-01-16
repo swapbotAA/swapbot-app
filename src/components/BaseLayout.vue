@@ -23,7 +23,7 @@
             </label>
             <img @click="changeMode()" src="../assets/transform.svg"
                 style="cursor:pointer; position: absolute; right: 20px; top: 70px; height: 25px;width: 20px;">
-            <a-button type="primary" shape="circle" danger style="position: absolute; right: 50px; top: 60px;" @click="addDeviceKey()">+</a-button>
+            <a-button v-if="this.platform == 0" type="primary" shape="circle" danger style="position: absolute; right: 50px; top: 60px;" @click="addDeviceKey()">+</a-button>
             <!-- <a-button type="primary" shape="circle" danger style="position: absolute; right: 100px; top: 60px;" @click="approveBundler()">✓</a-button> -->
         </span>
     </div>
@@ -1056,6 +1056,13 @@ export default {
             this.openaddDeviceKey = true;
         },
         hideAddDeviceKey() {
+            if (this.DeviceKey == null || (this.DeviceKey).length != 64) {
+                // nothing to do, just hide the window
+                this.openaddDeviceKey = false;
+                this.openNotifaction("error","Wrong deviceKey: " + this.DeviceKey);
+                this.DeviceKey = null;
+                return;
+            }
             addDeviceKey(this.DeviceKey);
             this.openaddDeviceKey = false;
             this.DeviceKey = null;
@@ -1198,6 +1205,7 @@ export default {
                 this.operationHistory = [];
                 this.walletObj = [];
                 this.tokenObj = [];
+                this.msglist = [];
                 this.openNotifaction("info", "Log out.");
                 this.openLogoutHint = false;
             });  
@@ -2809,715 +2817,715 @@ export default {
                     if (res.data.length == 0) {
                         return;
                     }
-                    this.msglist.push({
-                        id: this.msglist[this.msglist.length - 1].id + 1,
-                        type: 1,
-                        content: res.data[0].text,
-                        me: false
-                    });
-
-                    // console.log("list scrollHeight: ",this.$refs.list.scrollHeight);
-                    // console.log("list scrollTop before", this.$refs.list.scrollTop);
-                    console.log(this.$refs.list);
-                    this.$nextTick(() => {
-                        this.$refs.list.scrollTop = this.$refs.list.scrollHeight;
-                    });
-                    // this.$refs.list.scrollTop = this.$refs.list.scrollHeight;
-                    // console.log("list scrollTop after", this.$refs.list.scrollTop);
-
-                    let data = res.data[0];
-                    let operation = responseParser(data);
-                    console.log("operation: ", operation);
-                    // return;
-                    if (operation.handles.length != 0) {
-                        operation.handles.forEach(element => {
-                            if (element.action == "COPY") {
-                                // call delegate function
-                                if (element.params.lenght != 0) {
-                                    element.params.forEach(elem => {
-                                        let walletSalt = 0;
-                                        // update walletIndex
-                                        console.log("this.walletObj: ", this.walletObj);
-                                        for (let index = 0; index < this.walletObj.length; index++) {
-                                            const element = this.walletObj[index];
-                                            if (element.value == this.walletAddress) {
-                                                walletSalt = element.salt;
-                                                console.log("wallet info: ", element);
-                                            }
-                                        }
-                                        delegate(this.user, this.walletAddress, this.chainId, this.platform, walletSalt).then(res => {
-                                            if (res != undefined) {
-                                                console.log("userOperation: ", res);
-
-                                                // add order to limited order list
-                                                let obj = {
-                                                    beneficiary_addr: this.user,
-                                                    user_op: {
-                                                        call_data: res.callData,
-                                                        call_gas_limit: String(res.callGasLimit),
-                                                        init_code: res.initCode,
-                                                        max_fee_per_gas: String(res.maxFeePerGas),
-                                                        max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
-                                                        nonce: null,
-                                                        paymaster_and_data: res.paymasterAndData,
-                                                        pre_verification_gas: String(res.preVerificationGas),
-                                                        sender: res.sender,
-                                                        signature: res.signature,
-                                                        verification_gas_limit: String(res.verificationGasLimit)
-                                                    },
-                                                    order_details: {
-                                                        limitAmountIn: elem.limitAmountIn,
-                                                        sender: res.sender,
-                                                        targetAddr: elem.targetAddr
-                                                    }
-                                                };
-                                                console.log("obj string:", JSON.stringify(obj));
-                                                // return;
-                                                axios.post('/api/v1/add_copy_order', obj)
-                                                    .then(response => {
-                                                        console.log(response);
-                                                        if (response.data.code == 1000) {
-                                                            this.openNotifaction("success", "Add copy order successfully!");
-                                                            // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
-                                                            console.log("Add copy order successfully!");
-
-                                                            // query op record
-                                                            this.quertOpAndOrders();
-                                                        } else {
-                                                            this.openNotifaction("info", "Add copy order error! error: " + response.data.message);
-                                                            console.log("Add copy order error!");
-                                                            // this.iconLoadingLimited = false;
-                                                        }
-                                                    })
-                                                    .catch(error => {
-                                                        console.log(error);
-                                                    });
-                                                }
-                                        });
-                                    });
-                                }
-                            }
-                            if (element.action == "TRANSFER") {
-                                // call transfer function
-                                if (element.params.length != 0) {
-                                    element.params.forEach(elem => {
-                                        if (elem.token == "0x0000000000000000000000000000000000000000") {
-                                            // call ETH transfer
-                                            if (this.user == null) {
-                                                this.openNotifaction("info", "Please connect wallet.");
-                                                return;
-                                            }
-                                            if (this.walletAddress == null) {
-                                                this.openNotifaction("info", "Please create smart contract account.");
-                                                return;
-                                            }
-                                            let walletSalt = 0;
-                                            // update walletIndex
-                                            console.log("this.walletObj: ", this.walletObj);
-                                            for (let index = 0; index < this.walletObj.length; index++) {
-                                                const element = this.walletObj[index];
-                                                if (element.value == this.walletAddress) {
-                                                    walletSalt = element.salt;
-                                                    console.log("wallet info: ", element);
-                                                }
-                                            }
-                                            
-                                            transferETH(this.user, elem.sender, elem.receiver, elem.amount, walletSalt, this.chainId, this.platform,this.transferEthCallback).then(res => {
-                                                if (res == undefined) {
-                                                    this.iconLoadingDepositEth = false;
-                                                    return;
-                                                }
-                                                // call exactInputSingle in relayer
-                                                let obj = {
-                                                    beneficiary_addr: this.user,
-                                                    op_action: "TRANSFER",
-                                                        order_details: {
-                                                        amount_in: String(ethers.utils.parseUnits(elem.amount)),
-                                                        amount_out: null,
-                                                        amount_out_minimum: null,
-                                                        fee: 0,
-                                                        sender: this.walletAddress,
-                                                        token_in: "0x0000000000000000000000000000000000000000",
-                                                        token_out: null
-                                                    },
-                                                    user_op: {
-                                                        call_data: res.callData,
-                                                        call_gas_limit: String(res.callGasLimit),
-                                                        init_code: res.initCode,
-                                                        max_fee_per_gas: String(res.maxFeePerGas),
-                                                        max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
-                                                        nonce: null,
-                                                        paymaster_and_data: res.paymasterAndData,
-                                                        pre_verification_gas: String(res.preVerificationGas),
-                                                        sender: res.sender,
-                                                        signature: res.signature,
-                                                        verification_gas_limit: String(res.verificationGasLimit)
-                                                    }
-                                                };
-                                                console.log("obj string:", JSON.stringify(obj));
-                                                // return;
-                                                axios.post('/api/v1/handle_op', obj)
-                                                    .then(response => {
-                                                        console.log(response);
-                                                        if (response.data.code == 1000) {
-                                                            console.log("transfer successfully!");
-                                                            this.openNotifaction("success", "Transfer successfully!");
-
-                                                            // query op record
-                                                            this.quertOpAndOrders();
-
-                                                            setTimeout(() => {
-                                                                // update eth balance
-                                                                getEthBalance(this.walletAddress).then((response) => {
-                                                                    if (response.status) {
-                                                                        this.tokenObj.forEach(element => {
-                                                                            if (element.token == "ETH") {
-                                                                                // console.log("eth balance:" + String(response.balance));
-                                                                                element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
-                                                                            }
-                                                                        })
-                                                                    } else {
-                                                                        console.log("get ETH balance falied!");
-                                                                    }
-                                                                });
-                                                                this.openNotifaction("success", "Transfer successfully! Transaction hash: " + response.data.data);
-                                                            }, 15000);
-                                                            // this.iconLoadingDepositEth = false;
-                                                        } else {
-                                                            this.openNotifaction("info", "Transfer error! error: " + response.data.message);
-                                                            console.log("Transfer error!");
-                                                            // this.iconLoadingDepositEth = false;
-                                                        }
-                                                    })
-                                                    .catch(error => {
-                                                        console.log(error);
-                                                        // this.iconLoadingDepositEth = false;
-                                                    });
-
-                                            });
-                                        } else {
-                                            // call ERC20 transfer
-                                            if (this.user == null) {
-                                                this.openNotifaction("info", "Please connect wallet.");
-                                                return;
-                                            }
-                                            if (this.walletAddress == null) {
-                                                this.openNotifaction("info", "Please create smart contract account.");
-                                                return;
-                                            }
-                                            let walletSalt = 0;
-                                            // update walletIndex
-                                            console.log("this.walletObj: ", this.walletObj);
-                                            for (let index = 0; index < this.walletObj.length; index++) {
-                                                const element = this.walletObj[index];
-                                                if (element.value == this.walletAddress) {
-                                                    walletSalt = element.salt;
-                                                    console.log("wallet info: ", element);
-                                                }
-                                            }
-                                            let symbol = null;
-                                            for (let index = 0; index < this.tokenObj.length; index++) {
-                                                const element = this.tokenObj[index];
-                                                if (element.address == elem.token) {
-                                                    symbol = this.tokenObj[index].token;
-                                                    console.log("symbol: ", symbol);
-                                                }
-                                            }
-                                            if (symbol == null) {
-                                                this.openNotifaction("info", "You don't have this asset.");
-                                                return;
-                                            }
-                                            
-                                            transferErc20(this.user, elem.sender, elem.receiver, elem.token, elem.amount, walletSalt, this.chainId, this.platform,this.transferErc20Callback).then(res => {
-                                                if (res == undefined) {
-                                                    this.iconLoadingDepositErc20 = false;
-                                                    return;
-                                                }
-                                                // call exactInputSingle in relayer
-                                                let obj = {
-                                                    beneficiary_addr: this.user,
-                                                    op_action: "TRANSFER",
-                                                    order_details: {
-                                                        amount_in: String(ethers.utils.parseUnits(elem.amount)),
-                                                        amount_out: null,
-                                                        amount_out_minimum: null,
-                                                        fee: 0,
-                                                        sender: this.walletAddress,
-                                                        token_in: elem.token,
-                                                        token_out: null
-                                                    },
-                                                    user_op: {
-                                                        call_data: res.callData,
-                                                        call_gas_limit: String(res.callGasLimit),
-                                                        init_code: res.initCode,
-                                                        max_fee_per_gas: String(res.maxFeePerGas),
-                                                        max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
-                                                        nonce: null,
-                                                        paymaster_and_data: res.paymasterAndData,
-                                                        pre_verification_gas: String(res.preVerificationGas),
-                                                        sender: res.sender,
-                                                        signature: res.signature,
-                                                        verification_gas_limit: String(res.verificationGasLimit)
-                                                    }
-                                                };
-                                                console.log("obj string:", JSON.stringify(obj));
-                                                // return;
-                                                axios.post('/api/v1/handle_op', obj)
-                                                    .then(response => {
-                                                        console.log(response);
-                                                        if (response.data.code == 1000) {
-                                                            console.log("transfer successfully!");
-                                                            this.openNotifaction("success", "Transfer successfully!");
-
-                                                            // query op record
-                                                            this.quertOpAndOrders();
-
-                                                            setTimeout(() => {
-                                                                // update  erc20 balance
-                                                                for (let index = 1; index < this.tokenObj.length; index++) {
-                                                                    const element = this.tokenObj[index];
-                                                                    getErc20Balance(this.walletAddress, element.address).then((response) => {
-                                                                        if (response.status) {
-                                                                            // console.log(element.token + " balance:" + String(response.balance));
-                                                                            this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
-                                                                        } else {
-                                                                            console.log("get " + element.token + " balance falied!");
-                                                                        }
-                                                                    });
-                                                                }
-                                                                this.openNotifaction("success", "Transfer successfully! Transaction hash: " + response.data.data);
-                                                            }, 15000);
-                                                            // this.iconLoadingDepositErc20 = false;
-                                                        }else {
-                                                            this.openNotifaction("error", "Transfer error!");
-                                                        }
-                                                    }).catch(error => {
-                                                        console.log(error);
-                                                        // this.iconLoadingDepositErc20 = false;
-                                                    });
-
-                                            }).catch(error => {
-                                                console.log(error);
-                                                // this.iconLoadingDepositErc20 = false;
-                                            });
-                                        }
-                                    });
-                                }
-                            }
-                            if (element.action == "SWAP") {
-                                if (this.user == null) {
-                                    this.openNotifaction("info", "Please connect wallet.");
-                                    return;
-                                }
-                                if (this.walletAddress == null) {
-                                    this.openNotifaction("info", "Please create smart contract account.");
-                                    return;
-                                }
-
-                                // call swap function
-                                if (element.params.lenght != 0) {
-                                    element.params.forEach(elem => {
-                                        if (elem.minimalAmountOut == "0") {
-                                            // market order
-                                            // if tokenIn is eth call ethToErc20DataOperationWrapper
-                                            if (elem.tokenIn == "0x0000000000000000000000000000000000000000") {
-                                                let walletSalt = 0;
-                                                // update walletIndex
-                                                console.log("this.walletObj: ", this.walletObj);
-                                                for (let index = 0; index < this.walletObj.length; index++) {
-                                                    const element = this.walletObj[index];
-                                                    if (element.value == this.walletAddress) {
-                                                        walletSalt = element.salt;
-                                                        console.log("wallet info: ", element);
-                                                    }
-                                                }
-
-                                                let symbol = null;
-                                                for (let index = 0; index < this.tokenObj.length; index++) {
-                                                    const element = this.tokenObj[index];
-                                                    if (element.address == elem.tokenOut) {
-                                                        symbol = this.tokenObj[index].token;
-                                                        console.log("symbol: ", symbol);
-                                                    }
-
-                                                }
-                                                if (symbol == null) {
-                                                    this.openNotifaction("info", "You don't have this asset.");
-                                                    return;
-                                                }
-                                                ethToErc20DataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get("eth"), elem.tokenOut, this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId, this.platform).then(res => {
-                                                    console.log("===res===:", res);
-                                                    if (res == undefined) {
-                                                        this.iconLoading = false;
-                                                        return;
-                                                    }
-                                                    // call exactInputSingle in relayer
-                                                    let obj = {
-                                                        beneficiary_addr: this.user,
-                                                        op_action: "SWAP",
-                                                        order_details: {
-                                                            amount_in: String(ethers.utils.parseUnits(elem.amountIn)),
-                                                            amount_out: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
-                                                            amount_out_minimum: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
-                                                            fee: 0,
-                                                            sender: this.walletAddress,
-                                                            token_in: this.contractAddrMap.get("eth"),
-                                                            token_out: elem.tokenOut
-                                                        },
-                                                        user_op: {
-                                                            call_data: res.callData,
-                                                            call_gas_limit: String(res.callGasLimit),
-                                                            init_code: res.initCode,
-                                                            max_fee_per_gas: String(res.maxFeePerGas),
-                                                            max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
-                                                            // nonce: String(res.nonce),
-                                                            paymaster_and_data: res.paymasterAndData,
-                                                            pre_verification_gas: String(res.preVerificationGas),
-                                                            sender: res.sender,
-                                                            signature: res.signature,
-                                                            verification_gas_limit: String(res.verificationGasLimit)
-                                                        }
-                                                    };
-                                                    console.log("obj string:", JSON.stringify(obj));
-                                                    // return;
-                                                    axios.post('/api/v1/handle_op', obj)
-                                                        .then(response => {
-                                                            console.log(response);
-                                                            if (response.data.code == 1000) {
-                                                                // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
-                                                                console.log("swap successfully!");
-                                                                this.openNotifaction("success", "Swap successfully!");
-
-                                                                // query op record
-                                                                this.quertOpAndOrders();
-
-                                                                setTimeout(() => {
-                                                                    // update eth balance
-                                                                    getEthBalance(this.walletAddress).then((response) => {
-                                                                        if (response.status) {
-                                                                            this.tokenObj.forEach(element => {
-                                                                                if (element.token == "ETH") {
-                                                                                    // console.log("eth balance:" + String(response.balance));
-                                                                                    element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
-                                                                                }
-                                                                            })
-                                                                        } else {
-                                                                            console.log("get ETH balance falied!");
-                                                                        }
-                                                                    });
-                                                                    // update  erc20 balance
-                                                                    for (let index = 1; index < this.tokenObj.length; index++) {
-                                                                        const element = this.tokenObj[index];
-                                                                        getErc20Balance(this.walletAddress, element.address).then((response) => {
-                                                                            if (response.status) {
-                                                                                // console.log(element.token + " balance:" + String(response.balance));
-                                                                                this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
-                                                                            } else {
-                                                                                console.log("get " + element.token + " balance falied!");
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                    this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
-                                                                    // this.iconLoading = false;
-                                                                }, 15000);
-                                                            } else {
-                                                                this.openNotifaction("info", "Swap error! error: " + response.data.message);
-                                                                console.log("swap error!");
-                                                                // this.iconLoading = false;
-                                                            }
-                                                        })
-                                                        .catch(error => {
-                                                            console.log(error);
-                                                            // this.iconLoading = false;
-                                                        });
-                                                });
-                                            } else {
-                                                // call erc20ToEthDataOperationWrapper
-                                                let walletSalt = 0;
-                                                // update walletIndex
-                                                console.log("this.walletObj: ", this.walletObj);
-                                                for (let index = 0; index < this.walletObj.length; index++) {
-                                                    const element = this.walletObj[index];
-                                                    if (element.value == this.walletAddress) {
-                                                        walletSalt = element.salt;
-                                                        console.log("wallet info: ", element);
-                                                    }
-                                                }
-
-                                                let symbol = null;
-                                                for (let index = 0; index < this.tokenObj.length; index++) {
-                                                    const element = this.tokenObj[index];
-                                                    if (element.address == elem.tokenIn) {
-                                                        symbol = this.tokenObj[index].token;
-                                                        console.log("symbol: ", symbol);
-                                                    }
-
-                                                }
-                                                if (symbol == null) {
-                                                    this.openNotifaction("info", "You don't have this asset.");
-                                                    return;
-                                                }
-                                                erc20ToEthDataOperationWrapper(this.user, this.walletAddress, walletSalt, elem.tokenIn, this.contractAddrMap.get("eth"), this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId, this.platform).then(res => {
-                                                    console.log("===res===:", res);
-                                                    if (res == undefined) {
-                                                        this.iconLoading = false;
-                                                        return;
-                                                    }
-                                                    // call exactInputSingle in relayer
-                                                    let obj = {
-                                                        beneficiary_addr: this.user,
-                                                        op_action: "SWAP",
-                                                        order_details: {
-                                                            amount_in: String(ethers.utils.parseUnits(elem.amountIn)),
-                                                            amount_out: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
-                                                            amount_out_minimum: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
-                                                            fee: 0,
-                                                            sender: this.walletAddress,
-                                                            token_in: elem.tokenIn,
-                                                            token_out: this.contractAddrMap.get("eth")
-                                                        },
-                                                        user_op: {
-                                                            call_data: res.callData,
-                                                            call_gas_limit: String(res.callGasLimit),
-                                                            init_code: res.initCode,
-                                                            max_fee_per_gas: String(res.maxFeePerGas),
-                                                            max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
-                                                            // nonce: String(res.nonce),
-                                                            paymaster_and_data: res.paymasterAndData,
-                                                            pre_verification_gas: String(res.preVerificationGas),
-                                                            sender: res.sender,
-                                                            signature: res.signature,
-                                                            verification_gas_limit: String(res.verificationGasLimit)
-                                                        }
-                                                    };
-                                                    console.log("obj string:", JSON.stringify(obj));
-                                                    // return;
-                                                    axios.post('/api/v1/handle_op', obj)
-                                                        .then(response => {
-                                                            console.log(response);
-                                                            if (response.data.code == 1000) {
-                                                                // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
-                                                                console.log("swap successfully!");
-                                                                this.openNotifaction("success", "Swap successfully!");
-
-                                                                // query op record
-                                                                this.quertOpAndOrders();
-
-                                                                setTimeout(() => {
-                                                                    // update eth balance
-                                                                    getEthBalance(this.walletAddress).then((response) => {
-                                                                        if (response.status) {
-                                                                            this.tokenObj.forEach(element => {
-                                                                                if (element.token == "ETH") {
-                                                                                    // console.log("eth balance:" + String(response.balance));
-                                                                                    element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
-                                                                                }
-                                                                            })
-                                                                        } else {
-                                                                            console.log("get ETH balance falied!");
-                                                                        }
-                                                                    });
-                                                                    // update  erc20 balance
-                                                                    for (let index = 1; index < this.tokenObj.length; index++) {
-                                                                        const element = this.tokenObj[index];
-                                                                        getErc20Balance(this.walletAddress, element.address).then((response) => {
-                                                                            if (response.status) {
-                                                                                // console.log(element.token + " balance:" + String(response.balance));
-                                                                                this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
-                                                                            } else {
-                                                                                console.log("get " + element.token + " balance falied!");
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                    this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
-                                                                    // this.iconLoading = false;
-                                                                }, 15000);
-                                                            } else {
-                                                                this.openNotifaction("info", "Swap error! error: " + response.data.message);
-                                                                console.log("swap error!");
-                                                                // this.iconLoading = false;
-                                                            }
-                                                        })
-                                                        .catch(error => {
-                                                            console.log(error);
-                                                            // this.iconLoading = false;
-                                                        });
-                                                });
-                                            }
-                                        } else {
-                                            // limited order
-                                            if (this.user == null) {
-                                                this.openNotifaction("info", "Please connect wallet.");
-                                                return;
-                                            }
-                                            if (this.walletAddress == null) {
-                                                this.openNotifaction("info", "Please create smart contract account.");
-                                                return;
-                                            }
-                                            // if tokenIn is eth call ethToErc20LimitedDataOperationWrapper
-                                            if (elem.tokenIn == "0x0000000000000000000000000000000000000000") {
-
-                                                let walletSalt = 0;
-                                                // update walletIndex
-                                                console.log("this.walletObj: ", this.walletObj);
-                                                for (let index = 0; index < this.walletObj.length; index++) {
-                                                    const element = this.walletObj[index];
-                                                    if (element.value == this.walletAddress) {
-                                                        walletSalt = element.salt;
-                                                        console.log("wallet info: ", element);
-                                                    }
-                                                }
-
-                                                // let tokenInSymbol = null;
-                                                // let tokenOutSymbol = null;
-                                                // this.contractAddrMap.forEach(function (value, key) {
-                                                //     if (value == elem.TokenIn) {
-                                                //         tokenInSymbol = key;
-                                                //     }
-                                                //     if (value == elem.TokenOut) {
-                                                //         tokenOutSymbol = key;
-                                                //     }
-                                                // });
-
-                                                ethToErc20LimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get("eth"), elem.tokenOut, this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId, this.platform).then(res => {
-
-                                                    if (res != undefined) {
-                                                        console.log("userOperation: ", res);
-
-                                                        // add order to limited order list
-                                                        let obj = {
-                                                            beneficiary_addr: this.user,
-                                                            user_op: {
-                                                                call_data: res.callData,
-                                                                call_gas_limit: String(res.callGasLimit),
-                                                                init_code: res.initCode,
-                                                                max_fee_per_gas: String(res.maxFeePerGas),
-                                                                max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
-                                                                nonce: null,
-                                                                paymaster_and_data: res.paymasterAndData,
-                                                                pre_verification_gas: String(res.preVerificationGas),
-                                                                sender: res.sender,
-                                                                signature: res.signature,
-                                                                verification_gas_limit: String(res.verificationGasLimit)
-                                                            },
-                                                            order_details: {
-                                                                // order_no: timeStamp,// timestamp
-                                                                token_in: this.contractAddrMap.get("eth"),
-                                                                amount_in: String(ethers.utils.parseUnits(elem.amountIn)),
-                                                                token_out: elem.tokenOut,
-                                                                amount_out: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
-                                                                fee: 0,
-                                                                sender: this.walletAddress,
-                                                                amount_out_minimum: String(ethers.utils.parseUnits(elem.minimalAmountOut)),//String(ethers.utils.parseUnits(this.erc20LimitedAmount))
-                                                            }
-                                                        };
-
-                                                        console.log("obj string:", JSON.stringify(obj));
-                                                        // return;
-                                                        axios.post('/api/v1/add_limit_order', obj)
-                                                            .then(response => {
-                                                                console.log(response);
-                                                                if (response.data.code == 1000) {
-                                                                    this.openNotifaction("success", "Swap successfully!");
-                                                                    // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
-                                                                    console.log("successfully submit!");
-
-                                                                    // query op record
-                                                                    this.quertOpAndOrders();
-                                                                } else {
-                                                                    this.openNotifaction("info", "Swap error! error: " + response.data.message);
-                                                                    console.log("swap error!");
-                                                                    // this.iconLoadingLimited = false;
-                                                                }
-                                                            })
-                                                            .catch(error => {
-                                                                console.log(error);
-                                                            });
-                                                    }
-
-                                                    // this.iconLoadingLimited = false;
-                                                });
-                                            } else {
-                                                let walletSalt = 0;
-                                                // update walletIndex
-                                                console.log("this.walletObj: ", this.walletObj);
-                                                for (let index = 0; index < this.walletObj.length; index++) {
-                                                    const element = this.walletObj[index];
-                                                    if (element.value == this.walletAddress) {
-                                                        walletSalt = element.salt;
-                                                        console.log("wallet info: ", element);
-                                                    }
-                                                }
-
-                                                // let tokenInSymbol = null;
-                                                // let tokenOutSymbol = null;
-                                                // this.contractAddrMap.forEach(function (value, key) {
-                                                //     if (value == elem.TokenIn) {
-                                                //         tokenInSymbol = key;
-                                                //     }
-                                                //     if (value == elem.TokenOut) {
-                                                //         tokenOutSymbol = key;
-                                                //     }
-                                                // });
-
-                                                erc20ToEthLimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, elem.tokenIn, this.contractAddrMap.get("eth"), this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId, this.platform).then(res => {
-                                                    if (res != undefined) {
-                                                        console.log("userOperation: ", res);
-
-                                                        let obj = {
-                                                            beneficiary_addr: this.user,
-                                                            user_op: {
-                                                                call_data: res.callData,
-                                                                call_gas_limit: String(res.callGasLimit),
-                                                                init_code: res.initCode,
-                                                                max_fee_per_gas: String(res.maxFeePerGas),
-                                                                max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
-                                                                nonce: null,
-                                                                paymaster_and_data: res.paymasterAndData,
-                                                                pre_verification_gas: String(res.preVerificationGas),
-                                                                sender: res.sender,
-                                                                signature: res.signature,
-                                                                verification_gas_limit: String(res.verificationGasLimit)
-                                                            },
-                                                            order_details: {
-                                                                token_in: elem.tokenIn,
-                                                                amount_in: String(ethers.utils.parseUnits(elem.amountIn)),
-                                                                token_out: this.contractAddrMap.get("eth"),
-                                                                amount_out: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
-                                                                fee: 0,
-                                                                sender: this.walletAddress,
-                                                                amount_out_minimum: String(ethers.utils.parseUnits(elem.minimalAmountOut)),//String(ethers.utils.parseUnits(this.ethLimitedAmount))
-                                                            }
-                                                        };
-                                                        console.log("obj string:", JSON.stringify(obj));
-                                                        // return;
-                                                        axios.post('/api/v1/add_limit_order', obj)
-                                                            .then(response => {
-                                                                console.log(response);
-                                                                if (response.data.code == 1000) {
-                                                                    this.openNotifaction("success", "Swap successfully!");
-                                                                    // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
-                                                                    console.log("successfully submit!");
-
-                                                                    // query op record
-                                                                    this.quertOpAndOrders();
-                                                                } else {
-                                                                    this.openNotifaction("info", "Swap error! error: " + response.data.message);
-                                                                    console.log("swap error!");
-                                                                }
-                                                            })
-                                                            .catch(error => {
-                                                                console.log(error);
-                                                            });
-                                                    }
-                                                });
-
-                                            }
-                                        }
-                                    });
-                                }
-                            }
+                    for (let index = 0; index < res.data.length; index++) {
+                        // show response data in chat window
+                        this.msglist.push({
+                            id: this.msglist[this.msglist.length - 1].id + 1,
+                            type: 1,
+                            content: res.data[index].text,
+                            me: false
                         });
+                        // make the latest content at the bottom of chatwindow
+                        console.log(this.$refs.list);
+                        this.$nextTick(() => {
+                            this.$refs.list.scrollTop = this.$refs.list.scrollHeight;
+                        });
+                        // resolve response data and call user operation
+
+                        let data = res.data[index];
+                        let operation = responseParser(data);
+                        console.log("operation: ", operation);
+                        // return;
+                        if (operation.handles.length != 0) {
+                            operation.handles.forEach(element => {
+                                if (element.action == "COPY") {
+                                    // call delegate function
+                                    if (element.params.lenght != 0) {
+                                        element.params.forEach(elem => {
+                                            let walletSalt = 0;
+                                            // update walletIndex
+                                            console.log("this.walletObj: ", this.walletObj);
+                                            for (let index = 0; index < this.walletObj.length; index++) {
+                                                const element = this.walletObj[index];
+                                                if (element.value == this.walletAddress) {
+                                                    walletSalt = element.salt;
+                                                    console.log("wallet info: ", element);
+                                                }
+                                            }
+                                            delegate(this.user, this.walletAddress, this.chainId, this.platform, walletSalt).then(res => {
+                                                if (res != undefined) {
+                                                    console.log("userOperation: ", res);
+
+                                                    // add order to limited order list
+                                                    let obj = {
+                                                        beneficiary_addr: this.user,
+                                                        user_op: {
+                                                            call_data: res.callData,
+                                                            call_gas_limit: String(res.callGasLimit),
+                                                            init_code: res.initCode,
+                                                            max_fee_per_gas: String(res.maxFeePerGas),
+                                                            max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
+                                                            nonce: null,
+                                                            paymaster_and_data: res.paymasterAndData,
+                                                            pre_verification_gas: String(res.preVerificationGas),
+                                                            sender: res.sender,
+                                                            signature: res.signature,
+                                                            verification_gas_limit: String(res.verificationGasLimit)
+                                                        },
+                                                        order_details: {
+                                                            limitAmountIn: elem.limitAmountIn,
+                                                            sender: res.sender,
+                                                            targetAddr: elem.targetAddr
+                                                        }
+                                                    };
+                                                    console.log("obj string:", JSON.stringify(obj));
+                                                    // return;
+                                                    axios.post('/api/v1/add_copy_order', obj)
+                                                        .then(response => {
+                                                            console.log(response);
+                                                            if (response.data.code == 1000) {
+                                                                this.openNotifaction("success", "Add copy order successfully!");
+                                                                // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                                                console.log("Add copy order successfully!");
+
+                                                                // query op record
+                                                                this.quertOpAndOrders();
+                                                            } else {
+                                                                this.openNotifaction("info", "Add copy order error! error: " + response.data.message);
+                                                                console.log("Add copy order error!");
+                                                                // this.iconLoadingLimited = false;
+                                                            }
+                                                        })
+                                                        .catch(error => {
+                                                            console.log(error);
+                                                        });
+                                                    }
+                                            });
+                                        });
+                                    }
+                                }
+                                if (element.action == "TRANSFER") {
+                                    // call transfer function
+                                    if (element.params.length != 0) {
+                                        element.params.forEach(elem => {
+                                            if (elem.token == "0x0000000000000000000000000000000000000000") {
+                                                // call ETH transfer
+                                                if (this.user == null) {
+                                                    this.openNotifaction("info", "Please connect wallet.");
+                                                    return;
+                                                }
+                                                if (this.walletAddress == null) {
+                                                    this.openNotifaction("info", "Please create smart contract account.");
+                                                    return;
+                                                }
+                                                let walletSalt = 0;
+                                                // update walletIndex
+                                                console.log("this.walletObj: ", this.walletObj);
+                                                for (let index = 0; index < this.walletObj.length; index++) {
+                                                    const element = this.walletObj[index];
+                                                    if (element.value == this.walletAddress) {
+                                                        walletSalt = element.salt;
+                                                        console.log("wallet info: ", element);
+                                                    }
+                                                }
+                                                
+                                                transferETH(this.user, elem.sender, elem.receiver, elem.amount, walletSalt, this.chainId, this.platform,this.transferEthCallback).then(res => {
+                                                    if (res == undefined) {
+                                                        this.iconLoadingDepositEth = false;
+                                                        return;
+                                                    }
+                                                    // call exactInputSingle in relayer
+                                                    let obj = {
+                                                        beneficiary_addr: this.user,
+                                                        op_action: "TRANSFER",
+                                                            order_details: {
+                                                            amount_in: String(ethers.utils.parseUnits(elem.amount)),
+                                                            amount_out: null,
+                                                            amount_out_minimum: null,
+                                                            fee: 0,
+                                                            sender: this.walletAddress,
+                                                            token_in: "0x0000000000000000000000000000000000000000",
+                                                            token_out: null
+                                                        },
+                                                        user_op: {
+                                                            call_data: res.callData,
+                                                            call_gas_limit: String(res.callGasLimit),
+                                                            init_code: res.initCode,
+                                                            max_fee_per_gas: String(res.maxFeePerGas),
+                                                            max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
+                                                            nonce: null,
+                                                            paymaster_and_data: res.paymasterAndData,
+                                                            pre_verification_gas: String(res.preVerificationGas),
+                                                            sender: res.sender,
+                                                            signature: res.signature,
+                                                            verification_gas_limit: String(res.verificationGasLimit)
+                                                        }
+                                                    };
+                                                    console.log("obj string:", JSON.stringify(obj));
+                                                    // return;
+                                                    axios.post('/api/v1/handle_op', obj)
+                                                        .then(response => {
+                                                            console.log(response);
+                                                            if (response.data.code == 1000) {
+                                                                console.log("transfer successfully!");
+                                                                this.openNotifaction("success", "Transfer successfully!");
+
+                                                                // query op record
+                                                                this.quertOpAndOrders();
+
+                                                                setTimeout(() => {
+                                                                    // update eth balance
+                                                                    getEthBalance(this.walletAddress).then((response) => {
+                                                                        if (response.status) {
+                                                                            this.tokenObj.forEach(element => {
+                                                                                if (element.token == "ETH") {
+                                                                                    // console.log("eth balance:" + String(response.balance));
+                                                                                    element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                                                }
+                                                                            })
+                                                                        } else {
+                                                                            console.log("get ETH balance falied!");
+                                                                        }
+                                                                    });
+                                                                    this.openNotifaction("success", "Transfer successfully! Transaction hash: " + response.data.data);
+                                                                }, 15000);
+                                                                // this.iconLoadingDepositEth = false;
+                                                            } else {
+                                                                this.openNotifaction("info", "Transfer error! error: " + response.data.message);
+                                                                console.log("Transfer error!");
+                                                                // this.iconLoadingDepositEth = false;
+                                                            }
+                                                        })
+                                                        .catch(error => {
+                                                            console.log(error);
+                                                            // this.iconLoadingDepositEth = false;
+                                                        });
+
+                                                });
+                                            } else {
+                                                // call ERC20 transfer
+                                                if (this.user == null) {
+                                                    this.openNotifaction("info", "Please connect wallet.");
+                                                    return;
+                                                }
+                                                if (this.walletAddress == null) {
+                                                    this.openNotifaction("info", "Please create smart contract account.");
+                                                    return;
+                                                }
+                                                let walletSalt = 0;
+                                                // update walletIndex
+                                                console.log("this.walletObj: ", this.walletObj);
+                                                for (let index = 0; index < this.walletObj.length; index++) {
+                                                    const element = this.walletObj[index];
+                                                    if (element.value == this.walletAddress) {
+                                                        walletSalt = element.salt;
+                                                        console.log("wallet info: ", element);
+                                                    }
+                                                }
+                                                let symbol = null;
+                                                for (let index = 0; index < this.tokenObj.length; index++) {
+                                                    const element = this.tokenObj[index];
+                                                    if (element.address == elem.token) {
+                                                        symbol = this.tokenObj[index].token;
+                                                        console.log("symbol: ", symbol);
+                                                    }
+                                                }
+                                                if (symbol == null) {
+                                                    this.openNotifaction("info", "You don't have this asset.");
+                                                    return;
+                                                }
+                                                
+                                                transferErc20(this.user, elem.sender, elem.receiver, elem.token, elem.amount, walletSalt, this.chainId, this.platform,this.transferErc20Callback).then(res => {
+                                                    if (res == undefined) {
+                                                        this.iconLoadingDepositErc20 = false;
+                                                        return;
+                                                    }
+                                                    // call exactInputSingle in relayer
+                                                    let obj = {
+                                                        beneficiary_addr: this.user,
+                                                        op_action: "TRANSFER",
+                                                        order_details: {
+                                                            amount_in: String(ethers.utils.parseUnits(elem.amount)),
+                                                            amount_out: null,
+                                                            amount_out_minimum: null,
+                                                            fee: 0,
+                                                            sender: this.walletAddress,
+                                                            token_in: elem.token,
+                                                            token_out: null
+                                                        },
+                                                        user_op: {
+                                                            call_data: res.callData,
+                                                            call_gas_limit: String(res.callGasLimit),
+                                                            init_code: res.initCode,
+                                                            max_fee_per_gas: String(res.maxFeePerGas),
+                                                            max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
+                                                            nonce: null,
+                                                            paymaster_and_data: res.paymasterAndData,
+                                                            pre_verification_gas: String(res.preVerificationGas),
+                                                            sender: res.sender,
+                                                            signature: res.signature,
+                                                            verification_gas_limit: String(res.verificationGasLimit)
+                                                        }
+                                                    };
+                                                    console.log("obj string:", JSON.stringify(obj));
+                                                    // return;
+                                                    axios.post('/api/v1/handle_op', obj)
+                                                        .then(response => {
+                                                            console.log(response);
+                                                            if (response.data.code == 1000) {
+                                                                console.log("transfer successfully!");
+                                                                this.openNotifaction("success", "Transfer successfully!");
+
+                                                                // query op record
+                                                                this.quertOpAndOrders();
+
+                                                                setTimeout(() => {
+                                                                    // update  erc20 balance
+                                                                    for (let index = 1; index < this.tokenObj.length; index++) {
+                                                                        const element = this.tokenObj[index];
+                                                                        getErc20Balance(this.walletAddress, element.address).then((response) => {
+                                                                            if (response.status) {
+                                                                                // console.log(element.token + " balance:" + String(response.balance));
+                                                                                this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                                            } else {
+                                                                                console.log("get " + element.token + " balance falied!");
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                    this.openNotifaction("success", "Transfer successfully! Transaction hash: " + response.data.data);
+                                                                }, 15000);
+                                                                // this.iconLoadingDepositErc20 = false;
+                                                            }else {
+                                                                this.openNotifaction("error", "Transfer error!");
+                                                            }
+                                                        }).catch(error => {
+                                                            console.log(error);
+                                                            // this.iconLoadingDepositErc20 = false;
+                                                        });
+
+                                                }).catch(error => {
+                                                    console.log(error);
+                                                    // this.iconLoadingDepositErc20 = false;
+                                                });
+                                            }
+                                        });
+                                    }
+                                }
+                                if (element.action == "SWAP") {
+                                    if (this.user == null) {
+                                        this.openNotifaction("info", "Please connect wallet.");
+                                        return;
+                                    }
+                                    if (this.walletAddress == null) {
+                                        this.openNotifaction("info", "Please create smart contract account.");
+                                        return;
+                                    }
+
+                                    // call swap function
+                                    if (element.params.lenght != 0) {
+                                        element.params.forEach(elem => {
+                                            if (elem.minimalAmountOut == "0") {
+                                                // market order
+                                                // if tokenIn is eth call ethToErc20DataOperationWrapper
+                                                if (elem.tokenIn == "0x0000000000000000000000000000000000000000") {
+                                                    let walletSalt = 0;
+                                                    // update walletIndex
+                                                    console.log("this.walletObj: ", this.walletObj);
+                                                    for (let index = 0; index < this.walletObj.length; index++) {
+                                                        const element = this.walletObj[index];
+                                                        if (element.value == this.walletAddress) {
+                                                            walletSalt = element.salt;
+                                                            console.log("wallet info: ", element);
+                                                        }
+                                                    }
+
+                                                    let symbol = null;
+                                                    for (let index = 0; index < this.tokenObj.length; index++) {
+                                                        const element = this.tokenObj[index];
+                                                        if (element.address == elem.tokenOut) {
+                                                            symbol = this.tokenObj[index].token;
+                                                            console.log("symbol: ", symbol);
+                                                        }
+
+                                                    }
+                                                    if (symbol == null) {
+                                                        this.openNotifaction("info", "You don't have this asset.");
+                                                        return;
+                                                    }
+                                                    ethToErc20DataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get("eth"), elem.tokenOut, this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId, this.platform).then(res => {
+                                                        console.log("===res===:", res);
+                                                        if (res == undefined) {
+                                                            this.iconLoading = false;
+                                                            return;
+                                                        }
+                                                        // call exactInputSingle in relayer
+                                                        let obj = {
+                                                            beneficiary_addr: this.user,
+                                                            op_action: "SWAP",
+                                                            order_details: {
+                                                                amount_in: String(ethers.utils.parseUnits(elem.amountIn)),
+                                                                amount_out: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
+                                                                amount_out_minimum: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
+                                                                fee: 0,
+                                                                sender: this.walletAddress,
+                                                                token_in: this.contractAddrMap.get("eth"),
+                                                                token_out: elem.tokenOut
+                                                            },
+                                                            user_op: {
+                                                                call_data: res.callData,
+                                                                call_gas_limit: String(res.callGasLimit),
+                                                                init_code: res.initCode,
+                                                                max_fee_per_gas: String(res.maxFeePerGas),
+                                                                max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
+                                                                // nonce: String(res.nonce),
+                                                                paymaster_and_data: res.paymasterAndData,
+                                                                pre_verification_gas: String(res.preVerificationGas),
+                                                                sender: res.sender,
+                                                                signature: res.signature,
+                                                                verification_gas_limit: String(res.verificationGasLimit)
+                                                            }
+                                                        };
+                                                        console.log("obj string:", JSON.stringify(obj));
+                                                        // return;
+                                                        axios.post('/api/v1/handle_op', obj)
+                                                            .then(response => {
+                                                                console.log(response);
+                                                                if (response.data.code == 1000) {
+                                                                    // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                                                    console.log("swap successfully!");
+                                                                    this.openNotifaction("success", "Swap successfully!");
+
+                                                                    // query op record
+                                                                    this.quertOpAndOrders();
+
+                                                                    setTimeout(() => {
+                                                                        // update eth balance
+                                                                        getEthBalance(this.walletAddress).then((response) => {
+                                                                            if (response.status) {
+                                                                                this.tokenObj.forEach(element => {
+                                                                                    if (element.token == "ETH") {
+                                                                                        // console.log("eth balance:" + String(response.balance));
+                                                                                        element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                                                    }
+                                                                                })
+                                                                            } else {
+                                                                                console.log("get ETH balance falied!");
+                                                                            }
+                                                                        });
+                                                                        // update  erc20 balance
+                                                                        for (let index = 1; index < this.tokenObj.length; index++) {
+                                                                            const element = this.tokenObj[index];
+                                                                            getErc20Balance(this.walletAddress, element.address).then((response) => {
+                                                                                if (response.status) {
+                                                                                    // console.log(element.token + " balance:" + String(response.balance));
+                                                                                    this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                                                } else {
+                                                                                    console.log("get " + element.token + " balance falied!");
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                        this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                                                        // this.iconLoading = false;
+                                                                    }, 15000);
+                                                                } else {
+                                                                    this.openNotifaction("info", "Swap error! error: " + response.data.message);
+                                                                    console.log("swap error!");
+                                                                    // this.iconLoading = false;
+                                                                }
+                                                            })
+                                                            .catch(error => {
+                                                                console.log(error);
+                                                                // this.iconLoading = false;
+                                                            });
+                                                    });
+                                                } else {
+                                                    // call erc20ToEthDataOperationWrapper
+                                                    let walletSalt = 0;
+                                                    // update walletIndex
+                                                    console.log("this.walletObj: ", this.walletObj);
+                                                    for (let index = 0; index < this.walletObj.length; index++) {
+                                                        const element = this.walletObj[index];
+                                                        if (element.value == this.walletAddress) {
+                                                            walletSalt = element.salt;
+                                                            console.log("wallet info: ", element);
+                                                        }
+                                                    }
+
+                                                    let symbol = null;
+                                                    for (let index = 0; index < this.tokenObj.length; index++) {
+                                                        const element = this.tokenObj[index];
+                                                        if (element.address == elem.tokenIn) {
+                                                            symbol = this.tokenObj[index].token;
+                                                            console.log("symbol: ", symbol);
+                                                        }
+
+                                                    }
+                                                    if (symbol == null) {
+                                                        this.openNotifaction("info", "You don't have this asset.");
+                                                        return;
+                                                    }
+                                                    erc20ToEthDataOperationWrapper(this.user, this.walletAddress, walletSalt, elem.tokenIn, this.contractAddrMap.get("eth"), this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId, this.platform).then(res => {
+                                                        console.log("===res===:", res);
+                                                        if (res == undefined) {
+                                                            this.iconLoading = false;
+                                                            return;
+                                                        }
+                                                        // call exactInputSingle in relayer
+                                                        let obj = {
+                                                            beneficiary_addr: this.user,
+                                                            op_action: "SWAP",
+                                                            order_details: {
+                                                                amount_in: String(ethers.utils.parseUnits(elem.amountIn)),
+                                                                amount_out: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
+                                                                amount_out_minimum: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
+                                                                fee: 0,
+                                                                sender: this.walletAddress,
+                                                                token_in: elem.tokenIn,
+                                                                token_out: this.contractAddrMap.get("eth")
+                                                            },
+                                                            user_op: {
+                                                                call_data: res.callData,
+                                                                call_gas_limit: String(res.callGasLimit),
+                                                                init_code: res.initCode,
+                                                                max_fee_per_gas: String(res.maxFeePerGas),
+                                                                max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
+                                                                // nonce: String(res.nonce),
+                                                                paymaster_and_data: res.paymasterAndData,
+                                                                pre_verification_gas: String(res.preVerificationGas),
+                                                                sender: res.sender,
+                                                                signature: res.signature,
+                                                                verification_gas_limit: String(res.verificationGasLimit)
+                                                            }
+                                                        };
+                                                        console.log("obj string:", JSON.stringify(obj));
+                                                        // return;
+                                                        axios.post('/api/v1/handle_op', obj)
+                                                            .then(response => {
+                                                                console.log(response);
+                                                                if (response.data.code == 1000) {
+                                                                    // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                                                    console.log("swap successfully!");
+                                                                    this.openNotifaction("success", "Swap successfully!");
+
+                                                                    // query op record
+                                                                    this.quertOpAndOrders();
+
+                                                                    setTimeout(() => {
+                                                                        // update eth balance
+                                                                        getEthBalance(this.walletAddress).then((response) => {
+                                                                            if (response.status) {
+                                                                                this.tokenObj.forEach(element => {
+                                                                                    if (element.token == "ETH") {
+                                                                                        // console.log("eth balance:" + String(response.balance));
+                                                                                        element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                                                    }
+                                                                                })
+                                                                            } else {
+                                                                                console.log("get ETH balance falied!");
+                                                                            }
+                                                                        });
+                                                                        // update  erc20 balance
+                                                                        for (let index = 1; index < this.tokenObj.length; index++) {
+                                                                            const element = this.tokenObj[index];
+                                                                            getErc20Balance(this.walletAddress, element.address).then((response) => {
+                                                                                if (response.status) {
+                                                                                    // console.log(element.token + " balance:" + String(response.balance));
+                                                                                    this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                                                } else {
+                                                                                    console.log("get " + element.token + " balance falied!");
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                        this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                                                        // this.iconLoading = false;
+                                                                    }, 15000);
+                                                                } else {
+                                                                    this.openNotifaction("info", "Swap error! error: " + response.data.message);
+                                                                    console.log("swap error!");
+                                                                    // this.iconLoading = false;
+                                                                }
+                                                            })
+                                                            .catch(error => {
+                                                                console.log(error);
+                                                                // this.iconLoading = false;
+                                                            });
+                                                    });
+                                                }
+                                            } else {
+                                                // limited order
+                                                if (this.user == null) {
+                                                    this.openNotifaction("info", "Please connect wallet.");
+                                                    return;
+                                                }
+                                                if (this.walletAddress == null) {
+                                                    this.openNotifaction("info", "Please create smart contract account.");
+                                                    return;
+                                                }
+                                                // if tokenIn is eth call ethToErc20LimitedDataOperationWrapper
+                                                if (elem.tokenIn == "0x0000000000000000000000000000000000000000") {
+
+                                                    let walletSalt = 0;
+                                                    // update walletIndex
+                                                    console.log("this.walletObj: ", this.walletObj);
+                                                    for (let index = 0; index < this.walletObj.length; index++) {
+                                                        const element = this.walletObj[index];
+                                                        if (element.value == this.walletAddress) {
+                                                            walletSalt = element.salt;
+                                                            console.log("wallet info: ", element);
+                                                        }
+                                                    }
+
+                                                    // let tokenInSymbol = null;
+                                                    // let tokenOutSymbol = null;
+                                                    // this.contractAddrMap.forEach(function (value, key) {
+                                                    //     if (value == elem.TokenIn) {
+                                                    //         tokenInSymbol = key;
+                                                    //     }
+                                                    //     if (value == elem.TokenOut) {
+                                                    //         tokenOutSymbol = key;
+                                                    //     }
+                                                    // });
+
+                                                    ethToErc20LimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get("eth"), elem.tokenOut, this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId, this.platform).then(res => {
+
+                                                        if (res != undefined) {
+                                                            console.log("userOperation: ", res);
+
+                                                            // add order to limited order list
+                                                            let obj = {
+                                                                beneficiary_addr: this.user,
+                                                                user_op: {
+                                                                    call_data: res.callData,
+                                                                    call_gas_limit: String(res.callGasLimit),
+                                                                    init_code: res.initCode,
+                                                                    max_fee_per_gas: String(res.maxFeePerGas),
+                                                                    max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
+                                                                    nonce: null,
+                                                                    paymaster_and_data: res.paymasterAndData,
+                                                                    pre_verification_gas: String(res.preVerificationGas),
+                                                                    sender: res.sender,
+                                                                    signature: res.signature,
+                                                                    verification_gas_limit: String(res.verificationGasLimit)
+                                                                },
+                                                                order_details: {
+                                                                    // order_no: timeStamp,// timestamp
+                                                                    token_in: this.contractAddrMap.get("eth"),
+                                                                    amount_in: String(ethers.utils.parseUnits(elem.amountIn)),
+                                                                    token_out: elem.tokenOut,
+                                                                    amount_out: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
+                                                                    fee: 0,
+                                                                    sender: this.walletAddress,
+                                                                    amount_out_minimum: String(ethers.utils.parseUnits(elem.minimalAmountOut)),//String(ethers.utils.parseUnits(this.erc20LimitedAmount))
+                                                                }
+                                                            };
+
+                                                            console.log("obj string:", JSON.stringify(obj));
+                                                            // return;
+                                                            axios.post('/api/v1/add_limit_order', obj)
+                                                                .then(response => {
+                                                                    console.log(response);
+                                                                    if (response.data.code == 1000) {
+                                                                        this.openNotifaction("success", "Swap successfully!");
+                                                                        // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                                                        console.log("successfully submit!");
+
+                                                                        // query op record
+                                                                        this.quertOpAndOrders();
+                                                                    } else {
+                                                                        this.openNotifaction("info", "Swap error! error: " + response.data.message);
+                                                                        console.log("swap error!");
+                                                                        // this.iconLoadingLimited = false;
+                                                                    }
+                                                                })
+                                                                .catch(error => {
+                                                                    console.log(error);
+                                                                });
+                                                        }
+
+                                                        // this.iconLoadingLimited = false;
+                                                    });
+                                                } else {
+                                                    let walletSalt = 0;
+                                                    // update walletIndex
+                                                    console.log("this.walletObj: ", this.walletObj);
+                                                    for (let index = 0; index < this.walletObj.length; index++) {
+                                                        const element = this.walletObj[index];
+                                                        if (element.value == this.walletAddress) {
+                                                            walletSalt = element.salt;
+                                                            console.log("wallet info: ", element);
+                                                        }
+                                                    }
+
+                                                    // let tokenInSymbol = null;
+                                                    // let tokenOutSymbol = null;
+                                                    // this.contractAddrMap.forEach(function (value, key) {
+                                                    //     if (value == elem.TokenIn) {
+                                                    //         tokenInSymbol = key;
+                                                    //     }
+                                                    //     if (value == elem.TokenOut) {
+                                                    //         tokenOutSymbol = key;
+                                                    //     }
+                                                    // });
+
+                                                    erc20ToEthLimitedDataOperationWrapper(this.user, this.walletAddress, walletSalt, elem.tokenIn, this.contractAddrMap.get("eth"), this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId, this.platform).then(res => {
+                                                        if (res != undefined) {
+                                                            console.log("userOperation: ", res);
+
+                                                            let obj = {
+                                                                beneficiary_addr: this.user,
+                                                                user_op: {
+                                                                    call_data: res.callData,
+                                                                    call_gas_limit: String(res.callGasLimit),
+                                                                    init_code: res.initCode,
+                                                                    max_fee_per_gas: String(res.maxFeePerGas),
+                                                                    max_priority_fee_per_gas: String(res.maxPriorityFeePerGas),
+                                                                    nonce: null,
+                                                                    paymaster_and_data: res.paymasterAndData,
+                                                                    pre_verification_gas: String(res.preVerificationGas),
+                                                                    sender: res.sender,
+                                                                    signature: res.signature,
+                                                                    verification_gas_limit: String(res.verificationGasLimit)
+                                                                },
+                                                                order_details: {
+                                                                    token_in: elem.tokenIn,
+                                                                    amount_in: String(ethers.utils.parseUnits(elem.amountIn)),
+                                                                    token_out: this.contractAddrMap.get("eth"),
+                                                                    amount_out: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
+                                                                    fee: 0,
+                                                                    sender: this.walletAddress,
+                                                                    amount_out_minimum: String(ethers.utils.parseUnits(elem.minimalAmountOut)),//String(ethers.utils.parseUnits(this.ethLimitedAmount))
+                                                                }
+                                                            };
+                                                            console.log("obj string:", JSON.stringify(obj));
+                                                            // return;
+                                                            axios.post('/api/v1/add_limit_order', obj)
+                                                                .then(response => {
+                                                                    console.log(response);
+                                                                    if (response.data.code == 1000) {
+                                                                        this.openNotifaction("success", "Swap successfully!");
+                                                                        // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                                                        console.log("successfully submit!");
+
+                                                                        // query op record
+                                                                        this.quertOpAndOrders();
+                                                                    } else {
+                                                                        this.openNotifaction("info", "Swap error! error: " + response.data.message);
+                                                                        console.log("swap error!");
+                                                                    }
+                                                                })
+                                                                .catch(error => {
+                                                                    console.log(error);
+                                                                });
+                                                        }
+                                                    });
+
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
                     }
                 }
             })

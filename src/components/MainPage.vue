@@ -5,18 +5,18 @@
             @onComplete="onComplete"
         >
         "color"
-"ball"
-"lines"
-"thick"
-"circle"
-"cobweb"
-"polygon"
-"square"
-"tadpole"
-"fountain"
-"random"
-"custom"
-        </vue-metamask> -->
+        "ball"
+        "lines"
+        "thick"
+        "circle"
+        "cobweb"
+        "polygon"
+        "square"
+        "tadpole"
+        "fountain"
+        "random"
+        "custom"
+    </vue-metamask> -->
     <particles-bg type="circle" :bg="true" />
     <!-- <div class="header"><img src="../assets/robot.svg" style="height: 100px;width: 100px; padding-right: 10px;">
       Sparky -->
