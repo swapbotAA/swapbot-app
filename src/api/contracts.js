@@ -132,7 +132,6 @@ async function addDeviceKey(DeviceKey) {
     // const factorKey = await coreKitInstance.getCurrentFactorKey();
     // const factorKey = await getWebBrowserFactor(coreKitInstance!);
 
-    // const devicekey = "1beaec2523953a43d500413826050b9b6af67d759fd600646e521bc9b27e6860"
     console.log(DeviceKey);
     // return;
     const DeviceKeyBN = new BN(DeviceKey, "hex");
