@@ -1211,6 +1211,7 @@ export default {
                     content: 'Welcome！',
                     me: false
                 }];
+                this.walletAddress = null;
                 this.openNotifaction("info", "Log out.");
                 this.openLogoutHint = false;
             });  
@@ -2787,6 +2788,11 @@ export default {
             this.numberRight = index;
         },
         send() {
+            if (this.walletAddress == null) {
+                this.openNotifaction("info","Please login");
+                this.text = '';
+                return;
+            }
             if (this.text) {
                 this.msglist.push({
                     id: this.msglist[this.msglist.length - 1].id + 1,
