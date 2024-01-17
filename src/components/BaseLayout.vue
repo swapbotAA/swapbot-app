@@ -78,7 +78,7 @@
                             </a-button>
                         </span>
                     </span>
-                    <!-- @click="openNotifaction('success')" -->
+                    <!-- @click="openNotification('success')" -->
                     <a-button type="primary" shape="circle" @click="showAddErc20Drawer()">+</a-button>
                 </div>
                 <div id="contentOperation" v-show="number == 1">
@@ -1033,14 +1033,14 @@ export default {
                         .then(response => {
                             console.log(response);
                             if (response.data.code == 1000) {
-                                this.openNotifaction("success", "Add copy order successfully!");
-                                // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                this.openNotification("success", "Add copy order successfully!");
+                                // this.openNotification("success", "Swap successfully! Transaction hash: " + response.data.data);
                                 console.log("Add copy order successfully!");
 
                                 // query op record
                                 this.quertOpAndOrders();
                             } else {
-                                this.openNotifaction("info", "Add copy order error! error: " + response.data.message);
+                                this.openNotification("info", "Add copy order error! error: " + response.data.message);
                                 console.log("Add copy order error!");
                                 // this.iconLoadingLimited = false;
                             }
@@ -1059,7 +1059,7 @@ export default {
             if (this.DeviceKey == null || (this.DeviceKey).length != 64) {
                 // nothing to do, just hide the window
                 this.openaddDeviceKey = false;
-                this.openNotifaction("error","Wrong deviceKey: " + this.DeviceKey);
+                this.openNotification("error","Wrong deviceKey: " + this.DeviceKey);
                 this.DeviceKey = null;
                 return;
             }
@@ -1212,7 +1212,7 @@ export default {
                     me: false
                 }];
                 this.walletAddress = null;
-                this.openNotifaction("info", "Log out.");
+                this.openNotification("info", "Log out.");
                 this.openLogoutHint = false;
             });  
         },
@@ -1382,15 +1382,15 @@ export default {
             },
         submitLimitedSwap() {
             if (this.user == null) {
-                this.openNotifaction("info", "Please connect wallet.");
+                this.openNotification("info", "Please connect wallet.");
                 return;
             }
             if (this.walletAddress == null) {
-                this.openNotifaction("info", "Please create smart contract account.");
+                this.openNotification("info", "Please create smart contract account.");
                 return;
             }
             if (this.ethLimitedAmount == undefined || this.erc20LimitedAmount == undefined) {
-                this.openNotifaction("info", "Please enter the transaction amount.");
+                this.openNotification("info", "Please enter the transaction amount.");
                 return;
             }
 
@@ -1460,14 +1460,14 @@ export default {
                             .then(response => {
                                 console.log(response);
                                 if (response.data.code == 1000) {
-                                    this.openNotifaction("success", "Swap successfully!");
-                                    // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                    this.openNotification("success", "Swap successfully!");
+                                    // this.openNotification("success", "Swap successfully! Transaction hash: " + response.data.data);
                                     console.log("successfully submit!");
 
                                     // query op record
                                     this.quertOpAndOrders();
                                 } else {
-                                    this.openNotifaction("info", "Swap error! error: " + response.data.message);
+                                    this.openNotification("info", "Swap error! error: " + response.data.message);
                                     console.log("swap error!");
                                     this.iconLoadingLimited = false;
                                 }
@@ -1530,14 +1530,14 @@ export default {
                             .then(response => {
                                 console.log(response);
                                 if (response.data.code == 1000) {
-                                    this.openNotifaction("success", "Swap successfully!");
-                                    // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                    this.openNotification("success", "Swap successfully!");
+                                    // this.openNotification("success", "Swap successfully! Transaction hash: " + response.data.data);
                                     console.log("successfully submit!");
 
                                     // query op record
                                     this.quertOpAndOrders();
                                 } else {
-                                    this.openNotifaction("info", "Swap error! error: " + response.data.message);
+                                    this.openNotification("info", "Swap error! error: " + response.data.message);
                                     console.log("swap error!");
                                     this.iconLoadingLimited = false;
                                 }
@@ -1553,15 +1553,15 @@ export default {
         },
         submitSwap() {
             if (this.user == null) {
-                this.openNotifaction("info", "Please connect wallet.");
+                this.openNotification("info", "Please connect wallet.");
                 return;
             }
             if (this.walletAddress == null) {
-                this.openNotifaction("info", "Please create smart contract account.");
+                this.openNotification("info", "Please create smart contract account.");
                 return;
             }
             if (this.ethAmount == undefined || this.erc20Amount == undefined) {
-                this.openNotifaction("info", "Please enter the transaction amount.");
+                this.openNotification("info", "Please enter the transaction amount.");
                 return;
             }
             if (!this.contractAddrMap.has(this.subKeySrc)) {
@@ -1629,9 +1629,9 @@ export default {
                         .then(response => {
                             console.log(response);
                             if (response.data.code == 1000) {
-                                // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                // this.openNotification("success", "Swap successfully! Transaction hash: " + response.data.data);
                                 console.log("swap successfully!");
-                                this.openNotifaction("success", "Swap successfully!");
+                                this.openNotification("success", "Swap successfully!");
 
                                 // query op record
                                 this.quertOpAndOrders();
@@ -1662,11 +1662,11 @@ export default {
                                             }
                                         });
                                     }
-                                    this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                    this.openNotification("success", "Swap successfully! Transaction hash: " + response.data.data);
                                     this.iconLoading = false;
                                 }, 15000);
                             } else {
-                                this.openNotifaction("info", "Swap error! error: " + response.data.message);
+                                this.openNotification("info", "Swap error! error: " + response.data.message);
                                 console.log("swap error!");
                                 this.iconLoading = false;
                             }
@@ -1730,9 +1730,9 @@ export default {
                         .then(response => {
                             console.log(response);
                             if (response.data.code == 1000) {
-                                // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                // this.openNotification("success", "Swap successfully! Transaction hash: " + response.data.data);
                                 console.log("swap successfully!");
-                                this.openNotifaction("success", "Swap successfully!");
+                                this.openNotification("success", "Swap successfully!");
 
                                 // query op record
                                 this.quertOpAndOrders();
@@ -1763,11 +1763,11 @@ export default {
                                             }
                                         });
                                     }
-                                    this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                    this.openNotification("success", "Swap successfully! Transaction hash: " + response.data.data);
                                     this.iconLoading = false;
                                 }, 15000);
                             } else {
-                                this.openNotifaction("info", "Swap error! error: " + response.data.message);
+                                this.openNotification("info", "Swap error! error: " + response.data.message);
                                 console.log("swap error!");
                                 this.iconLoading = false;
                             }
@@ -1783,7 +1783,7 @@ export default {
             console.log("receipt status:", value);
             if (value) {
                 // notice: transaction success
-                this.openNotifaction("success", "Swap successfully! Transaction hash: " + value.transactionHash);
+                this.openNotification("success", "Swap successfully! Transaction hash: " + value.transactionHash);
                 // update eth balance
                 getEthBalance(this.walletAddress).then((response) => {
                     if (response.status) {
@@ -1810,7 +1810,7 @@ export default {
                     });
                 }
             } else {
-                this.openNotifaction("error", "Swap Failed!");
+                this.openNotification("error", "Swap Failed!");
             }
             // update loading icon
             this.iconLoading = false;
@@ -1901,7 +1901,7 @@ export default {
                     this.orderData.splice(index, 1);
                 }
             }
-            this.openNotifaction("success", "cancel successfully!");
+            this.openNotification("success", "cancel successfully!");
             // delete order from limited order list
             axios.post('/api/v1/cancel_limit_order', {
                 sender: this.walletAddress,
@@ -1939,7 +1939,7 @@ export default {
                 MainPage.user = this.user;
                 console.log('user address:', this.user);
                 this.openLogin = false;
-                this.openNotifaction("success", "Log in.");
+                this.openNotification("success", "Log in.");
                 // we need get user data from backend service
                 // 1. get user smart contract accounts
                 axios.post('/api/v1/query_contract_accounts', {
@@ -1995,7 +1995,7 @@ export default {
                 this.operationHistory = [];
                 this.walletObj = [];
                 this.tokenObj = [];
-                // this.openNotifaction("info", "Log out.");
+                // this.openNotification("info", "Log out.");
             } else {
                 this.user = data.metaMaskAddress;
                 // this.getTxHistory();
@@ -2168,7 +2168,7 @@ export default {
             console.log("receipt status:", value);
             if (value) {
                 // notice: create success
-                this.openNotifaction("success", "Create Account Address successfully! Address: " + value);
+                this.openNotification("success", "Create Account Address successfully! Address: " + value);
                 this.walletObj.push({
                     label: value,
                     value: value,
@@ -2215,7 +2215,7 @@ export default {
                 });
 
             } else {
-                this.openNotifaction("error", "Create Account Address Failed!");
+                this.openNotification("error", "Create Account Address Failed!");
                 console.log("wallet salt should subtract 1");
                 if (this.walletObj.length > 0) {
                     this.walletSalt = this.walletSalt - 1;
@@ -2224,7 +2224,7 @@ export default {
         },
         changeWallet(value) {
             this.walletAddress = value;
-            this.openNotifaction("success", "wallet address changed! addr: " + this.walletAddress);
+            this.openNotification("success", "wallet address changed! addr: " + this.walletAddress);
             this.tokenObj.forEach(element => {
                 if (element.token == "ETH") {
                     element.address = this.walletAddress;
@@ -2348,7 +2348,7 @@ export default {
                             console.log(response);
                             if (response.data.code == 1000) {
                                 console.log("transfer successfully!");
-                                this.openNotifaction("success", "Transfer successfully!");
+                                this.openNotification("success", "Transfer successfully!");
 
                                 // query op record
                                 this.quertOpAndOrders();
@@ -2367,11 +2367,11 @@ export default {
                                             console.log("get ETH balance falied!");
                                         }
                                     });
-                                    this.openNotifaction("success", "Transfer successfully! Transaction hash: " + response.data.data);
+                                    this.openNotification("success", "Transfer successfully! Transaction hash: " + response.data.data);
                                 }, 15000);
                                 this.iconLoadingDepositEth = false;
                             } else {
-                                this.openNotifaction("info", "Transfer error! error: " + response.data.message);
+                                this.openNotification("info", "Transfer error! error: " + response.data.message);
                                 console.log("Transfer error!");
                                 this.iconLoadingDepositEth = false;
                             }
@@ -2384,7 +2384,7 @@ export default {
                     // clear params
                     this.depositEth = null;
                     this.depositEthAdd = null;
-                    this.openNotifaction("info", "Transaction pending.");
+                    this.openNotification("info", "Transaction pending.");
 
                 });
 
@@ -2402,7 +2402,7 @@ export default {
 
             if (value) {
                 // notice: transaction success
-                this.openNotifaction("success", "Transfer successfully! Transaction hash: " + value.transactionHash);
+                this.openNotification("success", "Transfer successfully! Transaction hash: " + value.transactionHash);
                 // update  eth balance
                 getEthBalance(this.walletAddress).then((response) => {
                     if (response.status) {
@@ -2428,7 +2428,7 @@ export default {
                 //   });
                 // }
             } else {
-                this.openNotifaction("error", "Deposit Failed!");
+                this.openNotification("error", "Deposit Failed!");
             }
             // update loading icon
             this.iconLoadingDepositEth = false;
@@ -2505,7 +2505,7 @@ export default {
                                 console.log(response);
                                 if (response.data.code == 1000) {
                                     console.log("transfer successfully!");
-                                    this.openNotifaction("success", "Transfer successfully!");
+                                    this.openNotification("success", "Transfer successfully!");
 
                                     // query op record
                                     this.quertOpAndOrders();
@@ -2523,11 +2523,11 @@ export default {
                                                 }
                                             });
                                         }
-                                        this.openNotifaction("success", "Transfer successfully! Transaction hash: " + response.data.data);
+                                        this.openNotification("success", "Transfer successfully! Transaction hash: " + response.data.data);
                                     }, 15000);
                                     this.iconLoadingDepositErc20 = false;
                                 }else {
-                                    this.openNotifaction("error", "Transfer error!");
+                                    this.openNotification("error", "Transfer error!");
                                     this.iconLoadingDepositErc20 = false;
                                 }
                             }).catch(error => {
@@ -2538,7 +2538,7 @@ export default {
                         // clear params
                         this.depositErc20 = null;
                         this.depositErc20Add = null;
-                        this.openNotifaction("info", "Transaction pending.");
+                        this.openNotification("info", "Transaction pending.");
 
                     }).catch(error => {
                         console.log(error);
@@ -2563,7 +2563,7 @@ export default {
 
             if (value) {
                 // notice: transaction success
-                this.openNotifaction("success", "Transfer successfully! Transaction hash: " + value.transactionHash);
+                this.openNotification("success", "Transfer successfully! Transaction hash: " + value.transactionHash);
                 // update  erc20 balance
                 for (let index = 1; index < this.tokenObj.length; index++) {
                     const element = this.tokenObj[index];
@@ -2577,7 +2577,7 @@ export default {
                     });
                 }
             } else {
-                this.openNotifaction("error", "Deposit Failed!");
+                this.openNotification("error", "Deposit Failed!");
             }
             // update loading icon
             this.iconLoadingDepositErc20 = false;
@@ -2607,7 +2607,7 @@ export default {
                 withdrawETH(this.user, this.walletAddress, walletSalt, this.tokenObj[0].address, this.withdrawEth, this.chainId, this.hideEthWithdrawCallback);
                 this.withdrawEth = null;
 
-                this.openNotifaction("info", "Transaction pending.");
+                this.openNotification("info", "Transaction pending.");
             }
             this.withdrawEthOpen = false;
         },
@@ -2615,7 +2615,7 @@ export default {
             console.log("receipt status:", value);
             if (value) {
                 // notice: transaction success
-                this.openNotifaction("success", "Withdraw successfully! Transaction hash: " + value.transactionHash);
+                this.openNotification("success", "Withdraw successfully! Transaction hash: " + value.transactionHash);
                 // update  eth balance
                 getEthBalance(this.walletAddress).then((response) => {
                     if (response.status) {
@@ -2630,7 +2630,7 @@ export default {
                     }
                 });
             } else {
-                this.openNotifaction("error", "Withdraw Failed!");
+                this.openNotification("error", "Withdraw Failed!");
             }
             // update loading icon
             this.iconLoadingWithdrawEth = false;
@@ -2672,7 +2672,7 @@ export default {
                 }
                 this.withdrawErc20 = null;
 
-                this.openNotifaction("info", "Transaction pending.");
+                this.openNotification("info", "Transaction pending.");
             }
             this.withdrawErc20Open = false;
         },
@@ -2680,7 +2680,7 @@ export default {
             console.log("receipt status:", value);
             if (value) {
                 // notice: transaction success
-                this.openNotifaction("success", "Withdraw erc20 successfully! Transaction hash: " + value.transactionHash);
+                this.openNotification("success", "Withdraw erc20 successfully! Transaction hash: " + value.transactionHash);
                 // update  erc20 balance
                 for (let index = 1; index < this.tokenObj.length; index++) {
                     const element = this.tokenObj[index];
@@ -2694,7 +2694,7 @@ export default {
                     });
                 }
             } else {
-                this.openNotifaction("error", "Withdraw erc20 Failed!");
+                this.openNotification("error", "Withdraw erc20 Failed!");
             }
             // update loading icon
             this.iconLoadingWithdrawErc20 = false;
@@ -2717,7 +2717,7 @@ export default {
             console.log("PriTxChecked:", this.PriTxChecked);
             this.openSetting = false;
         },
-        openNotifaction(type, content) {
+        openNotification(type, content) {
             notification[type]({
                 message: 'Notification',
                 description:
@@ -2733,7 +2733,7 @@ export default {
                 console.log("addCustomToken: ", this.addErc20Symbol);
                 let tmpObj = { token: this.addErc20Symbol, address: this.addErc20Address, balance: 0 };
                 this.tokenObj.push(tmpObj);
-                this.openNotifaction("success", "Successfully add new asset.");
+                this.openNotification("success", "Successfully add new asset.");
                 // new asset info should be stored into asset list
                 axios.post('/api/v1/add_account_asset', {
                     sender: this.walletAddress,
@@ -2789,7 +2789,7 @@ export default {
         },
         send() {
             if (this.walletAddress == null) {
-                this.openNotifaction("info","Please login");
+                this.openNotification("info","Please login");
                 this.text = '';
                 return;
             }
@@ -2895,14 +2895,14 @@ export default {
                                                         .then(response => {
                                                             console.log(response);
                                                             if (response.data.code == 1000) {
-                                                                this.openNotifaction("success", "Add copy order successfully!");
-                                                                // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                                                this.openNotification("success", "Add copy order successfully!");
+                                                                // this.openNotification("success", "Swap successfully! Transaction hash: " + response.data.data);
                                                                 console.log("Add copy order successfully!");
 
                                                                 // query op record
                                                                 this.quertOpAndOrders();
                                                             } else {
-                                                                this.openNotifaction("info", "Add copy order error! error: " + response.data.message);
+                                                                this.openNotification("info", "Add copy order error! error: " + response.data.message);
                                                                 console.log("Add copy order error!");
                                                                 // this.iconLoadingLimited = false;
                                                             }
@@ -2922,11 +2922,11 @@ export default {
                                             if (elem.token == "0x0000000000000000000000000000000000000000") {
                                                 // call ETH transfer
                                                 if (this.user == null) {
-                                                    this.openNotifaction("info", "Please connect wallet.");
+                                                    this.openNotification("info", "Please connect wallet.");
                                                     return;
                                                 }
                                                 if (this.walletAddress == null) {
-                                                    this.openNotifaction("info", "Please create smart contract account.");
+                                                    this.openNotification("info", "Please create smart contract account.");
                                                     return;
                                                 }
                                                 let walletSalt = 0;
@@ -2979,7 +2979,7 @@ export default {
                                                             console.log(response);
                                                             if (response.data.code == 1000) {
                                                                 console.log("transfer successfully!");
-                                                                this.openNotifaction("success", "Transfer successfully!");
+                                                                this.openNotification("success", "Transfer successfully!");
 
                                                                 // query op record
                                                                 this.quertOpAndOrders();
@@ -2998,11 +2998,11 @@ export default {
                                                                             console.log("get ETH balance falied!");
                                                                         }
                                                                     });
-                                                                    this.openNotifaction("success", "Transfer successfully! Transaction hash: " + response.data.data);
+                                                                    this.openNotification("success", "Transfer successfully! Transaction hash: " + response.data.data);
                                                                 }, 15000);
                                                                 // this.iconLoadingDepositEth = false;
                                                             } else {
-                                                                this.openNotifaction("info", "Transfer error! error: " + response.data.message);
+                                                                this.openNotification("info", "Transfer error! error: " + response.data.message);
                                                                 console.log("Transfer error!");
                                                                 // this.iconLoadingDepositEth = false;
                                                             }
@@ -3016,11 +3016,11 @@ export default {
                                             } else {
                                                 // call ERC20 transfer
                                                 if (this.user == null) {
-                                                    this.openNotifaction("info", "Please connect wallet.");
+                                                    this.openNotification("info", "Please connect wallet.");
                                                     return;
                                                 }
                                                 if (this.walletAddress == null) {
-                                                    this.openNotifaction("info", "Please create smart contract account.");
+                                                    this.openNotification("info", "Please create smart contract account.");
                                                     return;
                                                 }
                                                 let walletSalt = 0;
@@ -3042,7 +3042,7 @@ export default {
                                                     }
                                                 }
                                                 if (symbol == null) {
-                                                    this.openNotifaction("info", "You don't have this asset.");
+                                                    this.openNotification("info", "You don't have this asset.");
                                                     return;
                                                 }
                                                 
@@ -3085,7 +3085,7 @@ export default {
                                                             console.log(response);
                                                             if (response.data.code == 1000) {
                                                                 console.log("transfer successfully!");
-                                                                this.openNotifaction("success", "Transfer successfully!");
+                                                                this.openNotification("success", "Transfer successfully!");
 
                                                                 // query op record
                                                                 this.quertOpAndOrders();
@@ -3103,11 +3103,11 @@ export default {
                                                                             }
                                                                         });
                                                                     }
-                                                                    this.openNotifaction("success", "Transfer successfully! Transaction hash: " + response.data.data);
+                                                                    this.openNotification("success", "Transfer successfully! Transaction hash: " + response.data.data);
                                                                 }, 15000);
                                                                 // this.iconLoadingDepositErc20 = false;
                                                             }else {
-                                                                this.openNotifaction("error", "Transfer error!");
+                                                                this.openNotification("error", "Transfer error!");
                                                             }
                                                         }).catch(error => {
                                                             console.log(error);
@@ -3124,11 +3124,11 @@ export default {
                                 }
                                 if (element.action == "SWAP") {
                                     if (this.user == null) {
-                                        this.openNotifaction("info", "Please connect wallet.");
+                                        this.openNotification("info", "Please connect wallet.");
                                         return;
                                     }
                                     if (this.walletAddress == null) {
-                                        this.openNotifaction("info", "Please create smart contract account.");
+                                        this.openNotification("info", "Please create smart contract account.");
                                         return;
                                     }
 
@@ -3160,7 +3160,7 @@ export default {
 
                                                     }
                                                     if (symbol == null) {
-                                                        this.openNotifaction("info", "You don't have this asset.");
+                                                        this.openNotification("info", "You don't have this asset.");
                                                         return;
                                                     }
                                                     ethToErc20DataOperationWrapper(this.user, this.walletAddress, walletSalt, this.contractAddrMap.get("eth"), elem.tokenOut, this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId, this.platform).then(res => {
@@ -3202,9 +3202,9 @@ export default {
                                                             .then(response => {
                                                                 console.log(response);
                                                                 if (response.data.code == 1000) {
-                                                                    // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                                                    // this.openNotification("success", "Swap successfully! Transaction hash: " + response.data.data);
                                                                     console.log("swap successfully!");
-                                                                    this.openNotifaction("success", "Swap successfully!");
+                                                                    this.openNotification("success", "Swap successfully!");
 
                                                                     // query op record
                                                                     this.quertOpAndOrders();
@@ -3235,11 +3235,11 @@ export default {
                                                                                 }
                                                                             });
                                                                         }
-                                                                        this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                                                        this.openNotification("success", "Swap successfully! Transaction hash: " + response.data.data);
                                                                         // this.iconLoading = false;
                                                                     }, 15000);
                                                                 } else {
-                                                                    this.openNotifaction("info", "Swap error! error: " + response.data.message);
+                                                                    this.openNotification("info", "Swap error! error: " + response.data.message);
                                                                     console.log("swap error!");
                                                                     // this.iconLoading = false;
                                                                 }
@@ -3272,7 +3272,7 @@ export default {
 
                                                     }
                                                     if (symbol == null) {
-                                                        this.openNotifaction("info", "You don't have this asset.");
+                                                        this.openNotification("info", "You don't have this asset.");
                                                         return;
                                                     }
                                                     erc20ToEthDataOperationWrapper(this.user, this.walletAddress, walletSalt, elem.tokenIn, this.contractAddrMap.get("eth"), this.fee, this.routerAddress, elem.amountIn, elem.minimalAmountOut, this.chainId, this.platform).then(res => {
@@ -3314,9 +3314,9 @@ export default {
                                                             .then(response => {
                                                                 console.log(response);
                                                                 if (response.data.code == 1000) {
-                                                                    // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                                                    // this.openNotification("success", "Swap successfully! Transaction hash: " + response.data.data);
                                                                     console.log("swap successfully!");
-                                                                    this.openNotifaction("success", "Swap successfully!");
+                                                                    this.openNotification("success", "Swap successfully!");
 
                                                                     // query op record
                                                                     this.quertOpAndOrders();
@@ -3347,11 +3347,11 @@ export default {
                                                                                 }
                                                                             });
                                                                         }
-                                                                        this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                                                        this.openNotification("success", "Swap successfully! Transaction hash: " + response.data.data);
                                                                         // this.iconLoading = false;
                                                                     }, 15000);
                                                                 } else {
-                                                                    this.openNotifaction("info", "Swap error! error: " + response.data.message);
+                                                                    this.openNotification("info", "Swap error! error: " + response.data.message);
                                                                     console.log("swap error!");
                                                                     // this.iconLoading = false;
                                                                 }
@@ -3365,11 +3365,11 @@ export default {
                                             } else {
                                                 // limited order
                                                 if (this.user == null) {
-                                                    this.openNotifaction("info", "Please connect wallet.");
+                                                    this.openNotification("info", "Please connect wallet.");
                                                     return;
                                                 }
                                                 if (this.walletAddress == null) {
-                                                    this.openNotifaction("info", "Please create smart contract account.");
+                                                    this.openNotification("info", "Please create smart contract account.");
                                                     return;
                                                 }
                                                 // if tokenIn is eth call ethToErc20LimitedDataOperationWrapper
@@ -3436,14 +3436,14 @@ export default {
                                                                 .then(response => {
                                                                     console.log(response);
                                                                     if (response.data.code == 1000) {
-                                                                        this.openNotifaction("success", "Swap successfully!");
-                                                                        // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                                                        this.openNotification("success", "Swap successfully!");
+                                                                        // this.openNotification("success", "Swap successfully! Transaction hash: " + response.data.data);
                                                                         console.log("successfully submit!");
 
                                                                         // query op record
                                                                         this.quertOpAndOrders();
                                                                     } else {
-                                                                        this.openNotifaction("info", "Swap error! error: " + response.data.message);
+                                                                        this.openNotification("info", "Swap error! error: " + response.data.message);
                                                                         console.log("swap error!");
                                                                         // this.iconLoadingLimited = false;
                                                                     }
@@ -3513,14 +3513,14 @@ export default {
                                                                 .then(response => {
                                                                     console.log(response);
                                                                     if (response.data.code == 1000) {
-                                                                        this.openNotifaction("success", "Swap successfully!");
-                                                                        // this.openNotifaction("success", "Swap successfully! Transaction hash: " + response.data.data);
+                                                                        this.openNotification("success", "Swap successfully!");
+                                                                        // this.openNotification("success", "Swap successfully! Transaction hash: " + response.data.data);
                                                                         console.log("successfully submit!");
 
                                                                         // query op record
                                                                         this.quertOpAndOrders();
                                                                     } else {
-                                                                        this.openNotifaction("info", "Swap error! error: " + response.data.message);
+                                                                        this.openNotification("info", "Swap error! error: " + response.data.message);
                                                                         console.log("swap error!");
                                                                     }
                                                                 })
@@ -3545,7 +3545,7 @@ export default {
             console.log("receipt status:", value);
             if (value) {
                 // notice: transaction success
-                this.openNotifaction("success", "Transfer successfully! Transaction hash: " + value.transactionHash);
+                this.openNotification("success", "Transfer successfully! Transaction hash: " + value.transactionHash);
                 let status = { code: "1", error: null };
                 let txHash = value.transactionHash;
                 this.operation.status = status;
@@ -3565,7 +3565,7 @@ export default {
                     }
                 });
             } else {
-                this.openNotifaction("error", "Transfer Failed!");
+                this.openNotification("error", "Transfer Failed!");
             }
         },
         changeMode() {
@@ -3576,7 +3576,7 @@ export default {
             try {
                 await toClipboard(this.walletAddress);
                 // alert("c");
-                this.openNotifaction("success", "Address copyed.");
+                this.openNotification("success", "Address copyed.");
             } catch (e) {
                 console.error(e);
             }
