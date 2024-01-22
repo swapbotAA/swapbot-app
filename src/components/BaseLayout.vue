@@ -11,7 +11,7 @@
                 </a-button>
             </label> -->
             <label>
-                <a-button v-if="this.user == null" type="primary" danger style="position: absolute; right: 10px; top: 10px;" @click="showLogin()">Login
+                <a-button v-if="this.user == null" :loading="iconLoadingLogin" type="primary" danger style="position: absolute; right: 10px; top: 10px;" @click="showLogin()">Login
                     <!-- <span v-if="this.user == null">Login</span>
                     <span v-else>{{ this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4) }}</span> -->
                 </a-button>
@@ -934,6 +934,7 @@ export default {
             iconLoading: ref(false),
             iconLoadingLimited: ref(false),
             iconLoadingSend: ref(false),
+            iconLoadingLogin: ref(false),
             // chat bot params
             text: '',
             mode: 'automatic',// or automatic manual
@@ -1239,7 +1240,9 @@ export default {
         },
         googleLogin () {
             this.openLogin = false;
+            this.iconLoadingLogin = true;
             login().then(response => {
+                this.iconLoadingLogin = false;
                     console.log("response: ",response);
                     if (response == undefined) {
                         this.openNotification("info","Required more shares, please enter your backup/ device factor key, or reset account [unrecoverable once reset, please use it with caution].");
