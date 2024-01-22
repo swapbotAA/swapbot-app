@@ -20,11 +20,10 @@ const coreKitInstance = new Web3AuthMPCCoreKit({
         tickerName: "Ethereum",
     },
   });
-// console.log("coreKitInstance: ",process.env.VUE_APP_RPC_TARGET);
+
 console.log("##0##");
 await coreKitInstance.init();
-
-
+console.log("coreKitInstance: ", coreKitInstance);
 console.log("##1##");
 // Initialize within setup()
 const web3auth = new Web3Auth({

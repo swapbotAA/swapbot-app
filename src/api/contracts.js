@@ -4,20 +4,26 @@ import UniswapRouter from "./abis/UniswapRouter.json";
 import Uni from "./abis/Uni.json";
 import SparkyAccountFactory from "./abis/SparkyAccountFactory.json";
 import EntryPoint from "./abis/EntryPoint.json";
-
+import BN from 'bn.js';
+import Web3 from 'web3';
+import bowser from "bowser";
+// import { storeWebBrowserFactor, keyToMnemonic, mnemonicToKey, COREKIT_STATUS } from "@web3auth/mpc-core-kit";
+import { TssShareType, getWebBrowserFactor, generateFactorKey, COREKIT_STATUS, keyToMnemonic, mnemonicToKey } from "@web3auth/mpc-core-kit";
 // web3auth
 import { Web3Auth } from "@web3auth/modal";
 import { web3auth, coreKitInstance } from "../main";
-import { Web3 } from "web3";
 // import BN from 'bn.js'
-// import { getWebBrowserFactor } from "@web3auth/mpc-core-kit";
 let provider = null;
 let signer = null;
 // web3auth end
 
+let coreKitStatus = null;
+let backupFactorKey = "";
+let mnemonicFactor = "";
+
 const wallet_address = "0x90CaF385c36b19d9f2BB9B5098398b6844eff8eB";
 const uniswapRouter_address = "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E";
-const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"];// [0:Uni]
+const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14","0x55979784068d1BEf37B49F41cAC8040A4b79C4a7","0x779877A7B0D9E8603169DdbD7836e478b4624789","0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0"];// [uni,weth,usdc,link,usdt]
 
 // ETH-Hangzhou branch begin
 const sparkyAccountFactory_address = "0x97e4Ac7528c1F797Fe5269B0EECCd25D897b3917";//"0xf8F3f05Bb80Ecd7cbF5925598966ea5C9C0857A1";//"0x81003ED6857971b34967dEC7C979a6d51C793Ef4";
@@ -87,30 +93,39 @@ const bundler_address = "0x8e19ffB632A8e74F172cfe3082493ACfa8a1556B";
 //##################################single factor login above##############################################
 
 async function login() {
-    await coreKitInstance.loginWithOauth({
-        subVerifierDetails: {
-            typeOfLogin: "google",
-            verifier: "sparky-test-verifier", // you verifier name
-            clientId: process.env.VUE_APP_VERIFIER_ID, // your client id recieved from google
-        },
-    });
-    console.log("Login succeed");
-    const user = await coreKitInstance.getUserInfo();
-    console.log("User info", user);
-    const detail = await coreKitInstance.getKeyDetails();
-    console.log("key details", detail);
-
-    const web3authProvider = await coreKitInstance.provider;
-    provider = new ethers.BrowserProvider(web3authProvider); 
-    signer = await provider.getSigner();
-    const userAccounts = await signer.getAddress();
-    console.log("userAccounts: ",userAccounts);
-    let platform = 0;// 0 represent normal platform, such as google
-
-    return {
-        userAccounts: userAccounts, 
-        platform: platform
-    };
+    // return;
+    try {
+        await coreKitInstance.loginWithOauth({
+            subVerifierDetails: {
+                typeOfLogin: "google",
+                verifier: "sparky-test-verifier", // you verifier name
+                clientId: process.env.VUE_APP_VERIFIER_ID, // your client id recieved from google
+            },
+        });
+        console.log("Login succeed");
+        const user = await coreKitInstance.getUserInfo();
+        if (coreKitInstance.status === COREKIT_STATUS.REQUIRED_SHARE) {
+            console.log("required more shares, please enter your backup/ device factor key, or reset account [unrecoverable once reset, please use it with caution]");
+            return;
+          }
+        console.log("User info", user);
+        const detail = await coreKitInstance.getKeyDetails();
+        console.log("key details", detail);
+    
+        const web3authProvider = await coreKitInstance.provider;
+        provider = new ethers.BrowserProvider(web3authProvider); 
+        signer = await provider.getSigner();
+        const userAccounts = await signer.getAddress();
+        console.log("userAccounts: ",userAccounts);
+        let platform = 0;// 0 represent normal platform, such as google
+        
+        return {
+            userAccounts: userAccounts, 
+            platform: platform
+        };
+    } catch (error) {
+        console.log(error);
+    }
 
 }
 
@@ -119,46 +134,105 @@ async function logout() {
         uiConsole("coreKitInstance not initialized yet");
         return;
     }
-    await coreKitInstance.logout();
+    try {
+        await coreKitInstance.logout();
+    } catch (error) {
+        console.log(error);
+    }
 }
 
-async function addDeviceKey(DeviceKey) {
-    // let rtv = await coreKitInstance.exportBackupShare();
-    // console.log(rtv);
-    
-    // const factorKey1 = await coreKitInstance.getCurrentFactorKey();
-    // console.log("getCurrentFactorKey: ",factorKey1);
-    // return;
-    // const factorKey = await coreKitInstance.getCurrentFactorKey();
-    // const factorKey = await getWebBrowserFactor(coreKitInstance!);
+async function resetAccount() {
+    await coreKitInstance.tKey.storageLayer.setMetadata({
+        privKey: new BN(coreKitInstance.metadataKey, "hex"),
+        input: { message: "KEY_NOT_FOUND" },
+      });
+    console.log("reset");
+    // ========================
+    // try {
+    //     await getDeviceFactor();
+    //     await inputBackupFactorKey();
+    //   } catch (e) {
+    //       console.log(e);
+    //   }
+}
 
-    console.log(DeviceKey);
-    // return;
-    const DeviceKeyBN = new BN(DeviceKey, "hex");
-    await coreKitInstance.inputFactorKey(DeviceKeyBN);
-    // const factorKeyMnemonic = factorKey;
-    // const factorKeyMnemonic = keyToMnemonic(factorKey);
+async function getDeviceFactor() {
+    try {
+      const factorKey = await getWebBrowserFactor(coreKitInstance);
+      backupFactorKey = factorKey;
+      console.log("Device share: ", factorKey);
+      return factorKey;
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+async function inputBackupFactorKey () {
+    if (!coreKitInstance) {
+      return new Error("coreKitInstance not found");
+    }
+    if (!backupFactorKey) {
+      return new Error("backupFactorKey not found");
+    }
+    const factorKey = new BN(backupFactorKey, "hex")
+    await coreKitInstance.inputFactorKey(factorKey);
+
+    coreKitStatus = coreKitInstance.status;
+
+    if (coreKitInstance.status === COREKIT_STATUS.REQUIRED_SHARE) {
+      console.log("required more shares even after inputing backup factor key, please enter your backup/ device factor key, or reset account [unrecoverable once reset, please use it with caution]");
+    }
+    console.log("=========");
     const detail = await coreKitInstance.getKeyDetails();
     console.log("key details", detail);
-    // uiConsole("MFA enabled, device factor stored in local store, deleted hashed cloud key, your backup factor key: ", factorKeyMnemonic);
+    const web3authProvider = await coreKitInstance.provider;
+    provider = new ethers.BrowserProvider(web3authProvider); 
+    signer = await provider.getSigner();
+    const userAccounts = await signer.getAddress();
+    console.log("userAccounts: ",userAccounts);
+}
+
+async function enableMFA() {
+    // return "apart climb quarter minimum okay direct medal soft venue pulse valid quality next chronic garden notable alone nominee frozen uniform bachelor current blue this";
+    try {
+        const factorKey = await coreKitInstance.enableMFA({});
+        const factorKeyMnemonic = keyToMnemonic(factorKey);
+        console.log("MFA enabled, device factor stored in local store, deleted hashed cloud key, your backup factor key: ", factorKeyMnemonic);
+        return factorKeyMnemonic;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+}
+
+async function RecoveryFactorKeyUsingMnemonic(DeviceKey) {
+    if (!coreKitInstance) {
+        throw new Error("coreKitInstance is not set");
+      }
+      try {
+        const factorKey = await mnemonicToKey(DeviceKey);
+        backupFactorKey = factorKey;
+        return factorKey;
+      } catch (error) {
+        console.log(error);
+      }
+}
+
+async function exportMnemonicFactor() {
+    if (!coreKitInstance) {
+      throw new Error("coreKitInstance is not set");
+    }
+    uiConsole("export share type: ", TssShareType.RECOVERY);
+    const factorKey = generateFactorKey();
+    await coreKitInstance.createFactor({
+      shareType: TssShareType.RECOVERY,
+      factorKey: factorKey.private
+    });
+    const factorKeyMnemonic = await keyToMnemonic(factorKey.private.toString("hex"));
+    console.log("Export factor key mnemonic: ", factorKeyMnemonic);
 }
 
 async function signTx(UserOperationWithoutSig, chainId) {
-    // const provider = await coreKitInstance.loginWithOauth({
-    //     subVerifierDetails: {
-    //         typeOfLogin: "google",
-    //         verifier: "google-test-sparky", // you verifier name
-    //         clientId: "891554446842-updnhqiutf8j2575mq5sasrebg79prlh.apps.googleusercontent.com", // your client id recieved from google
-    //     },
-    // });
-    // const provider = await coreKitInstance.provider;
-    // console.log(provider);
-    // const ethersProvider = new ethers.BrowserProvider(provider); // web3auth.provider
-
-    // const signer = await provider.getSigner();
-
-
-    // const originalMessage = "Hello World";
 
     const domain = {
         name: 'SparkyAccount',
@@ -181,14 +255,39 @@ async function signTx(UserOperationWithoutSig, chainId) {
         ],
     };
 
-    console.log(signer);
-
+    console.log("signer: ",signer);
+    console.log("UserOperationWithoutSig: ",UserOperationWithoutSig);
     let signature = await signer.signTypedData(domain, types, { ...UserOperationWithoutSig });
     console.log("signed message: ", signature);
     return signature;
 
-    // const signedMessage = await signer.signMessage(JSON.stringify(content));
-    // console.log("signed message: ", signedMessage)
+    // let content = "hello";
+    // const signedMessage = await signer.signMessage(JSON.stringify(UserOperationWithoutSig));
+    // console.log("signed message: ", signedMessage);
+    // return signedMessage;
+    
+    // const signer = await provider.getSigner();
+    // console.log("signer: ",signer);
+    // const fromAddress = await signer.getAddress();
+    // console.log("fromAddress: ",fromAddress);
+    // // let content = "["+JSON.stringify(UserOperationWithoutSig)+"]";
+    // // console.log("content: ",content);
+    // const originalMessage = [
+    //     { name: "sender", type: "address", vaule:  UserOperationWithoutSig.sender},
+    //     // { name: 'nonce', type: 'uint256' },
+    //     { name: "initCode", type: "bytes", vaule:  UserOperationWithoutSig.initCode},
+    //     { name: "callData", type: "bytes", vaule: UserOperationWithoutSig.callData},
+    //     { name: "callGasLimit", type: "uint256", vaule:  UserOperationWithoutSig.callGasLimit},
+    //     // { name: "verificationGasLimit", type: "uint256", vaule:  UserOperationWithoutSig.verificationGasLimit},
+    //     // { name: "preVerificationGas", type: "uint256", vaule:  UserOperationWithoutSig.preVerificationGas},
+    //     // { name: "maxFeePerGas", type: "uint256", vaule:  UserOperationWithoutSig.maxFeePerGas},
+    //     // { name: "maxPriorityFeePerGas", type: "uint256", vaule:  UserOperationWithoutSig.maxPriorityFeePerGas},
+    //     // { name: "paymasterAndData", type: "bytes", vaule: UserOperationWithoutSig.paymasterAndData},
+    //   ];
+    // const params = [originalMessage, fromAddress];
+    // const method = "eth_signTypedData";
+    // const signedMessage = await signer.provider.send(method, params);
+    // console.log("signedMessage: ",signedMessage);
     // return signedMessage;
 }
 
@@ -408,7 +507,7 @@ async function transferETH(user ,addr, toAddr, amount, salt, chainId, platform, 
         }else {
             let r = window.confirm("Sign this Tx?");
             if (r) {
-                sig = await signTx(userOperationWithoutSig,chainId); 
+                sig = await signTx(userOperationWithoutSig, chainId, signer); 
             }else{
                 return;
             }
@@ -1183,7 +1282,7 @@ async function createTypedDataAndSign(UserOperationWithoutSig, chainId, signer) 
     // console.log(ethers._TypedDataEncoder.hashDomain(domain))
 
     console.log(signer);
-
+    console.log("UserOperationWithoutSig: ",UserOperationWithoutSig);
     let signature = await signer.signTypedData(domain, types, { ...UserOperationWithoutSig });
     return signature;
 }
@@ -1208,6 +1307,11 @@ export {
   transferErc20,
   login,
   logout,
-  addDeviceKey,
-  delegate
+  getDeviceFactor,
+  delegate,
+  inputBackupFactorKey,
+  resetAccount,
+  enableMFA,
+  RecoveryFactorKeyUsingMnemonic,
+  exportMnemonicFactor
 }
