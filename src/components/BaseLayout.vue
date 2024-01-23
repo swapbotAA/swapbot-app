@@ -2359,6 +2359,8 @@ export default {
                                 console.log(error);
                             });
                     });
+                }else {
+                    this.openNotification("info", "Please install metaMask.");
                 }
             } else {
                 return;
