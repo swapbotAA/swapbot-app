@@ -1017,122 +1017,241 @@ export default {
         }
     },
     created: function() {
-        console.log("check coreKitInstance if already exists...");
+        console.log("check if user is already logined in google...");
         reload().then(res => {
             console.log("reload response: ", res);
-            if (res == undefined) {
-                return;
-            }
-            console.log("user:", res.userAccounts);
-            this.user = res.userAccounts;
-            this.platform = res.platform;
+            if (!res) {
+                console.log("check if user is already logined in metamask...");
+                if (window.ethereum) {
+                    window.ethereum.enable().then(res => {
+                        console.log("res: ",res);
+                        this.user = res[0];
+                        this.platform = 1;
 
-            if (res.userAccounts != null) {
-                initInstances().then((response) => {
-                    if (response.status) {
-                        console.log("Init success");
+                        console.log("this.user: ", this.user);
+                        if (this.user != null) {
+                            getWeb3Provider();
+                            initInstances().then((response) => {
+                                if (response.status) {
+                                    console.log("Init success");
 
-                    } else {
-                        console.log("Init failed");
-                    }
-                });
-                axios.post('/api/v1/query_contract_accounts', {
-                            user: this.user
-                        })
-                        .then(response => {
-                            console.log(response);
-                            if (response.data.code == 1000) {
-                                console.log("Successfully obtained user smart contract account.");
-                                if (response.data.data != null && response.data.data.length > 0) {
-                                    response.data.data.forEach(element => {
-                                        this.walletObj.push(
-                                            {
-                                                label: element.Account,
-                                                value: element.Account,
-                                                disabled: false,
-                                                salt: element.Salt
-                                            }
-                                        );
-                                        // default select first address
-                                        if (Number(element.Salt) == 0) {
-                                            this.walletAddress = element.Account;
-
-                                            // add first account address into asset list
-                                            if (this.tokenObj.length == 0) {
-                                                console.log("asset Address: ", element.Account);
-                                                console.log("asset symbol: ", "ETH");
-                                                let tmpObj = { token: "ETH", address: element.Account, balance: 0 };
-                                                this.tokenObj.push(tmpObj);
-                                            }
-                                        }
-                                        if (Number(element.Salt) > this.walletSalt) {
-                                            // update user wallet salt
-                                            this.walletSalt = Number(element.Salt);
-                                        }
-                                    })
+                                } else {
+                                    console.log("Init failed");
                                 }
-                                console.log("this wallet address:", this.walletAddress);
-                                console.log("this wallet salt:", this.walletSalt);
-
-                                if (this.walletAddress != null) {
-                                    // before get balances, we need obtain asset list from backend service
-                                    axios.post('/api/v1/query_account_assets', {
-                                        sender: this.walletAddress
+                            });
+                            axios.post('/api/v1/query_contract_accounts', {
+                                        user: this.user
                                     })
-                                        .then(response => {
-                                            console.log(response);
-                                            if (response.data.code == 1000) {
-                                                console.log("Successfully obtained user asset list.");
-                                                if (response.data.data != null && response.data.data.length > 0) {
-                                                    response.data.data.forEach(element => {
-                                                        console.log("asset Address: ", element.Address);
-                                                        console.log("asset symbol: ", element.Token);
-                                                        let tmpObj = { token: element.Token, address: element.Address, balance: 0 };
-                                                        this.tokenObj.push(tmpObj);
+                                    .then(response => {
+                                        console.log(response);
+                                        if (response.data.code == 1000) {
+                                            console.log("Successfully obtained user smart contract account.");
+                                            if (response.data.data != null && response.data.data.length > 0) {
+                                                response.data.data.forEach(element => {
+                                                    this.walletObj.push(
+                                                        {
+                                                            label: element.Account,
+                                                            value: element.Account,
+                                                            disabled: false,
+                                                            salt: element.Salt
+                                                        }
+                                                    );
+                                                    // default select first address
+                                                    if (Number(element.Salt) == 0) {
+                                                        this.walletAddress = element.Account;
 
-                                                    })
-                                                }
+                                                        // add first account address into asset list
+                                                        if (this.tokenObj.length == 0) {
+                                                            console.log("asset Address: ", element.Account);
+                                                            console.log("asset symbol: ", "ETH");
+                                                            let tmpObj = { token: "ETH", address: element.Account, balance: 0 };
+                                                            this.tokenObj.push(tmpObj);
+                                                        }
+                                                    }
+                                                    if (Number(element.Salt) > this.walletSalt) {
+                                                        // update user wallet salt
+                                                        this.walletSalt = Number(element.Salt);
+                                                    }
+                                                })
                                             }
+                                            console.log("this wallet address:", this.walletAddress);
+                                            console.log("this wallet salt:", this.walletSalt);
 
-                                            // update erc20 balance
-                                            for (let index = 1; index < this.tokenObj.length; index++) {
-                                                const element = this.tokenObj[index];
-                                                getErc20Balance(this.walletAddress, element.address).then((response) => {
+                                            if (this.walletAddress != null) {
+                                                // before get balances, we need obtain asset list from backend service
+                                                axios.post('/api/v1/query_account_assets', {
+                                                    sender: this.walletAddress
+                                                })
+                                                    .then(response => {
+                                                        console.log(response);
+                                                        if (response.data.code == 1000) {
+                                                            console.log("Successfully obtained user asset list.");
+                                                            if (response.data.data != null && response.data.data.length > 0) {
+                                                                response.data.data.forEach(element => {
+                                                                    console.log("asset Address: ", element.Address);
+                                                                    console.log("asset symbol: ", element.Token);
+                                                                    let tmpObj = { token: element.Token, address: element.Address, balance: 0 };
+                                                                    this.tokenObj.push(tmpObj);
+
+                                                                })
+                                                            }
+                                                        }
+
+                                                        // update erc20 balance
+                                                        for (let index = 1; index < this.tokenObj.length; index++) {
+                                                            const element = this.tokenObj[index];
+                                                            getErc20Balance(this.walletAddress, element.address).then((response) => {
+                                                                if (response.status) {
+                                                                    // console.log(element.token + " balance:" + String(response.balance));
+                                                                    this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
+                                                                } else {
+                                                                    console.log("get " + element.token + " balance falied!");
+                                                                }
+                                                            });
+                                                        }
+                                                    })
+                                                    .catch(error => {
+                                                        console.log(error);
+                                                    });
+                                                // update  eth balance
+                                                getEthBalance(this.walletAddress).then((response) => {
                                                     if (response.status) {
-                                                        // console.log(element.token + " balance:" + String(response.balance));
-                                                        this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
+                                                        // console.log(element.token + " balance:" + response.balance.toNumber());
+                                                        this.tokenObj.forEach(element => {
+                                                            if (element.token == "ETH") {
+                                                                element.balance = this.formateNumber(ethers.formatEther(response.balance));
+                                                            }
+                                                        })
                                                     } else {
-                                                        console.log("get " + element.token + " balance falied!");
+                                                        console.log("get ETH balance failed!");
                                                     }
                                                 });
+                                                // get operation history
+                                                this.quertOpAndOrders();
+                                            }
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.log(error);
+                                    });
+                        }
+                    });
+                }else {
+                    console.log("nothing to do.");
+                    return;
+                }
+            }else {
+                console.log("user:", res.userAccounts);
+                this.user = res.userAccounts;
+                this.platform = res.platform;
+                
+                console.log("this.user: ", this.user);
+                if (this.user != null) {
+                    initInstances().then((response) => {
+                        if (response.status) {
+                            console.log("Init success");
+
+                        } else {
+                            console.log("Init failed");
+                        }
+                    });
+                    axios.post('/api/v1/query_contract_accounts', {
+                                user: this.user
+                            })
+                            .then(response => {
+                                console.log(response);
+                                if (response.data.code == 1000) {
+                                    console.log("Successfully obtained user smart contract account.");
+                                    if (response.data.data != null && response.data.data.length > 0) {
+                                        response.data.data.forEach(element => {
+                                            this.walletObj.push(
+                                                {
+                                                    label: element.Account,
+                                                    value: element.Account,
+                                                    disabled: false,
+                                                    salt: element.Salt
+                                                }
+                                            );
+                                            // default select first address
+                                            if (Number(element.Salt) == 0) {
+                                                this.walletAddress = element.Account;
+
+                                                // add first account address into asset list
+                                                if (this.tokenObj.length == 0) {
+                                                    console.log("asset Address: ", element.Account);
+                                                    console.log("asset symbol: ", "ETH");
+                                                    let tmpObj = { token: "ETH", address: element.Account, balance: 0 };
+                                                    this.tokenObj.push(tmpObj);
+                                                }
+                                            }
+                                            if (Number(element.Salt) > this.walletSalt) {
+                                                // update user wallet salt
+                                                this.walletSalt = Number(element.Salt);
                                             }
                                         })
-                                        .catch(error => {
-                                            console.log(error);
-                                        });
-                                    // update  eth balance
-                                    getEthBalance(this.walletAddress).then((response) => {
-                                        if (response.status) {
-                                            // console.log(element.token + " balance:" + response.balance.toNumber());
-                                            this.tokenObj.forEach(element => {
-                                                if (element.token == "ETH") {
-                                                    element.balance = this.formateNumber(ethers.formatEther(response.balance));
+                                    }
+                                    console.log("this wallet address:", this.walletAddress);
+                                    console.log("this wallet salt:", this.walletSalt);
+
+                                    if (this.walletAddress != null) {
+                                        // before get balances, we need obtain asset list from backend service
+                                        axios.post('/api/v1/query_account_assets', {
+                                            sender: this.walletAddress
+                                        })
+                                            .then(response => {
+                                                console.log(response);
+                                                if (response.data.code == 1000) {
+                                                    console.log("Successfully obtained user asset list.");
+                                                    if (response.data.data != null && response.data.data.length > 0) {
+                                                        response.data.data.forEach(element => {
+                                                            console.log("asset Address: ", element.Address);
+                                                            console.log("asset symbol: ", element.Token);
+                                                            let tmpObj = { token: element.Token, address: element.Address, balance: 0 };
+                                                            this.tokenObj.push(tmpObj);
+
+                                                        })
+                                                    }
+                                                }
+
+                                                // update erc20 balance
+                                                for (let index = 1; index < this.tokenObj.length; index++) {
+                                                    const element = this.tokenObj[index];
+                                                    getErc20Balance(this.walletAddress, element.address).then((response) => {
+                                                        if (response.status) {
+                                                            // console.log(element.token + " balance:" + String(response.balance));
+                                                            this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
+                                                        } else {
+                                                            console.log("get " + element.token + " balance falied!");
+                                                        }
+                                                    });
                                                 }
                                             })
-                                        } else {
-                                            console.log("get ETH balance failed!");
-                                        }
-                                    });
-                                    // get operation history
-                                    this.quertOpAndOrders();
+                                            .catch(error => {
+                                                console.log(error);
+                                            });
+                                        // update  eth balance
+                                        getEthBalance(this.walletAddress).then((response) => {
+                                            if (response.status) {
+                                                // console.log(element.token + " balance:" + response.balance.toNumber());
+                                                this.tokenObj.forEach(element => {
+                                                    if (element.token == "ETH") {
+                                                        element.balance = this.formateNumber(ethers.formatEther(response.balance));
+                                                    }
+                                                })
+                                            } else {
+                                                console.log("get ETH balance failed!");
+                                            }
+                                        });
+                                        // get operation history
+                                        this.quertOpAndOrders();
+                                    }
                                 }
-                            }
-                        })
-                        .catch(error => {
-                            console.log(error);
-                        });
-            }
-
+                            })
+                            .catch(error => {
+                                console.log(error);
+                            });
+                }
+            }          
         });
     },
     methods: {
@@ -2126,7 +2245,6 @@ export default {
                         console.log("res: ",res);
                         this.user = res[0];
 
-                        // this.$refs.metamask.init();
                         getWeb3Provider();
                         this.platform = 1; //1 represent web3 platform, such as metamask
                         initInstances().then((response) => {

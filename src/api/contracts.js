@@ -94,7 +94,7 @@ const bundler_address = "0x8e19ffB632A8e74F172cfe3082493ACfa8a1556B";
 async function reload() {
     console.log("COREKIT_STATUS: ", COREKIT_STATUS);
     console.log("current status: ", coreKitInstance.status);
-
+    // reload google login
     if (coreKitInstance.status === COREKIT_STATUS.LOGGED_IN) {
         const user = await coreKitInstance.getUserInfo();
         console.log("User info", user);
@@ -107,13 +107,14 @@ async function reload() {
         const userAccounts = await signer.getAddress();
         console.log("userAccounts: ",userAccounts);
         let platform = 0;// 0 represent normal platform, such as google
-        
+
         return {
             userAccounts: userAccounts, 
             platform: platform
         };
     }
-    return;
+
+    return false;
 }
 
 async function login() {
