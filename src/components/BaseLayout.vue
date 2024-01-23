@@ -814,7 +814,7 @@
 
 <script>
 import { Modal, notification } from 'ant-design-vue';
-import { ethers, utils, BigNumber } from 'ethers5';
+import { ethers, utils, BigNumber } from 'ethers6';
 import { ParticlesBg } from "particles-bg-vue";
 import { ref } from "vue";
 import useClipboard from "vue-clipboard3";
@@ -851,7 +851,8 @@ import {
     resetAccount,
     enableMFA,
     RecoveryFactorKeyUsingMnemonic,
-    exportMnemonicFactor
+    exportMnemonicFactor,
+    reload
 } from "../api/contracts";
 
 import { responseParser } from "../api/apiChat";
@@ -1016,113 +1017,123 @@ export default {
         }
     },
     created: function() {
-        // console.log("provider:", sessionStorage['provider']);
-        // console.log("user:", sessionStorage['user']);
-        // if (sessionStorage['user'] != null) {
-        //     initInstances().then((response) => {
-        //         if (response.status) {
-        //             console.log("Init success");
+        console.log("check coreKitInstance if already exists...");
+        reload().then(res => {
+            console.log("reload response: ", res);
+            if (res == undefined) {
+                return;
+            }
+            console.log("user:", res.userAccounts);
+            this.user = res.userAccounts;
+            this.platform = res.platform;
 
-        //         } else {
-        //             console.log("Init failed");
-        //         }
-        //     });
-        //     axios.post('/api/v1/query_contract_accounts', {
-        //                 user: this.user
-        //             })
-        //             .then(response => {
-        //                 console.log(response);
-        //                 if (response.data.code == 1000) {
-        //                     console.log("Successfully obtained user smart contract account.");
-        //                     if (response.data.data != null && response.data.data.length > 0) {
-        //                         response.data.data.forEach(element => {
-        //                             this.walletObj.push(
-        //                                 {
-        //                                     label: element.Account,
-        //                                     value: element.Account,
-        //                                     disabled: false,
-        //                                     salt: element.Salt
-        //                                 }
-        //                             );
-        //                             // default select first address
-        //                             if (Number(element.Salt) == 0) {
-        //                                 this.walletAddress = element.Account;
+            if (res.userAccounts != null) {
+                initInstances().then((response) => {
+                    if (response.status) {
+                        console.log("Init success");
 
-        //                                 // add first account address into asset list
-        //                                 if (this.tokenObj.length == 0) {
-        //                                     console.log("asset Address: ", element.Account);
-        //                                     console.log("asset symbol: ", "ETH");
-        //                                     let tmpObj = { token: "ETH", address: element.Account, balance: 0 };
-        //                                     this.tokenObj.push(tmpObj);
-        //                                 }
-        //                             }
-        //                             if (Number(element.Salt) > this.walletSalt) {
-        //                                 // update user wallet salt
-        //                                 this.walletSalt = Number(element.Salt);
-        //                             }
-        //                         })
-        //                     }
-        //                     console.log("this wallet address:", this.walletAddress);
-        //                     console.log("this wallet salt:", this.walletSalt);
+                    } else {
+                        console.log("Init failed");
+                    }
+                });
+                axios.post('/api/v1/query_contract_accounts', {
+                            user: this.user
+                        })
+                        .then(response => {
+                            console.log(response);
+                            if (response.data.code == 1000) {
+                                console.log("Successfully obtained user smart contract account.");
+                                if (response.data.data != null && response.data.data.length > 0) {
+                                    response.data.data.forEach(element => {
+                                        this.walletObj.push(
+                                            {
+                                                label: element.Account,
+                                                value: element.Account,
+                                                disabled: false,
+                                                salt: element.Salt
+                                            }
+                                        );
+                                        // default select first address
+                                        if (Number(element.Salt) == 0) {
+                                            this.walletAddress = element.Account;
 
-        //                     if (this.walletAddress != null) {
-        //                         // before get balances, we need obtain asset list from backend service
-        //                         axios.post('/api/v1/query_account_assets', {
-        //                             sender: this.walletAddress
-        //                         })
-        //                             .then(response => {
-        //                                 console.log(response);
-        //                                 if (response.data.code == 1000) {
-        //                                     console.log("Successfully obtained user asset list.");
-        //                                     if (response.data.data != null && response.data.data.length > 0) {
-        //                                         response.data.data.forEach(element => {
-        //                                             console.log("asset Address: ", element.Address);
-        //                                             console.log("asset symbol: ", element.Token);
-        //                                             let tmpObj = { token: element.Token, address: element.Address, balance: 0 };
-        //                                             this.tokenObj.push(tmpObj);
+                                            // add first account address into asset list
+                                            if (this.tokenObj.length == 0) {
+                                                console.log("asset Address: ", element.Account);
+                                                console.log("asset symbol: ", "ETH");
+                                                let tmpObj = { token: "ETH", address: element.Account, balance: 0 };
+                                                this.tokenObj.push(tmpObj);
+                                            }
+                                        }
+                                        if (Number(element.Salt) > this.walletSalt) {
+                                            // update user wallet salt
+                                            this.walletSalt = Number(element.Salt);
+                                        }
+                                    })
+                                }
+                                console.log("this wallet address:", this.walletAddress);
+                                console.log("this wallet salt:", this.walletSalt);
 
-        //                                         })
-        //                                     }
-        //                                 }
+                                if (this.walletAddress != null) {
+                                    // before get balances, we need obtain asset list from backend service
+                                    axios.post('/api/v1/query_account_assets', {
+                                        sender: this.walletAddress
+                                    })
+                                        .then(response => {
+                                            console.log(response);
+                                            if (response.data.code == 1000) {
+                                                console.log("Successfully obtained user asset list.");
+                                                if (response.data.data != null && response.data.data.length > 0) {
+                                                    response.data.data.forEach(element => {
+                                                        console.log("asset Address: ", element.Address);
+                                                        console.log("asset symbol: ", element.Token);
+                                                        let tmpObj = { token: element.Token, address: element.Address, balance: 0 };
+                                                        this.tokenObj.push(tmpObj);
 
-        //                                 // update erc20 balance
-        //                                 for (let index = 1; index < this.tokenObj.length; index++) {
-        //                                     const element = this.tokenObj[index];
-        //                                     getErc20Balance(this.walletAddress, element.address).then((response) => {
-        //                                         if (response.status) {
-        //                                             // console.log(element.token + " balance:" + String(response.balance));
-        //                                             this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
-        //                                         } else {
-        //                                             console.log("get " + element.token + " balance falied!");
-        //                                         }
-        //                                     });
-        //                                 }
-        //                             })
-        //                             .catch(error => {
-        //                                 console.log(error);
-        //                             });
-        //                         // update  eth balance
-        //                         getEthBalance(this.walletAddress).then((response) => {
-        //                             if (response.status) {
-        //                                 // console.log(element.token + " balance:" + response.balance.toNumber());
-        //                                 this.tokenObj.forEach(element => {
-        //                                     if (element.token == "ETH") {
-        //                                         element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
-        //                                     }
-        //                                 })
-        //                             } else {
-        //                                 console.log("get ETH balance failed!");
-        //                             }
-        //                         });
-        //                         // get operation history
-        //                         this.quertOpAndOrders();
-        //                     }
-        //                 }
-        //             })
-        //             .catch(error => {
-        //                 console.log(error);
-        //             });
-        // }
+                                                    })
+                                                }
+                                            }
+
+                                            // update erc20 balance
+                                            for (let index = 1; index < this.tokenObj.length; index++) {
+                                                const element = this.tokenObj[index];
+                                                getErc20Balance(this.walletAddress, element.address).then((response) => {
+                                                    if (response.status) {
+                                                        // console.log(element.token + " balance:" + String(response.balance));
+                                                        this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
+                                                    } else {
+                                                        console.log("get " + element.token + " balance falied!");
+                                                    }
+                                                });
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.log(error);
+                                        });
+                                    // update  eth balance
+                                    getEthBalance(this.walletAddress).then((response) => {
+                                        if (response.status) {
+                                            // console.log(element.token + " balance:" + response.balance.toNumber());
+                                            this.tokenObj.forEach(element => {
+                                                if (element.token == "ETH") {
+                                                    element.balance = this.formateNumber(ethers.formatEther(response.balance));
+                                                }
+                                            })
+                                        } else {
+                                            console.log("get ETH balance failed!");
+                                        }
+                                    });
+                                    // get operation history
+                                    this.quertOpAndOrders();
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
+            }
+
+        });
     },
     methods: {
         DeviceFactorKey() {
@@ -1333,7 +1344,7 @@ export default {
                                             getErc20Balance(this.walletAddress, element.address).then((response) => {
                                                 if (response.status) {
                                                     // console.log(element.token + " balance:" + String(response.balance));
-                                                    this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                    this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
                                                 } else {
                                                     console.log("get " + element.token + " balance falied!");
                                                 }
@@ -1349,7 +1360,7 @@ export default {
                                         // console.log(element.token + " balance:" + response.balance.toNumber());
                                         this.tokenObj.forEach(element => {
                                             if (element.token == "ETH") {
-                                                element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                element.balance = this.formateNumber(ethers.formatEther(response.balance));
                                             }
                                         })
                                     } else {
@@ -1432,7 +1443,7 @@ export default {
                                     if (symbol == null || element.Details.TokenIn == "0x0000000000000000000000000000000000000000") {
                                         symbol = "eth";
                                     }
-                                    let details = {tokenSymbol: symbol, amount: ethers.utils.formatEther(element.Details.TokenInAmount)};
+                                    let details = {tokenSymbol: symbol, amount: ethers.formatEther(element.Details.TokenInAmount)};
                                     operation.action = element.Action;
                                     operation.details = details;
                                     
@@ -1463,7 +1474,7 @@ export default {
                                     if (symbolOut == null || element.Details.TokenOut == "0x0000000000000000000000000000000000000000") {
                                         symbolOut = "eth";
                                     }
-                                    let details = {tokenIn: symbolIn, amountIn: ethers.utils.formatEther(element.Details.TokenInAmount), tokenOut: symbolOut};
+                                    let details = {tokenIn: symbolIn, amountIn: ethers.formatEther(element.Details.TokenInAmount), tokenOut: symbolOut};
                                     operation.action = element.Action;
                                     operation.details = details;
                                     
@@ -1495,7 +1506,7 @@ export default {
                                         symbolOut = "eth";
                                     }
 
-                                    let details = {tokenIn: symbolIn, amountIn: ethers.utils.formatEther(element.Details.TokenInAmount), tokenOut: symbolOut, amountOut: ethers.utils.formatEther(element.Details.TokenOutAmount)};
+                                    let details = {tokenIn: symbolIn, amountIn: ethers.formatEther(element.Details.TokenInAmount), tokenOut: symbolOut, amountOut: ethers.formatEther(element.Details.TokenOutAmount)};
                                     operation.action = element.Action;
                                     operation.details = details;
                                     
@@ -1526,7 +1537,7 @@ export default {
                             this.tokenObj.forEach(element => {
                             if (element.token == "ETH") {
                                 // console.log("eth balance:" + String(response.balance));
-                                element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                element.balance = this.formateNumber(ethers.formatEther(response.balance));
                             }
                             })
                         } else {
@@ -1539,7 +1550,7 @@ export default {
                         getErc20Balance(this.walletAddress, element.address).then((response) => {
                             if (response.status) {
                             // console.log(element.token + " balance:" + String(response.balance));
-                            this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                            this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
                             } else {
                             console.log("get " + element.token + " balance falied!");
                             }
@@ -1631,12 +1642,12 @@ export default {
                             order_details: {
                                 // order_no: timeStamp,// timestamp
                                 token_in: this.contractAddrMap.get(this.subKeyLimitedSrc),
-                                amount_in: String(ethers.utils.parseUnits(this.ethLimitedAmount)),
+                                amount_in: String(ethers.parseUnits(this.ethLimitedAmount)),
                                 token_out: this.contractAddrMap.get(this.subKeyLimitedDes),
-                                amount_out: String(ethers.utils.parseUnits(this.erc20LimitedAmount)),
+                                amount_out: String(ethers.parseUnits(this.erc20LimitedAmount)),
                                 fee: 0,
                                 sender: this.walletAddress,
-                                amount_out_minimum: String(ethers.utils.parseUnits(this.erc20LimitedAmount)),//String(ethers.utils.parseUnits(this.erc20LimitedAmount))
+                                amount_out_minimum: String(ethers.parseUnits(this.erc20LimitedAmount)),//String(ethers.parseUnits(this.erc20LimitedAmount))
                             }
                         };
                         console.log("obj string:", JSON.stringify(obj));
@@ -1701,12 +1712,12 @@ export default {
                             },
                             order_details: {
                                 token_in: this.contractAddrMap.get(this.subKeyLimitedDes),
-                                amount_in: String(ethers.utils.parseUnits(this.erc20LimitedAmount)),
+                                amount_in: String(ethers.parseUnits(this.erc20LimitedAmount)),
                                 token_out: this.contractAddrMap.get(this.subKeyLimitedSrc),
-                                amount_out: String(ethers.utils.parseUnits(this.ethLimitedAmount)),
+                                amount_out: String(ethers.parseUnits(this.ethLimitedAmount)),
                                 fee: 0,
                                 sender: this.walletAddress,
-                                amount_out_minimum: String(ethers.utils.parseUnits(this.ethLimitedAmount)),//String(ethers.utils.parseUnits(this.ethLimitedAmount))
+                                amount_out_minimum: String(ethers.parseUnits(this.ethLimitedAmount)),//String(ethers.parseUnits(this.ethLimitedAmount))
                             }
                         };
                         console.log("obj string:", JSON.stringify(obj));
@@ -1786,9 +1797,9 @@ export default {
                         beneficiary_addr: this.user,
                         op_action: "SWAP",
                         order_details: {
-                            amount_in: String(ethers.utils.parseUnits(this.ethAmount)),
-                            amount_out: String(ethers.utils.parseUnits(this.erc20Amount)),
-                            amount_out_minimum: String(ethers.utils.parseUnits(amountOutMinimum)),
+                            amount_in: String(ethers.parseUnits(this.ethAmount)),
+                            amount_out: String(ethers.parseUnits(this.erc20Amount)),
+                            amount_out_minimum: String(ethers.parseUnits(amountOutMinimum)),
                             fee: 0,
                             sender: this.walletAddress,
                             token_in: this.contractAddrMap.get(this.subKeySrc),
@@ -1828,7 +1839,7 @@ export default {
                                             this.tokenObj.forEach(element => {
                                                 if (element.token == "ETH") {
                                                     // console.log("eth balance:" + String(response.balance));
-                                                    element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                    element.balance = this.formateNumber(ethers.formatEther(response.balance));
                                                 }
                                             })
                                         } else {
@@ -1841,7 +1852,7 @@ export default {
                                         getErc20Balance(this.walletAddress, element.address).then((response) => {
                                             if (response.status) {
                                                 // console.log(element.token + " balance:" + String(response.balance));
-                                                this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
                                             } else {
                                                 console.log("get " + element.token + " balance falied!");
                                             }
@@ -1887,9 +1898,9 @@ export default {
                         beneficiary_addr: this.user,
                         op_action: "SWAP",
                         order_details: {
-                            amount_in: String(ethers.utils.parseUnits(this.erc20Amount)),
-                            amount_out: String(ethers.utils.parseUnits(this.ethAmount)),
-                            amount_out_minimum: String(ethers.utils.parseUnits(amountOutMinimum)),
+                            amount_in: String(ethers.parseUnits(this.erc20Amount)),
+                            amount_out: String(ethers.parseUnits(this.ethAmount)),
+                            amount_out_minimum: String(ethers.parseUnits(amountOutMinimum)),
                             fee: 0,
                             sender: this.walletAddress,
                             token_in: this.contractAddrMap.get(this.subKeyDes),
@@ -1929,7 +1940,7 @@ export default {
                                             this.tokenObj.forEach(element => {
                                                 if (element.token == "ETH") {
                                                     // console.log("eth balance:" + String(response.balance));
-                                                    element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                    element.balance = this.formateNumber(ethers.formatEther(response.balance));
                                                 }
                                             })
                                         } else {
@@ -1942,7 +1953,7 @@ export default {
                                         getErc20Balance(this.walletAddress, element.address).then((response) => {
                                             if (response.status) {
                                                 // console.log(element.token + " balance:" + String(response.balance));
-                                                this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
                                             } else {
                                                 console.log("get " + element.token + " balance falied!");
                                             }
@@ -1975,7 +1986,7 @@ export default {
                         this.tokenObj.forEach(element => {
                             if (element.token == "ETH") {
                                 // console.log("eth balance:" + String(response.balance));
-                                element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                element.balance = this.formateNumber(ethers.formatEther(response.balance));
                             }
                         })
                     } else {
@@ -1988,7 +1999,7 @@ export default {
                     getErc20Balance(this.walletAddress, element.address).then((response) => {
                         if (response.status) {
                             // console.log(element.token + " balance:" + String(response.balance));
-                            this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                            this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
                         } else {
                             console.log("get " + element.token + " balance falied!");
                         }
@@ -2197,7 +2208,7 @@ export default {
                                                     getErc20Balance(this.walletAddress, element.address).then((response) => {
                                                         if (response.status) {
                                                             // console.log(element.token + " balance:" + String(response.balance));
-                                                            this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                            this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
                                                         } else {
                                                             console.log("get " + element.token + " balance falied!");
                                                         }
@@ -2213,7 +2224,7 @@ export default {
                                                 // console.log(element.token + " balance:" + response.balance.toNumber());
                                                 this.tokenObj.forEach(element => {
                                                     if (element.token == "ETH") {
-                                                        element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                        element.balance = this.formateNumber(ethers.formatEther(response.balance));
                                                     }
                                                 })
                                             } else {
@@ -2325,7 +2336,7 @@ export default {
         //                                     getErc20Balance(this.walletAddress, element.address).then((response) => {
         //                                         if (response.status) {
         //                                             // console.log(element.token + " balance:" + String(response.balance));
-        //                                             this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+        //                                             this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
         //                                         } else {
         //                                             console.log("get " + element.token + " balance falied!");
         //                                         }
@@ -2341,7 +2352,7 @@ export default {
         //                                 // console.log(element.token + " balance:" + response.balance.toNumber());
         //                                 this.tokenObj.forEach(element => {
         //                                     if (element.token == "ETH") {
-        //                                         element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+        //                                         element.balance = this.formateNumber(ethers.formatEther(response.balance));
         //                                     }
         //                                 })
         //                             } else {
@@ -2510,7 +2521,7 @@ export default {
                         getErc20Balance(this.walletAddress, element.address).then((response) => {
                             if (response.status) {
                                 // console.log(element.token + " balance:" + String(response.balance));
-                                this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
                             } else {
                                 console.log("get " + element.token + " balance falied!");
                             }
@@ -2528,7 +2539,7 @@ export default {
                     this.tokenObj.forEach(element => {
                         if (element.token == "ETH") {
                             // console.log("eth balance:" + String(response.balance));
-                            element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                            element.balance = this.formateNumber(ethers.formatEther(response.balance));
                         }
                     })
                 } else {
@@ -2568,7 +2579,7 @@ export default {
                         beneficiary_addr: this.user,
                         op_action: "TRANSFER",
                             order_details: {
-                            amount_in: String(ethers.utils.parseUnits(this.depositEth)),
+                            amount_in: String(ethers.parseUnits(this.depositEth)),
                             amount_out: null,
                             amount_out_minimum: null,
                             fee: 0,
@@ -2609,7 +2620,7 @@ export default {
                                             this.tokenObj.forEach(element => {
                                                 if (element.token == "ETH") {
                                                     // console.log("eth balance:" + String(response.balance));
-                                                    element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                    element.balance = this.formateNumber(ethers.formatEther(response.balance));
                                                 }
                                             })
                                         } else {
@@ -2658,7 +2669,7 @@ export default {
                         // console.log(element.token + " balance:" + response.balance.toNumber());
                         this.tokenObj.forEach(element => {
                             if (element.token == "ETH") {
-                                element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                element.balance = this.formateNumber(ethers.formatEther(response.balance));
                             }
                         })
                     } else {
@@ -2725,7 +2736,7 @@ export default {
                             beneficiary_addr: this.user,
                             op_action: "TRANSFER",
                             order_details: {
-                                amount_in: String(ethers.utils.parseUnits(this.depositErc20)),
+                                amount_in: String(ethers.parseUnits(this.depositErc20)),
                                 amount_out: null,
                                 amount_out_minimum: null,
                                 fee: 0,
@@ -2766,7 +2777,7 @@ export default {
                                             getErc20Balance(this.walletAddress, element.address).then((response) => {
                                                 if (response.status) {
                                                     // console.log(element.token + " balance:" + String(response.balance));
-                                                    this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                    this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
                                                 } else {
                                                     console.log("get " + element.token + " balance falied!");
                                                 }
@@ -2819,7 +2830,7 @@ export default {
                     getErc20Balance(this.walletAddress, element.address).then((response) => {
                         if (response.status) {
                             // console.log(element.token + " balance:" + String(response.balance));
-                            this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                            this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
                         } else {
                             console.log("get " + element.token + " balance falied!");
                         }
@@ -2871,7 +2882,7 @@ export default {
                         this.tokenObj.forEach(element => {
                             if (element.token == "ETH") {
                                 // console.log("eth balance:" + String(response.balance));
-                                element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                element.balance = this.formateNumber(ethers.formatEther(response.balance));
                             }
                         })
                     } else {
@@ -2936,7 +2947,7 @@ export default {
                     getErc20Balance(this.walletAddress, element.address).then((response) => {
                         if (response.status) {
                             // console.log(element.token + " balance:" + String(response.balance));
-                            this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                            this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
                         } else {
                             console.log("get " + element.token + " balance falied!");
                         }
@@ -3133,7 +3144,7 @@ export default {
                                                             verification_gas_limit: String(res.verificationGasLimit)
                                                         },
                                                         order_details: {
-                                                            limitAmountIn: String(ethers.utils.parseUnits(elem.limitAmountIn)),
+                                                            limitAmountIn: String(ethers.parseUnits(elem.limitAmountIn)),
                                                             sender: res.sender,
                                                             targetAddr: elem.targetAddr
                                                         }
@@ -3199,7 +3210,7 @@ export default {
                                                         beneficiary_addr: this.user,
                                                         op_action: "TRANSFER",
                                                             order_details: {
-                                                            amount_in: String(ethers.utils.parseUnits(elem.amount)),
+                                                            amount_in: String(ethers.parseUnits(elem.amount)),
                                                             amount_out: null,
                                                             amount_out_minimum: null,
                                                             fee: 0,
@@ -3240,7 +3251,7 @@ export default {
                                                                             this.tokenObj.forEach(element => {
                                                                                 if (element.token == "ETH") {
                                                                                     // console.log("eth balance:" + String(response.balance));
-                                                                                    element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                                                    element.balance = this.formateNumber(ethers.formatEther(response.balance));
                                                                                 }
                                                                             })
                                                                         } else {
@@ -3305,7 +3316,7 @@ export default {
                                                         beneficiary_addr: this.user,
                                                         op_action: "TRANSFER",
                                                         order_details: {
-                                                            amount_in: String(ethers.utils.parseUnits(elem.amount)),
+                                                            amount_in: String(ethers.parseUnits(elem.amount)),
                                                             amount_out: null,
                                                             amount_out_minimum: null,
                                                             fee: 0,
@@ -3346,7 +3357,7 @@ export default {
                                                                         getErc20Balance(this.walletAddress, element.address).then((response) => {
                                                                             if (response.status) {
                                                                                 // console.log(element.token + " balance:" + String(response.balance));
-                                                                                this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                                                this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
                                                                             } else {
                                                                                 console.log("get " + element.token + " balance falied!");
                                                                             }
@@ -3423,9 +3434,9 @@ export default {
                                                             beneficiary_addr: this.user,
                                                             op_action: "SWAP",
                                                             order_details: {
-                                                                amount_in: String(ethers.utils.parseUnits(elem.amountIn)),
-                                                                amount_out: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
-                                                                amount_out_minimum: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
+                                                                amount_in: String(ethers.parseUnits(elem.amountIn)),
+                                                                amount_out: String(ethers.parseUnits(elem.minimalAmountOut)),
+                                                                amount_out_minimum: String(ethers.parseUnits(elem.minimalAmountOut)),
                                                                 fee: 0,
                                                                 sender: this.walletAddress,
                                                                 token_in: this.contractAddrMap.get("eth"),
@@ -3465,7 +3476,7 @@ export default {
                                                                                 this.tokenObj.forEach(element => {
                                                                                     if (element.token == "ETH") {
                                                                                         // console.log("eth balance:" + String(response.balance));
-                                                                                        element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                                                        element.balance = this.formateNumber(ethers.formatEther(response.balance));
                                                                                     }
                                                                                 })
                                                                             } else {
@@ -3478,7 +3489,7 @@ export default {
                                                                             getErc20Balance(this.walletAddress, element.address).then((response) => {
                                                                                 if (response.status) {
                                                                                     // console.log(element.token + " balance:" + String(response.balance));
-                                                                                    this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                                                    this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
                                                                                 } else {
                                                                                     console.log("get " + element.token + " balance falied!");
                                                                                 }
@@ -3535,9 +3546,9 @@ export default {
                                                             beneficiary_addr: this.user,
                                                             op_action: "SWAP",
                                                             order_details: {
-                                                                amount_in: String(ethers.utils.parseUnits(elem.amountIn)),
-                                                                amount_out: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
-                                                                amount_out_minimum: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
+                                                                amount_in: String(ethers.parseUnits(elem.amountIn)),
+                                                                amount_out: String(ethers.parseUnits(elem.minimalAmountOut)),
+                                                                amount_out_minimum: String(ethers.parseUnits(elem.minimalAmountOut)),
                                                                 fee: 0,
                                                                 sender: this.walletAddress,
                                                                 token_in: elem.tokenIn,
@@ -3577,7 +3588,7 @@ export default {
                                                                                 this.tokenObj.forEach(element => {
                                                                                     if (element.token == "ETH") {
                                                                                         // console.log("eth balance:" + String(response.balance));
-                                                                                        element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                                                        element.balance = this.formateNumber(ethers.formatEther(response.balance));
                                                                                     }
                                                                                 })
                                                                             } else {
@@ -3590,7 +3601,7 @@ export default {
                                                                             getErc20Balance(this.walletAddress, element.address).then((response) => {
                                                                                 if (response.status) {
                                                                                     // console.log(element.token + " balance:" + String(response.balance));
-                                                                                    this.tokenObj[index].balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                                                                    this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
                                                                                 } else {
                                                                                     console.log("get " + element.token + " balance falied!");
                                                                                 }
@@ -3674,12 +3685,12 @@ export default {
                                                                 order_details: {
                                                                     // order_no: timeStamp,// timestamp
                                                                     token_in: this.contractAddrMap.get("eth"),
-                                                                    amount_in: String(ethers.utils.parseUnits(elem.amountIn)),
+                                                                    amount_in: String(ethers.parseUnits(elem.amountIn)),
                                                                     token_out: elem.tokenOut,
-                                                                    amount_out: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
+                                                                    amount_out: String(ethers.parseUnits(elem.minimalAmountOut)),
                                                                     fee: 0,
                                                                     sender: this.walletAddress,
-                                                                    amount_out_minimum: String(ethers.utils.parseUnits(elem.minimalAmountOut)),//String(ethers.utils.parseUnits(this.erc20LimitedAmount))
+                                                                    amount_out_minimum: String(ethers.parseUnits(elem.minimalAmountOut)),//String(ethers.parseUnits(this.erc20LimitedAmount))
                                                                 }
                                                             };
 
@@ -3755,12 +3766,12 @@ export default {
                                                                 },
                                                                 order_details: {
                                                                     token_in: elem.tokenIn,
-                                                                    amount_in: String(ethers.utils.parseUnits(elem.amountIn)),
+                                                                    amount_in: String(ethers.parseUnits(elem.amountIn)),
                                                                     token_out: this.contractAddrMap.get("eth"),
-                                                                    amount_out: String(ethers.utils.parseUnits(elem.minimalAmountOut)),
+                                                                    amount_out: String(ethers.parseUnits(elem.minimalAmountOut)),
                                                                     fee: 0,
                                                                     sender: this.walletAddress,
-                                                                    amount_out_minimum: String(ethers.utils.parseUnits(elem.minimalAmountOut)),//String(ethers.utils.parseUnits(this.ethLimitedAmount))
+                                                                    amount_out_minimum: String(ethers.parseUnits(elem.minimalAmountOut)),//String(ethers.parseUnits(this.ethLimitedAmount))
                                                                 }
                                                             };
                                                             console.log("obj string:", JSON.stringify(obj));
@@ -3813,7 +3824,7 @@ export default {
                         // console.log(element.token + " balance:" + response.balance.toNumber());
                         this.tokenObj.forEach(element => {
                             if (element.token == "ETH") {
-                                element.balance = this.formateNumber(ethers.utils.formatEther(response.balance));
+                                element.balance = this.formateNumber(ethers.formatEther(response.balance));
                             }
                         })
                     } else {

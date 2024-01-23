@@ -8,7 +8,7 @@ import BN from 'bn.js';
 import Web3 from 'web3';
 import bowser from "bowser";
 // import { storeWebBrowserFactor, keyToMnemonic, mnemonicToKey, COREKIT_STATUS } from "@web3auth/mpc-core-kit";
-import { TssShareType, getWebBrowserFactor, generateFactorKey, COREKIT_STATUS, keyToMnemonic, mnemonicToKey } from "@web3auth/mpc-core-kit";
+import { TssShareType, getWebBrowserFactor, generateFactorKey, COREKIT_STATUS, keyToMnemonic, mnemonicToKey, parseToken } from "@web3auth/mpc-core-kit";
 // web3auth
 import { Web3Auth } from "@web3auth/modal";
 import { web3auth, coreKitInstance } from "../main";
@@ -91,9 +91,32 @@ const bundler_address = "0x8e19ffB632A8e74F172cfe3082493ACfa8a1556B";
 //     return signedMessage;
 // }
 //##################################single factor login above##############################################
+async function reload() {
+    console.log("COREKIT_STATUS: ", COREKIT_STATUS);
+    console.log("current status: ", coreKitInstance.status);
+
+    if (coreKitInstance.status === COREKIT_STATUS.LOGGED_IN) {
+        const user = await coreKitInstance.getUserInfo();
+        console.log("User info", user);
+        const detail = await coreKitInstance.getKeyDetails();
+        console.log("key details", detail);
+    
+        const web3authProvider = await coreKitInstance.provider;
+        provider = new ethers.BrowserProvider(web3authProvider); 
+        signer = await provider.getSigner();
+        const userAccounts = await signer.getAddress();
+        console.log("userAccounts: ",userAccounts);
+        let platform = 0;// 0 represent normal platform, such as google
+        
+        return {
+            userAccounts: userAccounts, 
+            platform: platform
+        };
+    }
+    return;
+}
 
 async function login() {
-    // return;
     try {
         await coreKitInstance.loginWithOauth({
             subVerifierDetails: {
@@ -118,7 +141,7 @@ async function login() {
         const userAccounts = await signer.getAddress();
         console.log("userAccounts: ",userAccounts);
         let platform = 0;// 0 represent normal platform, such as google
-        
+
         return {
             userAccounts: userAccounts, 
             platform: platform
@@ -260,35 +283,6 @@ async function signTx(UserOperationWithoutSig, chainId) {
     let signature = await signer.signTypedData(domain, types, { ...UserOperationWithoutSig });
     console.log("signed message: ", signature);
     return signature;
-
-    // let content = "hello";
-    // const signedMessage = await signer.signMessage(JSON.stringify(UserOperationWithoutSig));
-    // console.log("signed message: ", signedMessage);
-    // return signedMessage;
-    
-    // const signer = await provider.getSigner();
-    // console.log("signer: ",signer);
-    // const fromAddress = await signer.getAddress();
-    // console.log("fromAddress: ",fromAddress);
-    // // let content = "["+JSON.stringify(UserOperationWithoutSig)+"]";
-    // // console.log("content: ",content);
-    // const originalMessage = [
-    //     { name: "sender", type: "address", vaule:  UserOperationWithoutSig.sender},
-    //     // { name: 'nonce', type: 'uint256' },
-    //     { name: "initCode", type: "bytes", vaule:  UserOperationWithoutSig.initCode},
-    //     { name: "callData", type: "bytes", vaule: UserOperationWithoutSig.callData},
-    //     { name: "callGasLimit", type: "uint256", vaule:  UserOperationWithoutSig.callGasLimit},
-    //     // { name: "verificationGasLimit", type: "uint256", vaule:  UserOperationWithoutSig.verificationGasLimit},
-    //     // { name: "preVerificationGas", type: "uint256", vaule:  UserOperationWithoutSig.preVerificationGas},
-    //     // { name: "maxFeePerGas", type: "uint256", vaule:  UserOperationWithoutSig.maxFeePerGas},
-    //     // { name: "maxPriorityFeePerGas", type: "uint256", vaule:  UserOperationWithoutSig.maxPriorityFeePerGas},
-    //     // { name: "paymasterAndData", type: "bytes", vaule: UserOperationWithoutSig.paymasterAndData},
-    //   ];
-    // const params = [originalMessage, fromAddress];
-    // const method = "eth_signTypedData";
-    // const signedMessage = await signer.provider.send(method, params);
-    // console.log("signedMessage: ",signedMessage);
-    // return signedMessage;
 }
 
 //获取 provider
@@ -1313,5 +1307,6 @@ export {
   resetAccount,
   enableMFA,
   RecoveryFactorKeyUsingMnemonic,
-  exportMnemonicFactor
+  exportMnemonicFactor,
+  reload
 }
