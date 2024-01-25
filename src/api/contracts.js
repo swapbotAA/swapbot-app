@@ -113,6 +113,15 @@ async function reload() {
             platform: platform
         };
     }
+    // reload metamask login
+    if (localStorage.getItem("userAccounts") != null) {
+        let platform = 1;// 1 represent web3 platform, such as metaMask
+        console.log("userAccounts: ", localStorage.getItem("userAccounts"));
+        return {
+            userAccounts: localStorage.getItem("userAccounts"), 
+            platform: platform
+        };
+    }
 
     return false;
 }
@@ -160,6 +169,9 @@ async function logout() {
     }
     try {
         await coreKitInstance.logout();
+        if (localStorage.getItem("userAccounts") != null) {
+            localStorage.removeItem("userAccounts");
+        }
     } catch (error) {
         console.log(error);
     }
@@ -295,6 +307,12 @@ async function getWeb3Provider() {
         // }
         provider = new ethers.BrowserProvider(window.ethereum, "any");
         signer = await provider.getSigner();
+        const userAccounts = await signer.getAddress();
+        console.log("user account: ", userAccounts);
+        console.log(localStorage.getItem("userAccounts"));
+        if (localStorage.getItem("userAccounts") == null) {
+            localStorage.setItem("userAccounts", userAccounts);
+        }
         // provider = new ethers.providers.Web3Provider(window.ethereum, "any");
     }
     // return window.web3Provider;
