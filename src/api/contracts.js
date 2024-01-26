@@ -2,6 +2,10 @@ import { ethers, BigNumber} from 'ethers6';
 import  Wallet from './abis/Wallet.json';
 import UniswapRouter from "./abis/UniswapRouter.json";
 import Uni from "./abis/Uni.json";
+import WETH9 from "./abis/Weth.json";
+import Usdc from "./abis/Usdc.json";
+import LinkToken from "./abis/Link.json";
+import Usdt from "./abis/Usdt.json";
 import SparkyAccountFactory from "./abis/SparkyAccountFactory.json";
 import EntryPoint from "./abis/EntryPoint.json";
 import BN from 'bn.js';
@@ -23,7 +27,10 @@ let mnemonicFactor = "";
 
 const wallet_address = "0x90CaF385c36b19d9f2BB9B5098398b6844eff8eB";
 const uniswapRouter_address = "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E";
-const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14","0x55979784068d1BEf37B49F41cAC8040A4b79C4a7","0x779877A7B0D9E8603169DdbD7836e478b4624789","0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0"];// [uni,weth,usdc,link,usdt]
+
+// [uni,weth,usdc,link,usdt]
+const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14","0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8","0x779877A7B0D9E8603169DdbD7836e478b4624789","0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0"];
+const abi_name_list = ["Uni", "Weth", "Usdc", "Link", "Usdt"];
 
 // ETH-Hangzhou branch begin
 const sparkyAccountFactory_address = "0x97e4Ac7528c1F797Fe5269B0EECCd25D897b3917";//"0xf8F3f05Bb80Ecd7cbF5925598966ea5C9C0857A1";//"0x81003ED6857971b34967dEC7C979a6d51C793Ef4";
@@ -344,8 +351,31 @@ async function initInstances() {
         for (let index = 0; index < erc20_address_list.length; index++) {
             const element = erc20_address_list[index];
             console.log("erc20_address_list "+index+": ",element);
-            let erc20Instance = new ethers.Contract(element, Uni.abi, provider);//.getSigner());
-            erc20InstanceList.push(erc20Instance);
+            if (element == "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984") {
+                console.log("init uni instance...");
+                let erc20Instance = new ethers.Contract(element, Uni.abi, provider);//.getSigner());
+                erc20InstanceList.push(erc20Instance);
+            }
+            if (element == "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14") {
+                console.log("init weth instance...");
+                let erc20Instance = new ethers.Contract(element, WETH9.abi, provider);//.getSigner());
+                erc20InstanceList.push(erc20Instance);
+            }
+            if (element == "0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8") {
+                console.log("init usdc instance...");
+                let erc20Instance = new ethers.Contract(element, Usdc.abi, provider);//.getSigner());
+                erc20InstanceList.push(erc20Instance);
+            }
+            if (element == "0x779877A7B0D9E8603169DdbD7836e478b4624789") {
+                console.log("init link instance...");
+                let erc20Instance = new ethers.Contract(element, LinkToken.abi, provider);//.getSigner());
+                erc20InstanceList.push(erc20Instance);
+            }
+            if (element == "0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0") {
+                console.log("init usdt instance...");
+                let erc20Instance = new ethers.Contract(element, Usdt.abi, provider);//.getSigner());
+                erc20InstanceList.push(erc20Instance);
+            }
         }
         
         console.log("wallet Instance: ",walletInstance);
@@ -392,6 +422,7 @@ async function getEthBalance(addr) {
 //get account balance ETH-Hangzhou
 async function getErc20Balance(addr, erc20Address) {
     let flag = null;
+    console.log("erc20Address: ", erc20Address);
     for (let index = 0; index < erc20_address_list.length; index++) {
         if(erc20_address_list[index] == erc20Address) {
             flag = index;
@@ -399,7 +430,7 @@ async function getErc20Balance(addr, erc20Address) {
     }
     if (flag == null) {
         console.log("Invalid erc20Address!");
-        return;
+        return { status: false, response: null };
     }
     let amount = await erc20InstanceList[flag].balanceOf(addr);
     console.log("erc20 amount: ",amount);

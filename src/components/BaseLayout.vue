@@ -1069,7 +1069,7 @@ export default {
                                         if (this.tokenObj.length == 0) {
                                             console.log("asset Address: ", element.Account);
                                             console.log("asset symbol: ", "ETH");
-                                            let tmpObj = { token: "ETH", address: element.Account, balance: 0 };
+                                            let tmpObj = { token: "ETH", address: element.Account, balance: "0.0" };
                                             this.tokenObj.push(tmpObj);
                                         }
                                     }
@@ -1095,7 +1095,7 @@ export default {
                                                 response.data.data.forEach(element => {
                                                     console.log("asset Address: ", element.Address);
                                                     console.log("asset symbol: ", element.Token);
-                                                    let tmpObj = { token: element.Token, address: element.Address, balance: 0 };
+                                                    let tmpObj = { token: element.Token, address: element.Address, balance: "0.0" };
                                                     this.tokenObj.push(tmpObj);
 
                                                 })
@@ -1313,7 +1313,7 @@ export default {
                                         if (this.tokenObj.length == 0) {
                                             console.log("asset Address: ", element.Account);
                                             console.log("asset symbol: ", "ETH");
-                                            let tmpObj = { token: "ETH", address: element.Account, balance: 0 };
+                                            let tmpObj = { token: "ETH", address: element.Account, balance: "0.0" };
                                             this.tokenObj.push(tmpObj);
                                         }
                                     }
@@ -1339,7 +1339,7 @@ export default {
                                                 response.data.data.forEach(element => {
                                                     console.log("asset Address: ", element.Address);
                                                     console.log("asset symbol: ", element.Token);
-                                                    let tmpObj = { token: element.Token, address: element.Address, balance: 0 };
+                                                    let tmpObj = { token: element.Token, address: element.Address, balance: "0.0" };
                                                     this.tokenObj.push(tmpObj);
 
                                                 })
@@ -2176,7 +2176,7 @@ export default {
                                                 if (this.tokenObj.length == 0) {
                                                     console.log("asset Address: ", element.Account);
                                                     console.log("asset symbol: ", "ETH");
-                                                    let tmpObj = { token: "ETH", address: element.Account, balance: 0 };
+                                                    let tmpObj = { token: "ETH", address: element.Account, balance: "0.0" };
                                                     this.tokenObj.push(tmpObj);
                                                 }
                                             }
@@ -2203,7 +2203,7 @@ export default {
                                                         response.data.data.forEach(element => {
                                                             console.log("asset Address: ", element.Address);
                                                             console.log("asset symbol: ", element.Token);
-                                                            let tmpObj = { token: element.Token, address: element.Address, balance: 0 };
+                                                            let tmpObj = { token: element.Token, address: element.Address, balance: "0.0" };
                                                             this.tokenObj.push(tmpObj);
 
                                                         })
@@ -2453,7 +2453,7 @@ export default {
                     if (this.tokenObj.length == 0) {
                         console.log("asset Address: ", this.walletAddress);
                         console.log("asset symbol: ", "ETH");
-                        let tmpObj = { token: "ETH", address: this.walletAddress, balance: 0 };
+                        let tmpObj = { token: "ETH", address: this.walletAddress, balance: "0.0" };
                         this.tokenObj.push(tmpObj);
                     }
                 }
@@ -2511,14 +2511,14 @@ export default {
                     if (response.data.code == 1000) {
                         // remove erc20 tokens but keep ETH
                         this.tokenObj = [];
-                        let tmpObj = { token: "ETH", address: this.walletAddress, balance: 0 };
+                        let tmpObj = { token: "ETH", address: this.walletAddress, balance: "0.0" };
                         this.tokenObj.push(tmpObj);
                         console.log("Successfully obtained user asset list.");
                         if (response.data.data != null && response.data.data.length > 0) {
                             response.data.data.forEach(element => {
                                 console.log("asset Address: ", element.Address);
                                 console.log("asset symbol: ", element.Token);
-                                tmpObj = { token: element.Token, address: element.Address, balance: 0 };
+                                tmpObj = { token: element.Token, address: element.Address, balance: "0.0" };
                                 this.tokenObj.push(tmpObj);
 
                             })
@@ -3001,7 +3001,7 @@ export default {
             if (this.addErc20Address != undefined && this.addErc20Symbol != undefined) {
                 console.log("addErc20Address: ", this.addErc20Address);
                 console.log("addCustomToken: ", this.addErc20Symbol);
-                let tmpObj = { token: this.addErc20Symbol, address: this.addErc20Address, balance: 0 };
+                let tmpObj = { token: this.addErc20Symbol, address: this.addErc20Address, balance: "0.0" };
                 this.tokenObj.push(tmpObj);
                 this.openNotification("success", "Successfully add new asset.");
                 // new asset info should be stored into asset list
