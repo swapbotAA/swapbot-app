@@ -1050,6 +1050,8 @@ export default {
                         if (response.data.code == 1000) {
                             console.log("Successfully obtained user smart contract account.");
                             if (response.data.data != null && response.data.data.length > 0) {
+                                let saltTemp = response.data.data[0].Salt;
+                                console.log("saltTemp: ", saltTemp);
                                 response.data.data.forEach(element => {
                                     this.walletObj.push(
                                         {
@@ -1059,10 +1061,10 @@ export default {
                                             salt: element.Salt
                                         }
                                     );
-                                    // default select first address
-                                    if (Number(element.Salt) == 0) {
+                                    // default select first address(which salt is the Minimum value)
+                                    if (Number(element.Salt) <= saltTemp) {
                                         this.walletAddress = element.Account;
-
+                                        
                                         // add first account address into asset list
                                         if (this.tokenObj.length == 0) {
                                             console.log("asset Address: ", element.Account);
@@ -1099,38 +1101,38 @@ export default {
                                                 })
                                             }
                                         }
-
+                                        this.queryOpAndOrders();
                                         // update erc20 balance
-                                        for (let index = 1; index < this.tokenObj.length; index++) {
-                                            const element = this.tokenObj[index];
-                                            getErc20Balance(this.walletAddress, element.address).then((response) => {
-                                                if (response.status) {
-                                                    // console.log(element.token + " balance:" + String(response.balance));
-                                                    this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
-                                                } else {
-                                                    console.log("get " + element.token + " balance falied!");
-                                                }
-                                            });
-                                        }
+                                        // for (let index = 1; index < this.tokenObj.length; index++) {
+                                        //     const element = this.tokenObj[index];
+                                        //     getErc20Balance(this.walletAddress, element.address).then((response) => {
+                                        //         if (response.status) {
+                                        //             // console.log(element.token + " balance:" + String(response.balance));
+                                        //             this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
+                                        //         } else {
+                                        //             console.log("get " + element.token + " balance falied!");
+                                        //         }
+                                        //     });
+                                        // }
                                     })
                                     .catch(error => {
                                         console.log(error);
                                     });
                                 // update  eth balance
-                                getEthBalance(this.walletAddress).then((response) => {
-                                    if (response.status) {
-                                        // console.log(element.token + " balance:" + response.balance.toNumber());
-                                        this.tokenObj.forEach(element => {
-                                            if (element.token == "ETH") {
-                                                element.balance = this.formateNumber(ethers.formatEther(response.balance));
-                                            }
-                                        })
-                                    } else {
-                                        console.log("get ETH balance failed!");
-                                    }
-                                });
+                                // getEthBalance(this.walletAddress).then((response) => {
+                                //     if (response.status) {
+                                //         // console.log(element.token + " balance:" + response.balance.toNumber());
+                                //         this.tokenObj.forEach(element => {
+                                //             if (element.token == "ETH") {
+                                //                 element.balance = this.formateNumber(ethers.formatEther(response.balance));
+                                //             }
+                                //         })
+                                //     } else {
+                                //         console.log("get ETH balance failed!");
+                                //     }
+                                // });
                                 // get operation history
-                                this.quertOpAndOrders();
+                                // this.queryOpAndOrders();
                             }
                         }
                     })
@@ -1225,7 +1227,7 @@ export default {
                                 console.log("Add copy order successfully!");
 
                                 // query op record
-                                this.quertOpAndOrders();
+                                this.queryOpAndOrders();
                             } else {
                                 this.openNotification("info", "Add copy order error! error: " + response.data.message);
                                 console.log("Add copy order error!");
@@ -1293,6 +1295,7 @@ export default {
                         if (response.data.code == 1000) {
                             console.log("Successfully obtained user smart contract account.");
                             if (response.data.data != null && response.data.data.length > 0) {
+                                let saltTemp = response.data.data[0].Salt;
                                 response.data.data.forEach(element => {
                                     this.walletObj.push(
                                         {
@@ -1303,7 +1306,7 @@ export default {
                                         }
                                     );
                                     // default select first address
-                                    if (Number(element.Salt) == 0) {
+                                    if (Number(element.Salt) <= saltTemp) {
                                         this.walletAddress = element.Account;
 
                                         // add first account address into asset list
@@ -1342,38 +1345,38 @@ export default {
                                                 })
                                             }
                                         }
-
+                                        this.queryOpAndOrders();
                                         // update erc20 balance
-                                        for (let index = 1; index < this.tokenObj.length; index++) {
-                                            const element = this.tokenObj[index];
-                                            getErc20Balance(this.walletAddress, element.address).then((response) => {
-                                                if (response.status) {
-                                                    // console.log(element.token + " balance:" + String(response.balance));
-                                                    this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
-                                                } else {
-                                                    console.log("get " + element.token + " balance falied!");
-                                                }
-                                            });
-                                        }
+                                        // for (let index = 1; index < this.tokenObj.length; index++) {
+                                        //     const element = this.tokenObj[index];
+                                        //     getErc20Balance(this.walletAddress, element.address).then((response) => {
+                                        //         if (response.status) {
+                                        //             // console.log(element.token + " balance:" + String(response.balance));
+                                        //             this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
+                                        //         } else {
+                                        //             console.log("get " + element.token + " balance falied!");
+                                        //         }
+                                        //     });
+                                        // }
                                     })
                                     .catch(error => {
                                         console.log(error);
                                     });
                                 // update  eth balance
-                                getEthBalance(this.walletAddress).then((response) => {
-                                    if (response.status) {
-                                        // console.log(element.token + " balance:" + response.balance.toNumber());
-                                        this.tokenObj.forEach(element => {
-                                            if (element.token == "ETH") {
-                                                element.balance = this.formateNumber(ethers.formatEther(response.balance));
-                                            }
-                                        })
-                                    } else {
-                                        console.log("get ETH balance failed!");
-                                    }
-                                });
+                                // getEthBalance(this.walletAddress).then((response) => {
+                                //     if (response.status) {
+                                //         // console.log(element.token + " balance:" + response.balance.toNumber());
+                                //         this.tokenObj.forEach(element => {
+                                //             if (element.token == "ETH") {
+                                //                 element.balance = this.formateNumber(ethers.formatEther(response.balance));
+                                //             }
+                                //         })
+                                //     } else {
+                                //         console.log("get ETH balance failed!");
+                                //     }
+                                // });
                                 // get operation history
-                                this.quertOpAndOrders();
+                                // this.queryOpAndOrders();
                             }
                         }
                     })
@@ -1417,7 +1420,7 @@ export default {
                 this.openLogoutHint = false;
             });  
         },
-        quertOpAndOrders () {
+        queryOpAndOrders () {
             axios.post('/api/v1/query_op_orders', {
                     sender: this.walletAddress
                 })
@@ -1448,7 +1451,7 @@ export default {
                                     if (symbol == null || element.Details.TokenIn == "0x0000000000000000000000000000000000000000") {
                                         symbol = "eth";
                                     }
-                                    let details = {tokenSymbol: symbol, amount: ethers.formatEther(element.Details.TokenInAmount)};
+                                    let details = {tokenSymbol: symbol, amount: ethers.formatEther(element.Details.TokenInAmount != "" ? element.Details.TokenInAmount : 0)};
                                     operation.action = element.Action;
                                     operation.details = details;
                                     
@@ -1479,7 +1482,7 @@ export default {
                                     if (symbolOut == null || element.Details.TokenOut == "0x0000000000000000000000000000000000000000") {
                                         symbolOut = "eth";
                                     }
-                                    let details = {tokenIn: symbolIn, amountIn: ethers.formatEther(element.Details.TokenInAmount), tokenOut: symbolOut};
+                                    let details = {tokenIn: symbolIn, amountIn: ethers.formatEther(element.Details.TokenInAmount != "" ? element.Details.TokenInAmount : 0), tokenOut: symbolOut};
                                     operation.action = element.Action;
                                     operation.details = details;
                                     
@@ -1511,7 +1514,7 @@ export default {
                                         symbolOut = "eth";
                                     }
 
-                                    let details = {tokenIn: symbolIn, amountIn: ethers.formatEther(element.Details.TokenInAmount), tokenOut: symbolOut, amountOut: ethers.formatEther(element.Details.TokenOutAmount)};
+                                    let details = {tokenIn: symbolIn, amountIn: ethers.formatEther(element.Details.TokenInAmount != "" ? element.Details.TokenInAmount : 0), tokenOut: symbolOut, amountOut: ethers.formatEther(element.Details.TokenOutAmount != "" ? element.Details.TokenOutAmount : 0)};
                                     operation.action = element.Action;
                                     operation.details = details;
                                     
@@ -1536,31 +1539,6 @@ export default {
                             });
                         }
                         console.log("operationHistory: ",this.operationHistory);
-                        // update eth balance
-                        getEthBalance(this.walletAddress).then((response) => {
-                        if (response.status) {
-                            this.tokenObj.forEach(element => {
-                            if (element.token == "ETH") {
-                                // console.log("eth balance:" + String(response.balance));
-                                element.balance = this.formateNumber(ethers.formatEther(response.balance));
-                            }
-                            })
-                        } else {
-                            console.log("get ETH balance falied!");
-                        }
-                        });
-                        // update  erc20 balance
-                        for (let index = 1; index < this.tokenObj.length; index++) {
-                        const element = this.tokenObj[index];
-                        getErc20Balance(this.walletAddress, element.address).then((response) => {
-                            if (response.status) {
-                            // console.log(element.token + " balance:" + String(response.balance));
-                            this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
-                            } else {
-                            console.log("get " + element.token + " balance falied!");
-                            }
-                        });
-                        }
 
                     } else {
                         console.log("error code: ", response.data.code);
@@ -1569,6 +1547,31 @@ export default {
                     .catch(error => {
                     console.log(error);
                     });
+            // update eth balance
+            getEthBalance(this.walletAddress).then((response) => {
+                if (response.status) {
+                    this.tokenObj.forEach(element => {
+                        if (element.token == "ETH") {
+                            // console.log("eth balance:" + String(response.balance));
+                            element.balance = this.formateNumber(ethers.formatEther(response.balance));
+                        }
+                    })
+                } else {
+                    console.log("get ETH balance falied!");
+                }
+            });
+            // update  erc20 balance
+            for (let index = 1; index < this.tokenObj.length; index++) {
+                const element = this.tokenObj[index];
+                getErc20Balance(this.walletAddress, element.address).then((response) => {
+                    if (response.status) {
+                    // console.log(element.token + " balance:" + String(response.balance));
+                    this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
+                    } else {
+                    console.log("get " + element.token + " balance falied!");
+                    }
+                });
+            }
         },
         scheduleTask() {
             const scheduleCronstyle = () => {
@@ -1576,7 +1579,7 @@ export default {
                 schedule.scheduleJob('*/1 * * * *', () => {
                 // console.log('scheduleCronstyle:' + new Date());
                 // query limited order status
-                this.quertOpAndOrders();
+                this.queryOpAndOrders();
                 });
             }
             scheduleCronstyle();
@@ -1666,7 +1669,7 @@ export default {
                                     console.log("successfully submit!");
 
                                     // query op record
-                                    this.quertOpAndOrders();
+                                    this.queryOpAndOrders();
                                 } else {
                                     this.openNotification("info", "Swap error! error: " + response.data.message);
                                     console.log("swap error!");
@@ -1736,7 +1739,7 @@ export default {
                                     console.log("successfully submit!");
 
                                     // query op record
-                                    this.quertOpAndOrders();
+                                    this.queryOpAndOrders();
                                 } else {
                                     this.openNotification("info", "Swap error! error: " + response.data.message);
                                     console.log("swap error!");
@@ -1835,7 +1838,7 @@ export default {
                                 this.openNotification("success", "Swap successfully!");
 
                                 // query op record
-                                this.quertOpAndOrders();
+                                this.queryOpAndOrders();
 
                                 setTimeout(() => {
                                     // update eth balance
@@ -1936,7 +1939,7 @@ export default {
                                 this.openNotification("success", "Swap successfully!");
 
                                 // query op record
-                                this.quertOpAndOrders();
+                                this.queryOpAndOrders();
 
                                 setTimeout(() => {
                                     // update eth balance
@@ -2155,6 +2158,7 @@ export default {
                                 if (response.data.code == 1000) {
                                     console.log("Successfully obtained user smart contract account.");
                                     if (response.data.data != null && response.data.data.length > 0) {
+                                        let saltTemp = response.data.data[0].Salt;
                                         response.data.data.forEach(element => {
                                             this.walletObj.push(
                                                 {
@@ -2165,7 +2169,7 @@ export default {
                                                 }
                                             );
                                             // default select first address
-                                            if (Number(element.Salt) == 0) {
+                                            if (Number(element.Salt) <= saltTemp) {
                                                 this.walletAddress = element.Account;
 
                                                 // add first account address into asset list as ETH
@@ -2205,39 +2209,39 @@ export default {
                                                         })
                                                     }
                                                 }
-
+                                                this.queryOpAndOrders();
                                                 // update erc20 balance
-                                                for (let index = 1; index < this.tokenObj.length; index++) {
-                                                    const element = this.tokenObj[index];
-                                                    getErc20Balance(this.walletAddress, element.address).then((response) => {
-                                                        if (response.status) {
-                                                            // console.log(element.token + " balance:" + String(response.balance));
-                                                            this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
-                                                        } else {
-                                                            console.log("get " + element.token + " balance falied!");
-                                                        }
-                                                    });
-                                                }
+                                                // for (let index = 1; index < this.tokenObj.length; index++) {
+                                                //     const element = this.tokenObj[index];
+                                                //     getErc20Balance(this.walletAddress, element.address).then((response) => {
+                                                //         if (response.status) {
+                                                //             // console.log(element.token + " balance:" + String(response.balance));
+                                                //             this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
+                                                //         } else {
+                                                //             console.log("get " + element.token + " balance falied!");
+                                                //         }
+                                                //     });
+                                                // }
                                             })
                                             .catch(error => {
                                                 console.log(error);
                                             });
                                         // update  eth balance
-                                        getEthBalance(this.walletAddress).then((response) => {
-                                            if (response.status) {
-                                                // console.log(element.token + " balance:" + response.balance.toNumber());
-                                                this.tokenObj.forEach(element => {
-                                                    if (element.token == "ETH") {
-                                                        element.balance = this.formateNumber(ethers.formatEther(response.balance));
-                                                    }
-                                                })
-                                            } else {
-                                                console.log("get ETH balance falied!");
-                                            }
-                                        });
+                                        // getEthBalance(this.walletAddress).then((response) => {
+                                        //     if (response.status) {
+                                        //         // console.log(element.token + " balance:" + response.balance.toNumber());
+                                        //         this.tokenObj.forEach(element => {
+                                        //             if (element.token == "ETH") {
+                                        //                 element.balance = this.formateNumber(ethers.formatEther(response.balance));
+                                        //             }
+                                        //         })
+                                        //     } else {
+                                        //         console.log("get ETH balance falied!");
+                                        //     }
+                                        // });
 
                                         // get operation history
-                                        this.quertOpAndOrders();
+                                        // this.queryOpAndOrders();
                                     }
                                 }
                             })
@@ -2367,7 +2371,7 @@ export default {
         //                         });
 
         //                         // get operation history
-        //                         this.quertOpAndOrders();
+        //                         this.queryOpAndOrders();
         //                     }
         //                 }
         //             })
@@ -2496,7 +2500,7 @@ export default {
                     element.address = this.walletAddress;
                 }
             })
-            console.log(this.tokenObj);
+            console.log("tokenObj: ", this.tokenObj);
             // return;
             // when user change wallet account, we need recall query_account_assets
             axios.post('/api/v1/query_account_assets', {
@@ -2519,41 +2523,41 @@ export default {
 
                             })
                         }
+                        this.queryOpAndOrders();
+                        // // update erc20 balance
+                        // for (let index = 1; index < this.tokenObj.length; index++) {
+                        //     const element = this.tokenObj[index];
+                        //     getErc20Balance(this.walletAddress, element.address).then((response) => {
+                        //         if (response.status) {
+                        //             console.log(element.token + " balance:" + String(response.balance));
+                        //             this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
+                        //         } else {
+                        //             console.log("get " + element.token + " balance falied!");
+                        //         }
+                        //     });
+                        // }
                     }
-
-                    // update erc20 balance
-                    for (let index = 1; index < this.tokenObj.length; index++) {
-                        const element = this.tokenObj[index];
-                        getErc20Balance(this.walletAddress, element.address).then((response) => {
-                            if (response.status) {
-                                // console.log(element.token + " balance:" + String(response.balance));
-                                this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
-                            } else {
-                                console.log("get " + element.token + " balance falied!");
-                            }
-                        });
-                    }
-                    this.orderData = [];
+                    // this.orderData = [];
                 })
                 .catch(error => {
                     console.log(error);
                 });
 
             // update eth balance
-            getEthBalance(this.walletAddress).then((response) => {
-                if (response.status) {
-                    this.tokenObj.forEach(element => {
-                        if (element.token == "ETH") {
-                            // console.log("eth balance:" + String(response.balance));
-                            element.balance = this.formateNumber(ethers.formatEther(response.balance));
-                        }
-                    })
-                } else {
-                    console.log("get ETH balance falied!");
-                }
-            });
+            // getEthBalance(this.walletAddress).then((response) => {
+            //     if (response.status) {
+            //         this.tokenObj.forEach(element => {
+            //             if (element.token == "ETH") {
+            //                 // console.log("eth balance:" + String(response.balance));
+            //                 element.balance = this.formateNumber(ethers.formatEther(response.balance));
+            //             }
+            //         })
+            //     } else {
+            //         console.log("get ETH balance falied!");
+            //     }
+            // });
             // get operation history
-            this.quertOpAndOrders();
+            // this.queryOpAndOrders();
         },
         showEthTransfer() {
             this.depositEthOpen = true;
@@ -2617,7 +2621,7 @@ export default {
                                 this.openNotification("success", "Transfer successfully!");
 
                                 // query op record
-                                this.quertOpAndOrders();
+                                this.queryOpAndOrders();
 
                                 setTimeout(() => {
                                     // update eth balance
@@ -2774,7 +2778,7 @@ export default {
                                     this.openNotification("success", "Transfer successfully!");
 
                                     // query op record
-                                    this.quertOpAndOrders();
+                                    this.queryOpAndOrders();
 
                                     setTimeout(() => {
                                         // update  erc20 balance
@@ -3166,7 +3170,7 @@ export default {
                                                                 console.log("Add copy order successfully!");
 
                                                                 // query op record
-                                                                this.quertOpAndOrders();
+                                                                this.queryOpAndOrders();
                                                             } else {
                                                                 this.openNotification("info", "Add copy order error! error: " + response.data.message);
                                                                 console.log("Add copy order error!");
@@ -3248,7 +3252,7 @@ export default {
                                                                 this.openNotification("success", "Transfer successfully!");
 
                                                                 // query op record
-                                                                this.quertOpAndOrders();
+                                                                this.queryOpAndOrders();
 
                                                                 setTimeout(() => {
                                                                     // update eth balance
@@ -3354,7 +3358,7 @@ export default {
                                                                 this.openNotification("success", "Transfer successfully!");
 
                                                                 // query op record
-                                                                this.quertOpAndOrders();
+                                                                this.queryOpAndOrders();
 
                                                                 setTimeout(() => {
                                                                     // update  erc20 balance
@@ -3473,7 +3477,7 @@ export default {
                                                                     this.openNotification("success", "Swap successfully!");
 
                                                                     // query op record
-                                                                    this.quertOpAndOrders();
+                                                                    this.queryOpAndOrders();
 
                                                                     setTimeout(() => {
                                                                         // update eth balance
@@ -3585,7 +3589,7 @@ export default {
                                                                     this.openNotification("success", "Swap successfully!");
 
                                                                     // query op record
-                                                                    this.quertOpAndOrders();
+                                                                    this.queryOpAndOrders();
 
                                                                     setTimeout(() => {
                                                                         // update eth balance
@@ -3711,7 +3715,7 @@ export default {
                                                                         console.log("successfully submit!");
 
                                                                         // query op record
-                                                                        this.quertOpAndOrders();
+                                                                        this.queryOpAndOrders();
                                                                     } else {
                                                                         this.openNotification("info", "Swap error! error: " + response.data.message);
                                                                         console.log("swap error!");
@@ -3791,7 +3795,7 @@ export default {
                                                                         console.log("successfully submit!");
 
                                                                         // query op record
-                                                                        this.quertOpAndOrders();
+                                                                        this.queryOpAndOrders();
                                                                     } else {
                                                                         this.openNotification("info", "Swap error! error: " + response.data.message);
                                                                         console.log("swap error!");

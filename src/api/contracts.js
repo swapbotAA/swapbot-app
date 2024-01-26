@@ -172,6 +172,13 @@ async function logout() {
         if (localStorage.getItem("userAccounts") != null) {
             localStorage.removeItem("userAccounts");
         }
+        // clear variables
+        provider = null;
+        signer = null;
+        
+        coreKitStatus = null;
+        backupFactorKey = "";
+        mnemonicFactor = "";
     } catch (error) {
         console.log(error);
     }
@@ -300,7 +307,7 @@ async function signTx(UserOperationWithoutSig, chainId) {
 
 //获取 provider
 async function getWeb3Provider() {
-
+    console.log("###provider###: ", provider);
     if (provider === null) {
         // if (!window.ethereum) {
         //     return null;
@@ -308,10 +315,10 @@ async function getWeb3Provider() {
         provider = new ethers.BrowserProvider(window.ethereum, "any");
         signer = await provider.getSigner();
         const userAccounts = await signer.getAddress();
-        console.log("user account: ", userAccounts);
-        console.log(localStorage.getItem("userAccounts"));
+        console.log("user account: ", userAccounts.toLowerCase());
+        console.log("localStorage userAccounts: ",localStorage.getItem("userAccounts"));
         if (localStorage.getItem("userAccounts") == null) {
-            localStorage.setItem("userAccounts", userAccounts);
+            localStorage.setItem("userAccounts", userAccounts.toLowerCase());
         }
         // provider = new ethers.providers.Web3Provider(window.ethereum, "any");
     }
