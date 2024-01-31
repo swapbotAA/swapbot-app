@@ -74,9 +74,10 @@
           <!-- <div style="color: black;">abc</div>
           <div style="color: black;">def</div> -->
           <div id="contentAsset" v-show="selectedKeys == 1">
+            <span class="menuTitle">Assets</span>
               <span ref="tokenList">
                   <span v-for="value in tokenObj">
-                      <a-button type="text" style="text-align: center; width: 100%; height: 100px; border-radius: 15px;"
+                      <a-button type="text" style="text-align: center; width: 105%; height: 50px; border-radius: 0px;margin-left: -10px;"
                           @click="showOperateDrawer(value)">
                           <DollarOutlined />
                           <span>{{ value.token }}</span><span>:&nbsp</span><span>{{ value.balance }}</span>
@@ -86,8 +87,22 @@
               <!-- @click="openNotification('success')" -->
               <a-button type="primary" shape="circle" @click="showAddErc20Drawer()" style="background: #80ddf3;">+</a-button>
           </div>
-
-          <div id="contentOperation" v-show="selectedKeys == 3">
+          <div id="chatManagement" v-show="selectedKeys == 2">
+            <span class="menuTitle">Chat List</span>
+            <a-button style="margin-top: 10px; width: 175px; background-color:#ccc; color: #f5f5f5;">+ create new chat</a-button>
+            <span>
+              <span v-for="value in chatObj">
+                <a-button type="text" style=" text-align: center; width: 100%; height: 40px; border-radius: 0px;">
+                    <CommentOutlined />
+                    <span style="width: 100px;">{{ value.title }}</span>
+                    <EditOutlined />
+                    <DeleteOutlined />
+                </a-button>  
+              </span>
+            </span>
+          </div>
+          <div id="operationHistory" v-show="selectedKeys == 3">
+            <span class="menuTitle">History</span>
               <span>
                   <a-list size="large" bordered :data-source="operationHistory"
                       style="margin-top: 5%; margin-bottom:8%; width: 90%; margin-left: 5%;text-align: left; background: #feecf9;">
@@ -175,6 +190,14 @@
                       </template>
                   </a-list>
               </span>
+          </div>
+          <div id="setting" v-show="selectedKeys == 4">
+            <span class="menuTitle">Setting</span>
+            <p style="font-size: 12px; font-weight: bolder; margin: 10px 55px 0px 10px;">Maximum slip point<a-input oninput="value=value.replace(/[^0-9.]/g,'')"
+                    v-model:value="slipPoint" placeholder="0" suffix="%" style="height: 35px; margin-top: 10px; width: 180px;" /></p>
+            <!-- <p style="font-size: medium;">Trade deadline<a-input oninput="value=value.replace(/[^0-9.]/g,'')"
+                    v-model:value="deadLine" placeholder="0" suffix="mins" style="height: 60px;" /></p>
+            <p style="font-size: medium;">Private Transaction &nbsp<a-switch v-model:checked="PriTxChecked" /></p> -->
           </div>
           <!--transfer token list modal windows ok-text="OK" cancel-text="CX" @ok="hideTransfer()"-->
           <a-modal v-model:open="openTransfer" title="Please select a token" footer="">
@@ -388,6 +411,12 @@
   </a-layout>
 </template>
 <style scoped lang="less">
+.menuTitle {
+  display: inline-block;
+  font-size: 15px;
+  font-weight: bolder;
+  margin: 10px 120px 10px 10px;
+}
 #components-layout-demo-side .logo {
   height: 32px;
   margin: 16px;
@@ -476,7 +505,7 @@
 </style>
 <script>
 import { ref } from 'vue';
-import { CommentOutlined, DollarOutlined, SettingOutlined, HistoryOutlined, PlusCircleOutlined } from '@ant-design/icons-vue';
+import { CommentOutlined, DollarOutlined, SettingOutlined, HistoryOutlined, PlusCircleOutlined,EditOutlined,DeleteOutlined } from '@ant-design/icons-vue';
 
 import { Modal, notification } from 'ant-design-vue';
 import { ethers, utils, BigNumber } from 'ethers6';
@@ -562,7 +591,9 @@ export default {
     DollarOutlined,
     SettingOutlined,
     HistoryOutlined,
-    PlusCircleOutlined
+    PlusCircleOutlined,
+    EditOutlined,
+    DeleteOutlined
   },
   data: () => {
     return {
@@ -693,6 +724,11 @@ export default {
       rateMap: rateMap,
       provider: null,
       platform: null,//sessionStorage['platform'] != null ? sessionStorage['platform'] : null,//1 represent web3 platform, such as metamask; 0 represent normal platform, such as google
+      chatObj: [
+        {title: "I want to tran..."},
+        {title: "I want to swap..."},
+        {title: "I want to copy..."}
+      ]
     }
   },
   created: function () {
@@ -1091,7 +1127,7 @@ export default {
         this.msglist = [{
           id: 1,
           type: 1,
-          content: 'Welcome！',
+          content: 'Welcome!',
           me: false
         }];
         this.walletAddress = null;
