@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <img class="head" src="../../assets/robot.svg"/>
+        <img class="head" src="../../assets/logo.svg"/>
 
         <div class="content">
             <div class="text" v-if="type===1">

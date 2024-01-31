@@ -1,6 +1,6 @@
 <template>
-  <a-layout style="min-height: 100vh">
-    <a-layout-header style="background: #f5f5f5; padding: 0; text-align: left; font-weight: bolder; font-size: 30px;">
+  <a-layout style="height: 100vh">
+    <a-layout-header style="height: 7vh; background: #f5f5f5; padding: 0; text-align: left; font-weight: bolder; font-size: 30px;">
       <img src="../assets/logo.svg" style="height: 55px;width: 55px; padding-left: 10px;">
       Sparky
       <img src="../assets/trumpet.svg" style="height: 20px;width: 20px; margin-left: 20px;">
@@ -30,11 +30,11 @@
           </label>
           <label>
             <a-button v-if="this.user == null" :loading="iconLoadingLogin" type="primary" danger
-              style="position: absolute; right: 10px; top: 15px;" @click="showLogin()">Login
+              style="position: absolute; right: 10px; top: 15px; background-color: #e8b0c3;" @click="showLogin()">Login
               <!-- <span v-if="this.user == null">Login</span>
                       <span v-else>{{ this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4) }}</span> -->
             </a-button>
-            <a-button v-if="this.user != null" type="primary" danger style="position: absolute; right: 10px; top: 15px;"
+            <a-button v-if="this.user != null" type="primary" danger style="position: absolute; right: 10px; top: 15px; background-color: #e8b0c3;"
               @click="showLogin()">
               {{ this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4) }}
               <!-- <span v-if="this.user == null">Login</span>
@@ -70,14 +70,14 @@
       </a-layout-sider>
       <a-layout>
         <a-layout-sider v-model:collapsed="collapsed" collapsible collapsedWidth="0" theme="light"
-          style="background: #ffeef9;">
+          style="background: white;">
           <!-- <div style="color: black;">abc</div>
           <div style="color: black;">def</div> -->
           <div id="contentAsset" v-show="selectedKeys == 1">
             <span class="menuTitle">Assets</span>
               <span ref="tokenList">
                   <span v-for="value in tokenObj">
-                      <a-button type="text" style="text-align: center; width: 105%; height: 50px; border-radius: 0px;margin-left: -10px;"
+                      <a-button type="text" style="text-align: center; width: 100%; height: 50px; border-radius: 0px;margin-left: 0px;"
                           @click="showOperateDrawer(value)">
                           <DollarOutlined />
                           <span>{{ value.token }}</span><span>:&nbsp</span><span>{{ value.balance }}</span>
@@ -105,7 +105,7 @@
             <span class="menuTitle">History</span>
               <span>
                   <a-list size="large" bordered :data-source="operationHistory"
-                      style="margin-top: 5%; margin-bottom:8%; width: 90%; margin-left: 5%;text-align: left; background: #feecf9;">
+                      style="margin-top: 5%; margin-bottom:8%; width: 90%; margin-left: 5%;text-align: left; background: white;">
                       <template #renderItem="{ item }">
                           <a-list-item>
                               <!--status.code: 0 pending 1 finish success-->
@@ -382,13 +382,14 @@
                 </span>
             </a-drawer>
         </a-layout-sider>
-        <a-layout-content style="min-height:86vh; background: linear-gradient(to right, #80ddf3, #7bebc3);">
+        <a-layout-content style="height:93vh; background: white;"><!--linear-gradient(to right, #80ddf3, #7bebc3)-->
           <div class="rightbar" ref="chatwindow">
             <div class="list" id="list" ref="list">
               <ul style="padding: 0; margin: 0;">
                 <li style="list-style: none;" v-for="(item, index) in msglist" :key="index">
                   <RightItem :id="item.id" :type="item.type" :content="item.content" v-if="item.me"></RightItem>
-                  <LeftItem :id="item.id" :type="item.type" :content="item.content" v-else></LeftItem>
+                  <!-- <LeftItem :id="item.id" :type="item.type" :content="item.content" v-else></LeftItem> -->
+                  <TypeWriter :id="item.id" :type="item.type" :contentList="item.content" v-else></TypeWriter>
                   <div v-scroll style="height: 0"></div>
                 </li>
               </ul>
@@ -516,6 +517,7 @@ import Chat from "./chatBot/Chat.vue";
 import LeftItem from "./chatBot/LeftItem.vue";
 import RightItem from "./chatBot/RightItem.vue";
 import MainPage from "./MainPage.vue";
+import TypeWriter from "./chatBot/TypeWriter.vue";
 import EthereumQRPlugin from 'ethereum-qr-code';
 import VueMetamask from 'vue-metamask';
 import { saveAs } from "file-saver";
@@ -593,7 +595,8 @@ export default {
     HistoryOutlined,
     PlusCircleOutlined,
     EditOutlined,
-    DeleteOutlined
+    DeleteOutlined,
+    TypeWriter
   },
   data: () => {
     return {
@@ -683,7 +686,8 @@ export default {
       msglist: [{
         id: 1,
         type: 1,
-        content: 'Welcome!',
+        content: ["Welcome!"],
+        // content: 'Itis also very simple to use and get started with. DOMPurify was started in February 2014 and, meanwhile, has reached version v3.0.8.',
         me: false
       }],
       tokenObj: [
@@ -728,7 +732,8 @@ export default {
         {title: "I want to tran..."},
         {title: "I want to swap..."},
         {title: "I want to copy..."}
-      ]
+      ],
+      // contentList: ["Itis also very simple to use and get started with. DOMPurify was started in February 2014 and, meanwhile, has reached version v3.0.8."]
     }
   },
   created: function () {
@@ -1127,7 +1132,7 @@ export default {
         this.msglist = [{
           id: 1,
           type: 1,
-          content: 'Welcome!',
+          content: ["Welcome!"],
           me: false
         }];
         this.walletAddress = null;
@@ -2784,7 +2789,7 @@ export default {
         this.msglist.push({
           id: this.msglist[this.msglist.length - 1].id + 1,
           type: 1,
-          content: this.text,
+          content: [this.text],
           me: true
         })
         // make user chat content at the bottom of chatwindow
@@ -2795,7 +2800,7 @@ export default {
           this.msglist.push({
             id: this.msglist[this.msglist.length - 1].id + 1,
             type: 1,
-            content: this.text,
+            content: [this.text],
             me: false
           });
         } else {
@@ -2815,14 +2820,24 @@ export default {
           if (res.data.length == 0) {
             return;
           }
+          let contentTmp = [];
           for (let index = 0; index < res.data.length; index++) {
-            // show response data in chat window
-            this.msglist.push({
+            contentTmp.push(res.data[index].text+"\n");
+          }
+          this.msglist.push({
               id: this.msglist[this.msglist.length - 1].id + 1,
               type: 1,
-              content: res.data[index].text,
+              content: contentTmp,
               me: false
-            });
+          });
+          for (let index = 0; index < res.data.length; index++) {
+            // show response data in chat window
+            // this.msglist.push({
+            //   id: this.msglist[this.msglist.length - 1].id + 1,
+            //   type: 1,
+            //   content: [res.data[index].text],
+            //   me: false
+            // });
             // make the latest content at the bottom of chatwindow
             console.log(this.$refs.list);
             this.$nextTick(() => {

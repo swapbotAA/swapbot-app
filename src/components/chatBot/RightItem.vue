@@ -4,7 +4,7 @@
              src="../../assets/user.svg"/>
         <div class="content">
             <div class="text" v-if="type===1" style="word-break: break-all;">
-                {{content}}
+                {{content[0]}}
             </div>
             <img class="img" :src="content" v-else-if="type===2"/>
         </div>
@@ -38,7 +38,7 @@
             margin-top: 10px;
 
             .text {
-                background-color: #eee;
+                // background-color: #eee;
                 border-bottom-left-radius: 10px;
                 padding: 5px 5px;
                 font-size: 14px;
