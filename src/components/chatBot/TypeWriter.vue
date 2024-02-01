@@ -1,20 +1,22 @@
 <template>
 	<div class="container">
         <img class="head" src="../../assets/logo.svg"/>
-
         <div class="content">
-			<div v-html="contentText" class="markdown leading-7">
+			<div v-if="contentText == '<LoadingOutlined/>'">
+				<LoadingOutlined/>
+			</div>
+			<div v-else v-html="contentText" class="markdown leading-7">
   			</div>
 			<!-- <div class="text">{{ contentText }}</div> -->
 				<!-- <div class="text" v-show="initPosition !== contentText.length" :style="{ display: initPosition % 2 == 0 || initPosition == total ? 'hidden' : 'inline-block' }">|</div> -->
         </div>
-
     </div>
 </template>
 
 <script>
 import {marked} from 'marked';
 import hljs from 'highlight.js';
+import {LoadingOutlined} from '@ant-design/icons-vue';
 marked.setOptions({
 			highlight: function (code, lang) {
 				try {
@@ -32,6 +34,9 @@ marked.setOptions({
 		});
 export default {
 	name: 'TypeWriter',
+	components: {
+		LoadingOutlined
+	},
 	props: {
 		contentList: {
 			type: Array,
@@ -43,6 +48,9 @@ export default {
 		},
 		uid: {
 			type: String | Number
+		},
+		loading: {
+			type: Boolean
 		}
 	},
 	data() {
@@ -72,9 +80,13 @@ export default {
 			const text = messageList.join('');
 			// me.initPosition =;
 			me.total = marked.parse(text).length;
-			console.log("messageList: ", text);
-			console.log("marked.setOptions: ", marked.parse(text));
-			me.getChatContent(marked.parse(text));
+			// console.log("messageList: ", text);
+			// console.log("marked.setOptions: ", marked.parse(text));
+			if (text == "<LoadingOutlined/>") {
+				me.contentText = text;
+			}else{
+				me.getChatContent(marked.parse(text));
+			}
 		},
 		// 逐字显示内容,text:全部聊天内容
 		getChatContent(text) {
@@ -85,6 +97,7 @@ export default {
 				// 判断是否全部拼接
 				if (me.initPosition == me.total) {
 					console.log(' me.total', me.total);
+					console.log(' me.contentText', me.contentText);
 					// 拼接内容
 					let nowStr = text.substring(0, me.initPosition);
 					me.contentText = nowStr;

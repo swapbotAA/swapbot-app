@@ -1,7 +1,7 @@
 <template>
   <a-layout style="height: 100vh">
     <a-layout-header style="height: 7vh; background: #f5f5f5; padding: 0; text-align: left; font-weight: bolder; font-size: 30px;">
-      <img src="../assets/logo.svg" style="height: 55px;width: 55px; padding-left: 10px;">
+      <img src="../assets/logo.svg" style="height: 55px;width: 55px; padding-left: 10px;  cursor: pointer" @click="homePage()">
       Sparky
       <img src="../assets/trumpet.svg" style="height: 20px;width: 20px; margin-left: 20px;">
       <span style="font-size: 15px; font-weight: 400; margin-left: 5px;">
@@ -389,17 +389,22 @@
                 <li style="list-style: none;" v-for="(item, index) in msglist" :key="index">
                   <RightItem :id="item.id" :type="item.type" :content="item.content" v-if="item.me"></RightItem>
                   <!-- <LeftItem :id="item.id" :type="item.type" :content="item.content" v-else></LeftItem> -->
-                  <TypeWriter :id="item.id" :type="item.type" :contentList="item.content" v-else></TypeWriter>
+                  <TypeWriter :id="item.id" :type="item.type" :contentList="item.content" :loading="iconLoadingLoginsend" v-else></TypeWriter>
                   <div v-scroll style="height: 0"></div>
                 </li>
               </ul>
             </div>
             <div class="bottom">
               <span class="input-send">
-                <img src="../assets/broom.svg" style="height: 25px;width: 25px; margin-right: 2%;">
+                <a-tooltip placement="leftBottom">
+                  <template #title>
+                    <span>Clear content</span>
+                  </template>
+                  <img src="../assets/broom.svg" style="height: 25px;width: 25px; margin-right: 2%;" @click="clearContent()">
+                </a-tooltip>
                 <label><a-input v-model:value="text" placeholder="Please type here..." class="input"
                     @keyup.enter="send" /></label>
-                <label><a-button type="primary" class="send" @click="send">Send</a-button></label>
+                <label><a-button :loading="iconLoadingLoginsend" type="primary" class="send" @click="send">Send</a-button></label>
               </span>
             </div>
           </div>
@@ -642,6 +647,7 @@ export default {
       iconLoadingLimited: ref(false),
       iconLoadingSend: ref(false),
       iconLoadingLogin: ref(false),
+      iconLoadingLoginsend: ref(false),
       // chat bot params
       text: '',
       mode: 'automatic',// or automatic manual
@@ -863,6 +869,15 @@ export default {
     });
   },
   methods: {
+    clearContent() {
+      console.log("clear chat content...");
+      this.msglist = [{
+        id: 1,
+        type: 1,
+        content: ["Welcome!"],
+        me: false
+      }];
+    },
     DeviceFactorKey() {
       try {
         getDeviceFactor().then(res => {
@@ -1848,6 +1863,9 @@ export default {
     browser() {
       window.open('https://sepolia.etherscan.io/address/' + this.walletAddress);
     },
+    homePage() {
+      window.open('https://www.sparkybot.xyz');
+    },
     async connect() {
       console.log("connect");
       if (this.user == null) {
@@ -2804,6 +2822,13 @@ export default {
             me: false
           });
         } else {
+          this.iconLoadingLoginsend = true;
+          this.msglist.push({
+              id: this.msglist[this.msglist.length - 1].id + 1,
+              type: 1,
+              content: ['<LoadingOutlined/>'],
+              me: false
+          });
           this.getResponse(this.text);
         }
         this.text = ''
@@ -2817,6 +2842,8 @@ export default {
       }).then(res => {
         if (res != null) {
           console.log(res);
+          this.iconLoadingLoginsend = false;
+          this.msglist.splice(this.msglist.length-1, 1);
           if (res.data.length == 0) {
             return;
           }
