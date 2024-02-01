@@ -1,16 +1,16 @@
 <template>
   <a-layout style="height: 100vh">
     <a-layout-header style="height: 7vh; background: #f5f5f5; padding: 0; text-align: left; font-weight: bolder; font-size: 30px;">
-      <img src="../assets/logo.svg" style="height: 55px;width: 55px; padding-left: 10px;  cursor: pointer" @click="homePage()">
+      <img src="../assets/logo.svg" style="height: 55px;width: 55px; padding-left: 10px;  padding-bottom: 5px; cursor: pointer" @click="homePage()">
       Sparky
-      <img src="../assets/trumpet.svg" style="height: 20px;width: 20px; margin-left: 20px;">
+      <!-- <img src="../assets/trumpet.svg" style="height: 20px;width: 20px; margin-left: 20px;"> -->
       <span style="font-size: 15px; font-weight: 400; margin-left: 5px;">
-        <label>
-          Sparky can make mistakes. Consider checking important information.
+        <label style="position: absolute; width: 1050px; height: 50px;margin-top: 5px; margin-left: 10px;">
+          <!-- <NoticeBar></NoticeBar> -->
         </label>
-        <label style="position: absolute;width: 1600px; right: 0%;">
-          <label>
-            <span style="position: absolute; width: 100px; right: 22%; top: 0px;">
+        <span style="position: absolute; width: 1600px; right: 0%;">
+          <label style="height:7vh; position: absolute; width: 100px; right: 26%; top: 0px;">
+            <span>
               <img src="../assets/sepolia.svg" style="height: 15px;width: 15px; margin-left: 0px;">
               SepoliaETH
             </span>
@@ -18,30 +18,78 @@
             SepoliaETH
             </a-button> -->
           </label>
-          <label>
+          <label style="height:7vh; padding-left: 10px;position: absolute;right: 9%;border-left-style: solid;border-left-color: rgb(204, 204, 204); border-left-width: thin;">
+            <!-- <a-dropdown v-if="this.walletAddress != null">
+              <a class="ant-dropdown-link" @click.prevent>
+                {{ this.walletAddress.substring(0, 10) + '...' + this.walletAddress.substring(this.walletAddress.length - 10) }}
+                <DownOutlined />
+              </a>
+              <template #overlay>
+                <a-menu @click="changeWallet">
+                  <a-menu-item v-for="item in walletObj" :key="item.value">{{ item.label.substring(0, 10) + '...' + item.label.substring(item.label.length - 10) }}</a-menu-item>
+                  
+                </a-menu>
+              </template>
+            </a-dropdown> -->
+            <!-- <a-dropdown v-else>
+              <a class="ant-dropdown-link" @click.prevent>
+                <DownOutlined />
+              </a>
+            </a-dropdown> -->
+            <PlusCircleOutlined style="padding-right: 10px;" @click="addWalletHint"/>
             <a-select :size="size" :default-value=walletObj[0] :key=walletObj[0]
-              style="position: absolute;width: 200px; right: 9%; margin-top: 15px;" @select="changeWallet">
+              style="width: 200px; border: 0px;" @select="changeWallet">
               <a-select-option style="text-align: center;" :value="item.value" :disabled="item.disabled"
                 v-for="item in walletObj" :key="item.value">{{ item.label }}</a-select-option>
             </a-select>
+            <a-dropdown :placement="'bottom'" >
+              <a class="ant-dropdown-link" @click.prevent>
+                <SmallDashOutlined style="padding-left: 10px;"/>
+              </a>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item :key="1" style="font-size: 15px;" @click="copyWalletAdd">copy address</a-menu-item>
+                  <a-menu-item :key="2" style="font-size: 15px;" @click="browser">view in etherscan</a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
             <!-- <a-button :loading="iconLoadingLogin" type="primary" danger style="position: absolute; width: 200px; right: 155px; top: 15px;" @click="">
               + abstract account address
             </a-button> -->
           </label>
-          <label>
-            <a-button v-if="this.user == null" :loading="iconLoadingLogin" type="primary" danger
-              style="position: absolute; right: 10px; top: 15px; background-color: #e8b0c3;" @click="showLogin()">Login
-              <!-- <span v-if="this.user == null">Login</span>
-                      <span v-else>{{ this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4) }}</span> -->
-            </a-button>
-            <a-button v-if="this.user != null" type="primary" danger style="position: absolute; right: 10px; top: 15px; background-color: #e8b0c3;"
+          <label style="height:7vh; padding-left: 10px;position: absolute;right: 25px;border-left-style: solid;border-left-color: rgb(204, 204, 204); border-left-width: thin;">
+            <a-dropdown v-if="this.user == null" :placement="'bottom'">
+              <a class="ant-dropdown-link" @click.prevent>
+                Login
+                <DownOutlined />
+              </a>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item :key="1" style="font-size: 15px;" @click="googleLogin">Google</a-menu-item>
+                  <a-menu-item :key="2" style="font-size: 15px;" @click="connect">MetaMask</a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+            <a-dropdown v-else :placement="'bottom'">
+              <a class="ant-dropdown-link" @click.prevent>
+                {{ this.user.substring(0, 4) + '...' + this.user.substring(this.user.length - 4) }}
+                <DownOutlined />
+              </a>
+              <template #overlay>
+                <a-menu @click="showLogin">
+                  <a-menu-item :key="1" style="font-size: 15px;">Logout</a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+            <!-- <a-button v-if="this.user == null" :loading="iconLoadingLogin" type="primary" danger
+              style="position: absolute; right: 10px; top: 15px; background-color: rgb(128, 221, 243);" @click="showLogin()">Login
+              </a-button>
+            <a-button v-if="this.user != null" type="primary" danger style="position: absolute; right: 10px; top: 15px; background-color: rgb(128, 221, 243);"
               @click="showLogin()">
               {{ this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4) }}
-              <!-- <span v-if="this.user == null">Login</span>
-                <span v-else>{{ this.user.substring(0, 5) + '...' + this.user.substring(this.user.length - 4) }}</span> -->
-            </a-button>
+              </a-button> -->
           </label>
-        </label>
+        </span>
       </span>
     </a-layout-header>
 
@@ -85,7 +133,8 @@
                   </span>
               </span>
               <!-- @click="openNotification('success')" -->
-              <a-button type="primary" shape="circle" @click="showAddErc20Drawer()" style="background: #80ddf3;">+</a-button>
+              <PlusCircleFilled style="padding-top: 10px;" @click="showAddErc20Drawer"/>
+              <!-- <a-button type="primary" shape="circle" @click="showAddErc20Drawer()" style="background: #80ddf3;">+</a-button> -->
           </div>
           <div id="chatManagement" v-show="selectedKeys == 2">
             <span class="menuTitle">Chat List</span>
@@ -485,7 +534,7 @@
       .send {
         width: 10%;
         height: 40px;
-        background-color: #e8b0c3;
+        // background-color: rgb(128, 221, 243);
         // right: 2%;
         // margin-top: 7px;
         // margin-right: 10px;
@@ -508,10 +557,18 @@
     border-radius: 30px;
     // margin-top: 10px;
 }
+
 </style>
 <script>
 import { ref } from 'vue';
-import { CommentOutlined, DollarOutlined, SettingOutlined, HistoryOutlined, PlusCircleOutlined,EditOutlined,DeleteOutlined } from '@ant-design/icons-vue';
+import { 
+        CommentOutlined, DollarOutlined, 
+        SettingOutlined, HistoryOutlined, 
+        PlusCircleOutlined,EditOutlined,
+        DeleteOutlined,DownOutlined,
+        DownCircleOutlined,SmallDashOutlined,
+        PlusCircleFilled
+       } from '@ant-design/icons-vue';
 
 import { Modal, notification } from 'ant-design-vue';
 import { ethers, utils, BigNumber } from 'ethers6';
@@ -523,6 +580,8 @@ import LeftItem from "./chatBot/LeftItem.vue";
 import RightItem from "./chatBot/RightItem.vue";
 import MainPage from "./MainPage.vue";
 import TypeWriter from "./chatBot/TypeWriter.vue";
+import NoticeBar from "./utils/NoticeBar.vue";
+
 import EthereumQRPlugin from 'ethereum-qr-code';
 import VueMetamask from 'vue-metamask';
 import { saveAs } from "file-saver";
@@ -588,20 +647,11 @@ rateMap.set("ethuni", "0x224Cc4e5b50036108C1d862442365054600c260C");// 0x1d42064
 export default {
   name: "BaseLayout",
   components: {
-    VueMetamask,
-    Chat,
-    ParticlesBg,
-    LeftItem,
-    RightItem,
-    MainPage,
-    CommentOutlined,
-    DollarOutlined,
-    SettingOutlined,
-    HistoryOutlined,
-    PlusCircleOutlined,
-    EditOutlined,
-    DeleteOutlined,
-    TypeWriter
+    VueMetamask,Chat,ParticlesBg,LeftItem,RightItem,MainPage,
+    CommentOutlined,DollarOutlined,SettingOutlined,HistoryOutlined,
+    PlusCircleOutlined,EditOutlined, DeleteOutlined,TypeWriter,
+    NoticeBar,DownOutlined,DownCircleOutlined,SmallDashOutlined,
+    PlusCircleFilled
   },
   data: () => {
     return {
