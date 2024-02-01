@@ -80,7 +80,8 @@ export default {
   word-break: keep-all;
   white-space: nowrap;
   overflow:hidden;
-  font-family: 微软雅黑; fontSize:14px;
+  font-family: 'Miriam Libre', sans-serif;
+  font-size:14px;
   background-color: #f5f5f5
 }
 ::-webkit-scrollbar {
