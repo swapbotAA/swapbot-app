@@ -25,6 +25,7 @@ let coreKitStatus = null;
 let backupFactorKey = "";
 let mnemonicFactor = "";
 
+// =====switch to Eth begin=====
 const wallet_address = "0x90CaF385c36b19d9f2BB9B5098398b6844eff8eB";
 const uniswapRouter_address = "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E";
 
@@ -32,11 +33,17 @@ const uniswapRouter_address = "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E";
 const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14","0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8","0x779877A7B0D9E8603169DdbD7836e478b4624789","0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0"];
 const abi_name_list = ["Uni", "Weth", "Usdc", "Link", "Usdt"];
 
-// ETH-Hangzhou branch begin
 const sparkyAccountFactory_address = "0x97e4Ac7528c1F797Fe5269B0EECCd25D897b3917";//"0xf8F3f05Bb80Ecd7cbF5925598966ea5C9C0857A1";//"0x81003ED6857971b34967dEC7C979a6d51C793Ef4";
 const entryPoint_address = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
 const sparkyPaymaster_address = "0x7BC827dF7aAdD95fCd1F670Bc2c36a860b4518AD";
-// ETH-Hangzhou branch end
+// =====end=====
+
+// =====switch to BSC begin=====
+// sparkyAccountFactory_address = ""
+// sparkyPaymaster_address = ""
+// const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14","0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8","0x779877A7B0D9E8603169DdbD7836e478b4624789","0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0"];
+// const abi_name_list = ["Uni", "Weth", "Usdc", "Link", "Usdt"];
+// =====end=====
 
 let walletInstance = null;
 let uniswapRouterInstance = null;
@@ -113,11 +120,14 @@ async function reload() {
         signer = await provider.getSigner();
         const userAccounts = await signer.getAddress();
         console.log("userAccounts: ",userAccounts);
+        const email = user.email;
+        console.log("email: ",email);
         let platform = 0;// 0 represent normal platform, such as google
 
         return {
             userAccounts: userAccounts, 
-            platform: platform
+            platform: platform,
+            emailAddress: email
         };
     }
     // reload metamask login
@@ -157,11 +167,14 @@ async function login() {
         signer = await provider.getSigner();
         const userAccounts = await signer.getAddress();
         console.log("userAccounts: ",userAccounts);
+        const email = user.email;
+        console.log("email: ",email);
         let platform = 0;// 0 represent normal platform, such as google
 
         return {
             userAccounts: userAccounts, 
-            platform: platform
+            platform: platform,
+            emailAddress: email
         };
     } catch (error) {
         console.log(error);

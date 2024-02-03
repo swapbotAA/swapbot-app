@@ -9,14 +9,11 @@
           <!-- <NoticeBar></NoticeBar> -->
         </label>
         <span style="position: absolute; width: 1600px; right: 0%;">
-          <label style="height:7vh; position: absolute; width: 100px; right: 26%; top: 0px;">
+          <label style="height:7vh; position: absolute; width: 100px; right: 23%; top: 0px;">
             <span>
-              <img src="../assets/sepolia.svg" style="height: 15px;width: 15px; margin-left: 0px;">
-              SepoliaETH
+              <img src="../assets/bsc.svg" style="height: 18px;width: 18px; margin-left: 0px;">
+              BSC
             </span>
-            <!-- <a-button :loading="iconLoadingLogin" type="primary" danger style="position: absolute; width: 100px; right: 385px; top: 15px;" @click="">
-            SepoliaETH
-            </a-button> -->
           </label>
           <label style="height:7vh; padding-left: 10px;position: absolute;right: 9%;border-left-style: solid;border-left-color: rgb(204, 204, 204); border-left-width: thin;">
             <!-- <a-dropdown v-if="this.walletAddress != null">
@@ -53,15 +50,13 @@
                 </a-menu>
               </template>
             </a-dropdown>
-            <!-- <a-button :loading="iconLoadingLogin" type="primary" danger style="position: absolute; width: 200px; right: 155px; top: 15px;" @click="">
-              + abstract account address
-            </a-button> -->
           </label>
           <label style="height:7vh; padding-left: 10px;position: absolute;right: 25px;border-left-style: solid;border-left-color: rgb(204, 204, 204); border-left-width: thin;">
             <a-dropdown v-if="this.user == null" placement="bottom">
               <a class="ant-dropdown-link" @click.prevent>
                 Login
-                <DownOutlined />
+                <DownOutlined v-if="iconLoadingLogin == false"/>
+                <LoadingOutlined v-else/>
               </a>
               <template #overlay>
                 <a-menu style="text-align: center;">
@@ -72,8 +67,8 @@
             </a-dropdown>
             <a-dropdown v-else placement="bottom">
               <a class="ant-dropdown-link" @click.prevent>
-                {{ this.user.substring(0, 4) + '...' + this.user.substring(this.user.length - 4) }}
-                <DownOutlined />
+                {{ this.platform == 0 ? this.emailAddress.substring(0, 4) + '...' + this.emailAddress.substring(this.emailAddress.length - 4) : this.user.substring(0, 4) + '...' + this.user.substring(this.user.length - 4) }}
+                <DownOutlined/>
               </a>
               <template #overlay>
                 <a-menu @click="showLogin" style="text-align: center;">
@@ -242,11 +237,17 @@
           </div>
           <div id="setting" v-show="selectedKeys == 4">
             <span class="menuTitle">Setting</span>
-            <p style="font-size: 12px; font-weight: bolder; margin: 10px 55px 0px 10px;">Maximum slip point<a-input oninput="value=value.replace(/[^0-9.]/g,'')"
-                    v-model:value="slipPoint" placeholder="0" suffix="%" style="height: 35px; margin-top: 10px; width: 180px;" /></p>
+            <p style="font-size: 12px; font-weight: bolder; margin: 10px 55px 10px 10px;">Maximum slip point</p>
             <!-- <p style="font-size: medium;">Trade deadline<a-input oninput="value=value.replace(/[^0-9.]/g,'')"
                     v-model:value="deadLine" placeholder="0" suffix="mins" style="height: 60px;" /></p>
             <p style="font-size: medium;">Private Transaction &nbsp<a-switch v-model:checked="PriTxChecked" /></p> -->
+            <a-row>
+              <a-col :span="15">
+                <a-slider v-model:value="slipPoint" :min="1" :max="100" />
+              </a-col>
+              <a-input oninput="value = Number(value.replace(/[^0-9.]/g,''))"
+                    v-model:value="slipPoint" placeholder="0" suffix="%" style="height: 35px; margin-left: 5px; width: 65px;" />
+            </a-row>
           </div>
           <!--transfer token list modal windows ok-text="OK" cancel-text="CX" @ok="hideTransfer()"-->
           <a-modal v-model:open="openTransfer" title="Please select a token" footer="">
@@ -412,15 +413,15 @@
                 </a-button>
               </div> -->
             </a-drawer>
-            <!--drawer of ERC20 adding-->
+            <!--drawer of asset adding-->
             <a-drawer v-model:open="addErc20Open" class="custom-class" root-class-name="root-class-name"
-                :root-style="{ color: 'blue' }" style="color: rgb(24, 18, 18)" title="Add ERC20" placement="bottom" height="230px"
+                :root-style="{ color: 'blue' }" style="color: rgb(24, 18, 18)" title="Add Asset" placement="bottom" height="230px"
                 @after-open-change="afterOpenChange">
                 <span style="position: absolute; width: 80%; left: 10%;line-height: 40px;">
                     <a-input oninput="value=value.replace(/[\W]/g,'')" v-model:value="addErc20Address"
-                        addon-before="erc20 token address" />
+                        addon-before="token address" />
                     <a-input oninput="value=value.replace(/[\W]/g,'')" v-model:value="addErc20Symbol"
-                        addon-before="erc20 token symbol" />
+                        addon-before="token symbol" />
 
                     <a-button type="primary" @click="addCustomToken()"
                         style="width: 150px;height: 40px;border: 0;border-radius: 5px;margin: 10px 3px;">
@@ -433,26 +434,26 @@
         </a-layout-sider>
         <a-layout-content style="height:93vh; background: white;"><!--linear-gradient(to right, #80ddf3, #7bebc3)-->
           <div class="rightbar" ref="chatwindow">
-            <div class="list" id="list" ref="list" v-if="greeting == false">
-              <ul style="padding: 0; margin: 0;">
+            <div class="list" id="list" ref="list">
+              <ul style="padding: 0; margin: 0;" v-if="greeting == false">
                 <li style="list-style: none;" v-for="(item, index) in msglist" :key="index">
                   <RightItem :id="item.id" :type="item.type" :content="item.content" v-if="item.me"></RightItem>
                   <!-- <LeftItem :id="item.id" :type="item.type" :content="item.content" v-else></LeftItem> -->
                   <TypeWriter :id="item.id" :type="item.type" :contentList="item.content" :loading="iconLoadingLoginsend" v-else></TypeWriter>
-                  <div v-scroll style="height: 0"></div>
+                  <!-- <div v-scroll style="height: 0"></div> -->
                 </li>
               </ul>
-            </div>
-            <div class="list" id="list" ref="list" v-if="greeting == true">
-              <img src="../assets/logo.svg" style="margin-top: 40%; width: 70px; height: 70px;">
-              <div style="font-size: 25px;font-weight: bolder; margin-top:10px; font-family: 'Miriam Libre', sans-serif;">How may I assist you with your Dex-trading journey?</div>
+              <ul style="padding: 0; margin: 0;" v-else>
+                <img src="../assets/logo.svg" style="margin-top: 30%; width: 70px; height: 70px;">
+                <div style="font-size: 25px;font-weight: bolder; margin-top:10px; font-family: 'Miriam Libre', sans-serif;">How may I assist you with your Dex-trading journey?</div>
+              </ul>
             </div>
             <div class="bottom">
               <div>
                 <a-tooltip placement="top">
                 <!-- <a-popover title="" trigger="hover"> -->
                   <template #title>
-                    <p style="height: 10px;">You can click button to chat quickly.</p>
+                    <p style="height: 10px;">Quick chat button</p>
                   </template>
                   <ExclamationCircleOutlined style="margin-right: 5px;"/>
                 <!-- </a-popover> -->
@@ -464,7 +465,13 @@
                   <template #title>
                     <span>Clear content</span>
                   </template>
-                  <img src="../assets/broom.svg" style="height: 25px;width: 25px; margin-right: 2%;" @click="clearContent()">
+                  <img src="../assets/broom.svg" style="height: 25px;width: 25px; margin-right: 1%;" @click="clearContent()">
+                </a-tooltip>
+                <a-tooltip placement="leftBottom">
+                  <template #title>
+                    <span>Restart chat</span>
+                  </template>
+                  <img src="../assets/restart.svg" style="height: 25px;width: 25px; margin-right: 1%;" @click="restartChat()">
                 </a-tooltip>
                 <label><a-input v-model:value="text" placeholder="Please type here..." class="input"
                     @keyup.enter="send" /></label>
@@ -482,6 +489,7 @@
 </template>
 <style scoped lang="less">
 .hotOperation {
+  margin-top: 20px;
   margin-bottom: 20px;
   margin-right: 5px;
 }
@@ -545,7 +553,7 @@
 
       .input {
         // padding-right: 10px;
-        width: 85%;
+        width: 80%;
         // left: 2%;
         height: 40px;
       }
@@ -579,14 +587,15 @@
 
 </style>
 <script>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { 
         CommentOutlined, DollarOutlined, 
         SettingOutlined, HistoryOutlined, 
         PlusCircleOutlined,EditOutlined,
         DeleteOutlined,DownOutlined,
         DownCircleOutlined,SmallDashOutlined,
-        PlusCircleFilled,ExclamationCircleOutlined
+        PlusCircleFilled,ExclamationCircleOutlined,
+        RedoOutlined,LoadingOutlined
        } from '@ant-design/icons-vue';
 
 import { Modal, notification } from 'ant-design-vue';
@@ -637,6 +646,9 @@ import {
 import { responseParser } from "../api/apiChat";
 import { getKeyThenIncreaseKey } from 'ant-design-vue/es/message';
 
+var dom;
+var observer;
+
 const schedule = require('node-schedule');
 const { toClipboard } = useClipboard();
 const axios = require('axios');
@@ -664,13 +676,37 @@ let rateMap = new Map();
 rateMap.set("ethuni", "0x224Cc4e5b50036108C1d862442365054600c260C");// 0x1d42064fc4beb5f8aaf85f4617ae8b3b5b8bd801
 
 export default {
-  name: "BaseLayout",
+  name: "LayoutTest",
+  setup() {
+    onMounted(() => {
+      dom = document.getElementById("list");
+      // Select the properties you want to observe
+      var config = {attributes: true, childList: true, subtree: true  };
+      console.log("---dom---: ", dom);
+      // callback function for operate dom when dom in changed
+      var callback = function (mutationsList) {
+        mutationsList.forEach(function (item, index) {
+          // console.log("this.$refs.list.scrollHeight: ",dom.scrollHeight);
+          dom.scrollTop = dom.scrollHeight;
+        });
+      };
+      // create a observer instance linking to callback
+      observer = new MutationObserver(callback);
+      // start observing target dom node
+      observer.observe(dom, config);
+    });
+    onUnmounted(() => {
+      // leave current route, destroy the observer
+      observer.disconnect();
+    });
+  },
   components: {
     VueMetamask,Chat,ParticlesBg,LeftItem,RightItem,MainPage,
     CommentOutlined,DollarOutlined,SettingOutlined,HistoryOutlined,
     PlusCircleOutlined,EditOutlined, DeleteOutlined,TypeWriter,
     NoticeBar,DownOutlined,DownCircleOutlined,SmallDashOutlined,
-    PlusCircleFilled,ExclamationCircleOutlined
+    PlusCircleFilled,ExclamationCircleOutlined,RedoOutlined,
+    LoadingOutlined
   },
   data: () => {
     return {
@@ -778,18 +814,18 @@ export default {
         // { label: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80a", value: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80a", disabled: false, salt: 1}
       ],
       operationHistory: [
-        // { action: "COPY_ORDER", details: { tokenSymbol: "", amount: "" }, status: { code: "active", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        // { action: "COPY_ORDER", details: { tokenSymbol: "", amount: "" }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        { action: "COPY_ORDER", details: { tokenSymbol: "", amount: "" }, status: { code: "active", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        { action: "COPY_ORDER", details: { tokenSymbol: "", amount: "" }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
         
-        // { action: "TRANSFER", details: { tokenSymbol: "ETH", amount: "100" }, status: { code: "success", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        // { action: "TRANSFER", details: { tokenSymbol: "ETH", amount: "" }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        // { action: "TRANSFER", details: { tokenSymbol: "ETH", amount: "" }, status: { code: "pending", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        // { action: "SWAP", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI" }, status: { code: "success", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        // { action: "SWAP", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI" }, status: { code: "pending", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        // { action: "SWAP", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI" }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        // { action: "LIMIT_ORDER", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI", amountOut: "0.1" }, status: { code: "success", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        // { action: "LIMIT_ORDER", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI", amountOut: "0.1"  }, status: { code: "pending", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        // { action: "LIMIT_ORDER", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI", amountOut: "0.1"  }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        { action: "TRANSFER", details: { tokenSymbol: "ETH", amount: "100" }, status: { code: "success", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        { action: "TRANSFER", details: { tokenSymbol: "ETH", amount: "" }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        { action: "TRANSFER", details: { tokenSymbol: "ETH", amount: "" }, status: { code: "pending", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        { action: "SWAP", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI" }, status: { code: "success", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        { action: "SWAP", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI" }, status: { code: "pending", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        { action: "SWAP", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI" }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        { action: "LIMIT_ORDER", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI", amountOut: "0.1" }, status: { code: "success", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        { action: "LIMIT_ORDER", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI", amountOut: "0.1"  }, status: { code: "pending", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        { action: "LIMIT_ORDER", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI", amountOut: "0.1"  }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
         
       ],
       operation: {
@@ -815,6 +851,7 @@ export default {
         "Is it a good time to buy eth?",
         "I wanna copy a transaction."
       ],
+      emailAddress: null,
       // contentList: ["Itis also very simple to use and get started with. DOMPurify was started in February 2014 and, meanwhile, has reached version v3.0.8."]
     }
   },
@@ -829,7 +866,9 @@ export default {
       console.log("user:", res.userAccounts);
       this.user = res.userAccounts;
       this.platform = res.platform;
-
+      if (this.platform == 0) {
+        this.emailAddress = res.emailAddress;
+      }
       console.log("this.user: ", this.user);
       if (this.user != null) {
         if (this.platform == 1) {
@@ -904,37 +943,10 @@ export default {
                       }
                     }
                     this.queryOpAndOrders();
-                    // update erc20 balance
-                    // for (let index = 1; index < this.tokenObj.length; index++) {
-                    //     const element = this.tokenObj[index];
-                    //     getErc20Balance(this.walletAddress, element.address).then((response) => {
-                    //         if (response.status) {
-                    //             // console.log(element.token + " balance:" + String(response.balance));
-                    //             this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
-                    //         } else {
-                    //             console.log("get " + element.token + " balance falied!");
-                    //         }
-                    //     });
-                    // }
                   })
                   .catch(error => {
                     console.log(error);
                   });
-                // update  eth balance
-                // getEthBalance(this.walletAddress).then((response) => {
-                //     if (response.status) {
-                //         // console.log(element.token + " balance:" + response.balance.toNumber());
-                //         this.tokenObj.forEach(element => {
-                //             if (element.token == "ETH") {
-                //                 element.balance = this.formateNumber(ethers.formatEther(response.balance));
-                //             }
-                //         })
-                //     } else {
-                //         console.log("get ETH balance failed!");
-                //     }
-                // });
-                // get operation history
-                // this.queryOpAndOrders();
               }
             }
           })
@@ -945,6 +957,29 @@ export default {
     });
   },
   methods: {
+    restartChat() {
+      if (this.walletAddress == null) {
+        this.openNotification("info", "Please login");
+        this.text = '';
+        return;
+      }
+      try {
+        axios.post('webhooks/rest/webhook', {
+        "sender": this.walletAddress,
+        "message": "/restart"
+        }).then(res => {
+          if (res != null) {
+            console.log(res);
+            if (res.data.length == 0) {
+              this.openNotification("info", "Chat has been reset.");
+            }
+          }
+        });
+      } catch (error) {
+        this.openNotification("error", "Reset failed.");
+        console.log("restart chat error: ", error);
+      }
+    },
     addChatContent(value) {
       console.log("hot operation: ", value);
       this.text = value;
@@ -1084,12 +1119,17 @@ export default {
         }
         console.log("userAccounts: ", response.userAccounts);
         console.log("platform: ", response.platform);
+        console.log("emailAddress: ", response.emailAddress);
         if (response.userAccounts != null) {
           this.user = response.userAccounts;
         }
 
         if (response.platform != null) {
           this.platform = response.platform;
+        }
+
+        if (response.emailAddress != null) {
+          this.emailAddress = response.emailAddress;
         }
         initInstances().then((response) => {
           if (response.status) {
@@ -1234,10 +1274,11 @@ export default {
         this.openNotification("info", "Log out.");
         this.openLogoutHint = false;
         this.greeting = true;
+        this.iconLoadingLogin = false;
       });
     },
     queryOpAndOrders() {
-      // return;
+      return;
       axios.post('/api/v1/query_op_orders', {
         sender: this.walletAddress
       })
@@ -2940,6 +2981,13 @@ export default {
                 content: contentTmp,
                 me: false
             });
+            // make the latest content at the bottom of chatwindow
+            // console.log("#ref list: ", this.$refs.list);
+            // this.$nextTick(() => {
+            //   console.log("#ref list scrollTop before: ", this.$refs.list.scrollTop);
+            //   this.$refs.list.scrollTop = this.$refs.list.scrollHeight;
+            //   console.log("#ref list scrollTop after: ", this.$refs.list.scrollTop);
+            // });
             for (let index = 0; index < res.data.length; index++) {
               // show response data in chat window
               // this.msglist.push({
@@ -2948,11 +2996,7 @@ export default {
               //   content: [res.data[index].text],
               //   me: false
               // });
-              // make the latest content at the bottom of chatwindow
-              console.log(this.$refs.list);
-              this.$nextTick(() => {
-                this.$refs.list.scrollTop = this.$refs.list.scrollHeight;
-              });
+              
               // resolve response data and call user operation
 
               let data = res.data[index];

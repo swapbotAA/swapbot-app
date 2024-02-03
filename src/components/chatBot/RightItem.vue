@@ -3,7 +3,7 @@
         <img class="head"
              src="../../assets/user.svg"/>
         <div class="content">
-            <div class="text" v-if="type===1" style="word-break: break-all;">
+            <div class="markdown leading-7" v-if="type===1" style="word-break: break-all;">
                 {{content[0]}}
             </div>
             <img class="img" :src="content" v-else-if="type===2"/>
