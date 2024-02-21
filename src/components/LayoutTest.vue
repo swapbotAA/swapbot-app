@@ -6,7 +6,7 @@
       <!-- <img src="../assets/trumpet.svg" style="height: 20px;width: 20px; margin-left: 20px;"> -->
       <span style="font-size: 15px; font-weight: 400; margin-left: 5px;">
         <label style="position: absolute; width: 1050px; height: 50px;margin-top: 5px; margin-left: 10px;">
-          <!-- <NoticeBar></NoticeBar> -->
+          <!-- <NoticeBar style="position: relative; width: 70%;"></NoticeBar> -->
         </label>
         <span style="position: absolute; width: 1600px; right: 0%;">
           <label style="height:7vh; position: absolute; width: 100px; right: 23%; top: 0px;">
@@ -112,8 +112,8 @@
         </a-menu>
       </a-layout-sider>
       <a-layout>
-        <a-layout-sider v-model:collapsed="collapsed" collapsible collapsedWidth="0" theme="light"
-          style="background: white;">
+        <a-layout-sider v-model:collapsed="collapsed" collapsible collapsedWidth="0.01" theme="light"
+          :style="{background: 'white', overflow: 'auto', }">
           <!-- <div style="color: black;">abc</div>
           <div style="color: black;">def</div> -->
           <div id="contentAsset" v-show="selectedKeys == 1">
@@ -148,7 +148,7 @@
           <div id="operationHistory" v-show="selectedKeys == 3">
             <span class="menuTitle">History</span>
               <span>
-                  <a-list size="large" bordered :data-source="operationHistory"
+                  <a-list size="large" :split="true" :data-source="operationHistory"
                       style="margin-top: 5%; margin-bottom:8%; width: 90%; margin-left: 5%;text-align: left; background: white;">
                       <template #renderItem="{ item }">
                           <a-list-item>
@@ -231,6 +231,9 @@
                                   <br /> 
                               </span>
                           </a-list-item>
+                      </template>
+                      <template #footer>
+                        <div>&nbsp</div>
                       </template>
                   </a-list>
               </span>
@@ -847,7 +850,7 @@ export default {
       ],
       hotOperations: [
         "What is going on in tech?",
-        "I wanna swap usdt for eth.",
+        "I wanna swap eth for uni.",
         "Is it a good time to buy eth?",
         "I wanna copy a transaction."
       ],
@@ -1278,7 +1281,7 @@ export default {
       });
     },
     queryOpAndOrders() {
-      return;
+      // return;
       axios.post('/api/v1/query_op_orders', {
         sender: this.walletAddress
       })

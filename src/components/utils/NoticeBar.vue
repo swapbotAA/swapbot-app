@@ -1,7 +1,7 @@
 <template>
   <div id="box" ref="box">
     <div class="marquee-box" ref="marquee" @mouseover="menter" @mouseleave="mleave">
-      <p ref="cmdlist" id="pWidth">
+      <p ref="cmdlist" id="pWidth" style="width: 1050px;">
         <img src="../../assets/trumpet.svg" style="height: 20px;width: 20px; margin-left: 20px;">
         Important note: Sparky is an experimental product at this moment, please do your own research and participate with small amount of tokens.
       </p>
@@ -65,9 +65,10 @@ export default {
 }
 .marquee-box  {
   position: relative;
-  width: 100%;
+  width: 60%;
   height: 100%;
   overflow:auto;
+  margin-left: 5%;
   background-color: #f5f5f5;
 }
 #pWidth{

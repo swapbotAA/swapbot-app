@@ -519,7 +519,13 @@ async function delegate(user, addr, chainId, platform, salt) {
         if (platform) {
             sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = window.confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
                 sig = await signTx(userOperationWithoutSig,chainId); 
             }else{
@@ -569,7 +575,13 @@ async function transferETH(user ,addr, toAddr, amount, salt, chainId, platform, 
         if (platform) {
             sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = window.confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
                 sig = await signTx(userOperationWithoutSig, chainId, signer); 
             }else{
@@ -632,7 +644,13 @@ async function transferErc20(user ,addr, toAddr, tokenAddr, amount, salt, chainI
         if (platform) {
             sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = window.confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
                 sig = await signTx(userOperationWithoutSig,chainId); 
             }else{
@@ -889,7 +907,13 @@ async function erc20ToEthDataOperationWrapper(user, addr, salt, tokenIn, tokenOu
         if (platform) {
             sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = window.confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
                 sig = await signTx(userOperationWithoutSig,chainId); 
             }else{
@@ -959,7 +983,13 @@ async function ethToErc20DataOperationWrapper(user, addr, salt, tokenIn, tokenOu
         if (platform) {
             sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = window.confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
                 sig = await signTx(userOperationWithoutSig,chainId); 
             }else{
@@ -1032,7 +1062,13 @@ async function ethToErc20LimitedDataOperationWrapper(user, addr, salt, tokenIn, 
         if (platform) {
             sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = window.confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
                 sig = await signTx(userOperationWithoutSig,chainId); 
             }else{
@@ -1102,7 +1138,13 @@ async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, 
         if (platform) {
             sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = window.confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
                 sig = await signTx(userOperationWithoutSig,chainId); 
             }else{

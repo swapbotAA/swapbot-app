@@ -113,7 +113,7 @@ export default {
 				// 未拼接完成的取字符串子串进行拼接更新
 				let nowStr = text.substring(0, me.initPosition);
 				me.contentText = nowStr;
-			}, 10);
+			}, 5);
 			me.timer = timer;
 		},
 		pause() {
