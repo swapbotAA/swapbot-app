@@ -850,8 +850,8 @@ export default {
       ],
       hotOperations: [
         "What is going on in tech?",
-        "I wanna swap eth for uni.",
-        "Is it a good time to buy eth?",
+        "I wanna swap bnb for usdt.",
+        "Is it a good time to buy bnb?",
         "I wanna copy a transaction."
       ],
       emailAddress: null,
