@@ -1,7 +1,7 @@
 <template>
   <div id="box" ref="box">
     <div class="marquee-box" ref="marquee" @mouseover="menter" @mouseleave="mleave">
-      <p ref="cmdlist" id="pWidth">
+      <p ref="cmdlist" id="pWidth" style="width: 1050px;">
         <img src="../../assets/trumpet.svg" style="height: 20px;width: 20px; margin-left: 20px;">
         Important note: Sparky is an experimental product at this moment, please do your own research and participate with small amount of tokens.
       </p>
@@ -23,12 +23,13 @@ export default {
   mounted() {
     let element = this.$refs.cmdlist;
     this.pwidth = document.defaultView.getComputedStyle(element,'').width.split('px');
+    console.log("------------this.pwidth--------: ", this.pwidth);
     this.timer = setInterval(this.clickCommend, 20);
   },
   
   watch:{
     value(newValue, oldValue) {
-      let allWidth= parseInt(this.windowWidth)+parseInt(this.pwidth[0]);
+      let allWidth= parseInt(this.windowWidth)+parseInt(this.pwidth[0]);//
       if(newValue <= -allWidth){
         this.$refs.cmdlist.style.marginLeft = this.windowWidth+"px";
         this.value = 0;
@@ -65,9 +66,10 @@ export default {
 }
 .marquee-box  {
   position: relative;
-  width: 100%;
+  width: 60%;
   height: 100%;
   overflow:auto;
+  margin-left: 5%;
   background-color: #f5f5f5;
 }
 #pWidth{

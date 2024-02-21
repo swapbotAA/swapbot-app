@@ -6,6 +6,11 @@ import WETH9 from "./abis/Weth.json";
 import Usdc from "./abis/Usdc.json";
 import LinkToken from "./abis/Link.json";
 import Usdt from "./abis/Usdt.json";
+
+import WBNB from "./bsc/WBNB.json";
+import BEP20USDT from "./bsc/BEP20USDT.json";
+import BEP20Ethereum from "./bsc/BEP20Ethereum.json";
+
 import SparkyAccountFactory from "./abis/SparkyAccountFactory.json";
 import EntryPoint from "./abis/EntryPoint.json";
 import BN from 'bn.js';
@@ -26,23 +31,22 @@ let backupFactorKey = "";
 let mnemonicFactor = "";
 
 // =====switch to Eth begin=====
-const wallet_address = "0x90CaF385c36b19d9f2BB9B5098398b6844eff8eB";
-const uniswapRouter_address = "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E";
+// -- const wallet_address = "0x90CaF385c36b19d9f2BB9B5098398b6844eff8eB";
+// -- const uniswapRouter_address = "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E";
 
-// [uni,weth,usdc,link,usdt]
-const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14","0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8","0x779877A7B0D9E8603169DdbD7836e478b4624789","0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0"];
-const abi_name_list = ["Uni", "Weth", "Usdc", "Link", "Usdt"];
-
-const sparkyAccountFactory_address = "0x97e4Ac7528c1F797Fe5269B0EECCd25D897b3917";//"0xf8F3f05Bb80Ecd7cbF5925598966ea5C9C0857A1";//"0x81003ED6857971b34967dEC7C979a6d51C793Ef4";
-const entryPoint_address = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
-const sparkyPaymaster_address = "0x7BC827dF7aAdD95fCd1F670Bc2c36a860b4518AD";
+// const sparkyAccountFactory_address = "0x97e4Ac7528c1F797Fe5269B0EECCd25D897b3917";//"0xf8F3f05Bb80Ecd7cbF5925598966ea5C9C0857A1";//"0x81003ED6857971b34967dEC7C979a6d51C793Ef4";
+// const entryPoint_address = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
+// const sparkyPaymaster_address = "0x7BC827dF7aAdD95fCd1F670Bc2c36a860b4518AD";
+// const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14","0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8","0x779877A7B0D9E8603169DdbD7836e478b4624789","0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0"];
+// const abi_name_list = ["Uni", "Weth", "Usdc", "Link", "Usdt"];
 // =====end=====
 
 // =====switch to BSC begin=====
-// sparkyAccountFactory_address = ""
-// sparkyPaymaster_address = ""
-// const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14","0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8","0x779877A7B0D9E8603169DdbD7836e478b4624789","0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0"];
-// const abi_name_list = ["Uni", "Weth", "Usdc", "Link", "Usdt"];
+const sparkyAccountFactory_address = "0x128Cc7cE4a50905a58C01bC3b4DBCe816722496f";
+const entryPoint_address = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
+const sparkyPaymaster_address = "0xbbf04ef94e5bd84c24ad4b7d9707a9867acd642b";
+const erc20_address_list = ["0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c","0x55d398326f99059fF775485246999027B3197955","0x2170Ed0880ac9A755fd29B2688956BD959F933F8","0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56","0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9","0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d","0xBf5140A22578168FD562DCcF235E5D43A02ce9B1"];
+const abi_name_list = ["WBNB", "USDT", "ETH", "BUSD", "TUSD", "USDC", "UNI"];
 // =====end=====
 
 let walletInstance = null;
@@ -52,7 +56,7 @@ let erc20InstanceList = [];
 let sparkyAccountFactoryInstance = null;
 let entryPointInstance = null;
 
-const bundler_address = "0x8e19ffB632A8e74F172cfe3082493ACfa8a1556B";
+const bundler_address = "0x25E9EdafC8e46C39938F33de391758F9cF45D561";
 // async function login() {
 
 //     // alert('Button cliked!');
@@ -300,9 +304,10 @@ async function signTx(UserOperationWithoutSig, chainId) {
     const domain = {
         name: 'SparkyAccount',
         version: '1',
-        chainId: chainId,
+        chainId: '56',//chainId,
         verifyingContract: UserOperationWithoutSig.sender
     };
+    console.log("domain: ", domain);
     const types = {
         UserOperationWithoutSig: [
             { name: 'sender', type: 'address' },
@@ -354,41 +359,68 @@ async function initInstances() {
         if (erc20InstanceList.length > 0) {
             erc20InstanceList = [];
         }
-        walletInstance = new ethers.Contract(wallet_address, Wallet.abi, provider);//.getSigner());
-        uniswapRouterInstance = new ethers.Contract(uniswapRouter_address, UniswapRouter.abi, provider);//.getSigner());
+        // walletInstance = new ethers.Contract(wallet_address, Wallet.abi, provider);//.getSigner());
+        // uniswapRouterInstance = new ethers.Contract(uniswapRouter_address, UniswapRouter.abi, provider);//.getSigner());
         entryPointInstance = new ethers.Contract(entryPoint_address, EntryPoint.abi, provider);//.getSigner());
-        // ETH-Hangzhou branch begin
         sparkyAccountFactoryInstance = new ethers.Contract(sparkyAccountFactory_address, SparkyAccountFactory.abi, provider);//.getSigner());
-        // ETH-Hangzhou branch end
 
+        // for (let index = 0; index < erc20_address_list.length; index++) {
+        //     const element = erc20_address_list[index];
+        //     console.log("erc20_address_list "+index+": ",element);
+        //     if (element == "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984") {
+        //         console.log("init uni instance...");
+        //         let erc20Instance = new ethers.Contract(element, Uni.abi, provider);//.getSigner());
+        //         erc20InstanceList.push(erc20Instance);
+        //     }
+        //     if (element == "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14") {
+        //         console.log("init weth instance...");
+        //         let erc20Instance = new ethers.Contract(element, WETH9.abi, provider);//.getSigner());
+        //         erc20InstanceList.push(erc20Instance);
+        //     }
+        //     if (element == "0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8") {
+        //         console.log("init usdc instance...");
+        //         let erc20Instance = new ethers.Contract(element, Usdc.abi, provider);//.getSigner());
+        //         erc20InstanceList.push(erc20Instance);
+        //     }
+        //     if (element == "0x779877A7B0D9E8603169DdbD7836e478b4624789") {
+        //         console.log("init link instance...");
+        //         let erc20Instance = new ethers.Contract(element, LinkToken.abi, provider);//.getSigner());
+        //         erc20InstanceList.push(erc20Instance);
+        //     }
+        //     if (element == "0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0") {
+        //         console.log("init usdt instance...");
+        //         let erc20Instance = new ethers.Contract(element, Usdt.abi, provider);//.getSigner());
+        //         erc20InstanceList.push(erc20Instance);
+        //     }
+        // }
         for (let index = 0; index < erc20_address_list.length; index++) {
             const element = erc20_address_list[index];
             console.log("erc20_address_list "+index+": ",element);
-            if (element == "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984") {
-                console.log("init uni instance...");
-                let erc20Instance = new ethers.Contract(element, Uni.abi, provider);//.getSigner());
+            if (element == "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c") {
+                console.log("init WBNB instance...");
+                let erc20Instance = new ethers.Contract(element, WBNB.abi, provider);//.getSigner());
                 erc20InstanceList.push(erc20Instance);
             }
-            if (element == "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14") {
-                console.log("init weth instance...");
-                let erc20Instance = new ethers.Contract(element, WETH9.abi, provider);//.getSigner());
+            if (element == "0x55d398326f99059fF775485246999027B3197955") {
+                console.log("init USDT instance...");
+                let erc20Instance = new ethers.Contract(element, BEP20USDT.abi, provider);//.getSigner());
                 erc20InstanceList.push(erc20Instance);
             }
-            if (element == "0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8") {
-                console.log("init usdc instance...");
-                let erc20Instance = new ethers.Contract(element, Usdc.abi, provider);//.getSigner());
-                erc20InstanceList.push(erc20Instance);
-            }
-            if (element == "0x779877A7B0D9E8603169DdbD7836e478b4624789") {
-                console.log("init link instance...");
-                let erc20Instance = new ethers.Contract(element, LinkToken.abi, provider);//.getSigner());
-                erc20InstanceList.push(erc20Instance);
-            }
-            if (element == "0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0") {
-                console.log("init usdt instance...");
-                let erc20Instance = new ethers.Contract(element, Usdt.abi, provider);//.getSigner());
-                erc20InstanceList.push(erc20Instance);
-            }
+            // if (element == "0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8") {
+            //     console.log("init usdc instance...");
+            //     let erc20Instance = new ethers.Contract(element, Usdc.abi, provider);//.getSigner());
+            //     erc20InstanceList.push(erc20Instance);
+            // }
+            // if (element == "0x779877A7B0D9E8603169DdbD7836e478b4624789") {
+            //     console.log("init link instance...");
+            //     let erc20Instance = new ethers.Contract(element, LinkToken.abi, provider);//.getSigner());
+            //     erc20InstanceList.push(erc20Instance);
+            // }
+            // if (element == "0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0") {
+            //     console.log("init usdt instance...");
+            //     let erc20Instance = new ethers.Contract(element, Usdt.abi, provider);//.getSigner());
+            //     erc20InstanceList.push(erc20Instance);
+            // }
         }
         
         console.log("wallet Instance: ",walletInstance);
@@ -441,6 +473,7 @@ async function getErc20Balance(addr, erc20Address) {
             flag = index;
         }
     }
+    console.log("===flag===: ", flag);
     if (flag == null) {
         console.log("Invalid erc20Address!");
         return { status: false, response: null };
@@ -508,10 +541,10 @@ async function delegate(user, addr, chainId, platform, salt) {
             initCode, 
             calldata,
             300000, // You can use this value temporarily, and then increase it
-            VerificationGasLimit, // You can use this value temporarily, and then increase it
+            3500000,//VerificationGasLimit, // You can use this value temporarily, and then increase it
             100000, // You can use this value temporarily, and then increase it
-            String(Math.round(1*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
-            ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
+            feeData.maxFeePerGas == null ? ethers.formatUnits(3600000000, "wei") : String(Math.round(1*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
+            feeData.maxPriorityFeePerGas == null ? ethers.formatUnits(3000000000, "wei") : ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address, // sparkyPaymaster address
         );
         // user sign 
@@ -519,7 +552,13 @@ async function delegate(user, addr, chainId, platform, salt) {
         if (platform) {
             sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = window.confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
                 sig = await signTx(userOperationWithoutSig,chainId); 
             }else{
@@ -560,8 +599,8 @@ async function transferETH(user ,addr, toAddr, amount, salt, chainId, platform, 
             300000, // You can use this value temporarily, and then increase it
             300000, // You can use this value temporarily, and then increase it
             100000, // You can use this value temporarily, and then increase it
-            String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
-            ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
+            feeData.maxFeePerGas == null ? ethers.formatUnits(3600000000, "wei") : String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
+            feeData.maxPriorityFeePerGas == null ? ethers.formatUnits(3000000000, "wei") : ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address, // sparkyPaymaster address
         );
         // user sign 
@@ -569,7 +608,13 @@ async function transferETH(user ,addr, toAddr, amount, salt, chainId, platform, 
         if (platform) {
             sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = window.confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
                 sig = await signTx(userOperationWithoutSig, chainId, signer); 
             }else{
@@ -623,8 +668,8 @@ async function transferErc20(user ,addr, toAddr, tokenAddr, amount, salt, chainI
             300000, // You can use this value temporarily, and then increase it
             300000, // You can use this value temporarily, and then increase it
             100000, // You can use this value temporarily, and then increase it
-            String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
-            ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
+            feeData.maxFeePerGas == null ? ethers.formatUnits(3600000000, "wei") : String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
+            feeData.maxPriorityFeePerGas == null ? ethers.formatUnits(3000000000, "wei") : ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address, // sparkyPaymaster address
         );
         // user sign 
@@ -632,7 +677,13 @@ async function transferErc20(user ,addr, toAddr, tokenAddr, amount, salt, chainI
         if (platform) {
             sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = window.confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
                 sig = await signTx(userOperationWithoutSig,chainId); 
             }else{
@@ -773,8 +824,8 @@ async function withdrawETH(user, addr, salt, wethAddr, amount, chainId, callback
             300000, // You can use this value temporarily, and then increase it
             300000, // You can use this value temporarily, and then increase it
             100000, // You can use this value temporarily, and then increase it
-            String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
-            ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
+            feeData.maxFeePerGas == null ? ethers.formatUnits(1200000000, "wei") : String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
+            feeData.maxPriorityFeePerGas == null ? ethers.formatUnits(1000000000, "wei") : ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address, // sparkyPaymaster address
         );
         // user sign 
@@ -822,8 +873,8 @@ async function withdrawERC20(user, addr, salt, uniAddr, rawAmount, chainId, call
             300000, // You can use this value temporarily, and then increase it
             300000, // You can use this value temporarily, and then increase it
             100000, // You can use this value temporarily, and then increase it
-            String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
-            ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
+            feeData.maxFeePerGas == null ? ethers.formatUnits(1200000000, "wei") : String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
+            feeData.maxPriorityFeePerGas == null ? ethers.formatUnits(1000000000, "wei") : ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address, // sparkyPaymaster address
         );
         // user sign 
@@ -880,8 +931,8 @@ async function erc20ToEthDataOperationWrapper(user, addr, salt, tokenIn, tokenOu
             300000,
             300000,
             100000,
-            String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
-            ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
+            feeData.maxFeePerGas == null ? ethers.formatUnits(3600000000, "wei") : String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
+            feeData.maxPriorityFeePerGas == null ? ethers.formatUnits(3000000000, "wei") : ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address,
         );
         // user sign 
@@ -889,7 +940,13 @@ async function erc20ToEthDataOperationWrapper(user, addr, salt, tokenIn, tokenOu
         if (platform) {
             sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = window.confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
                 sig = await signTx(userOperationWithoutSig,chainId); 
             }else{
@@ -942,16 +999,18 @@ async function ethToErc20DataOperationWrapper(user, addr, salt, tokenIn, tokenOu
         // function execute(dest,value,func)
         // dest is func call destination address，here is ROUTER address，value is tranfer amount，func_swap is calldata
         let calldata = createCallData("execute", [routerAddress, amountInBig, func_swap]);
+        // adapt bsc
+        // let calldata = createCallData("exactInputSingle", [routerAddress, amountInBig, func_swap]);
         let userOperationWithoutSig = new UserOperationWithoutSig(
             addr,
             // nonce,
             initCode,
             calldata,
             300000,
-            300000,
+            3500000,//300000,
             100000,
-            String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
-            ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
+            feeData.maxFeePerGas == null ? ethers.formatUnits(3600000000, "wei") : String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
+            feeData.maxPriorityFeePerGas == null ? ethers.formatUnits(3000000000, "wei") : ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address,
         );
         // user sign 
@@ -959,7 +1018,13 @@ async function ethToErc20DataOperationWrapper(user, addr, salt, tokenIn, tokenOu
         if (platform) {
             sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = window.confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
                 sig = await signTx(userOperationWithoutSig,chainId); 
             }else{
@@ -1021,10 +1086,10 @@ async function ethToErc20LimitedDataOperationWrapper(user, addr, salt, tokenIn, 
             initCode,
             calldata,
             300000,
-            300000,
+            3500000,//300000,
             100000,
-            String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
-            ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
+            feeData.maxFeePerGas == null ? ethers.formatUnits(3600000000, "wei") : String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
+            feeData.maxPriorityFeePerGas == null ? ethers.formatUnits(3000000000, "wei") : ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address,
         );
         // user sign 
@@ -1032,7 +1097,13 @@ async function ethToErc20LimitedDataOperationWrapper(user, addr, salt, tokenIn, 
         if (platform) {
             sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = window.confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
                 sig = await signTx(userOperationWithoutSig,chainId); 
             }else{
@@ -1093,8 +1164,8 @@ async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, 
             300000,
             300000,
             100000,
-            String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
-            ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
+            feeData.maxFeePerGas == null ? ethers.formatUnits(3600000000, "wei") : String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
+            feeData.maxPriorityFeePerGas == null ? ethers.formatUnits(3000000000, "wei") : ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address,
         );
         // user sign 
@@ -1102,7 +1173,13 @@ async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, 
         if (platform) {
             sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = window.confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
                 sig = await signTx(userOperationWithoutSig,chainId); 
             }else{
@@ -1123,6 +1200,7 @@ async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, 
         console.error(e);
     }
 }
+
 // async function randomString(e) {    
 //     e = e || 32;
 //     var t = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678",
@@ -1132,14 +1210,13 @@ async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, 
 //     return n;
 // }
 
-
 async function GetEstimatedGasFee() {
     let feeData = await provider.getFeeData();
     console.log(JSON.stringify(feeData));
     console.log("gasPrice: ",ethers.formatUnits(feeData.gasPrice, "wei"));
     // console.log("lastBaseFeePerGas: ",ethers.formatUnits(feeData.lastBaseFeePerGas, "wei"));
-    console.log("maxFeePerGas: ",String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))));// x 1.2
-    console.log("maxPriorityFeePerGas: ",ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"));
+    console.log("maxFeePerGas: ",feeData.maxFeePerGas == null ? null : String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))));// x 1.2
+    console.log("maxPriorityFeePerGas: ",feeData.maxPriorityFeePerGas == null ? null : ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"));
     // console.log(String(1.2*String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei")))));
     return feeData;//ethers.formatUnits(feeData.maxFeePerGas, "gwei");
 }

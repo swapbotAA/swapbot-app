@@ -6,7 +6,7 @@
       <!-- <img src="../assets/trumpet.svg" style="height: 20px;width: 20px; margin-left: 20px;"> -->
       <span style="font-size: 15px; font-weight: 400; margin-left: 5px;">
         <label style="position: absolute; width: 1050px; height: 50px;margin-top: 5px; margin-left: 10px;">
-          <!-- <NoticeBar></NoticeBar> -->
+          <!-- <NoticeBar style="position: relative; width: 70%;"></NoticeBar> -->
         </label>
         <span style="position: absolute; width: 1600px; right: 0%;">
           <label style="height:7vh; position: absolute; width: 100px; right: 23%; top: 0px;">
@@ -46,7 +46,7 @@
               <template #overlay>
                 <a-menu style="text-align: center;">
                   <a-menu-item :key="1" style="font-size: 15px;" @click="copyWalletAdd">Copy address</a-menu-item>
-                  <a-menu-item :key="2" style="font-size: 15px;" @click="browser">View in etherScan</a-menu-item>
+                  <a-menu-item :key="2" style="font-size: 15px;" @click="browser">View in BscScan</a-menu-item>
                 </a-menu>
               </template>
             </a-dropdown>
@@ -111,9 +111,9 @@
           </a-menu-item>
         </a-menu>
       </a-layout-sider>
-      <a-layout>
-        <a-layout-sider v-model:collapsed="collapsed" collapsible collapsedWidth="0" theme="light"
-          style="background: white;">
+      <a-layout><!--collapsedWidth="0"-->
+        <a-layout-sider v-model:collapsed="collapsed" collapsible collapsedWidth="0.01" theme="light"
+          :style="{background: 'white', overflow: 'auto', }">
           <!-- <div style="color: black;">abc</div>
           <div style="color: black;">def</div> -->
           <div id="contentAsset" v-show="selectedKeys == 1">
@@ -148,7 +148,7 @@
           <div id="operationHistory" v-show="selectedKeys == 3">
             <span class="menuTitle">History</span>
               <span>
-                  <a-list size="large" bordered :data-source="operationHistory"
+                  <a-list size="large" :split="true" :data-source="operationHistory"
                       style="margin-top: 5%; margin-bottom:8%; width: 90%; margin-left: 5%;text-align: left; background: white;">
                       <template #renderItem="{ item }">
                           <a-list-item>
@@ -231,6 +231,9 @@
                                   <br /> 
                               </span>
                           </a-list-item>
+                      </template>
+                      <template #footer>
+                        <div>&nbsp</div>
                       </template>
                   </a-list>
               </span>
@@ -655,7 +658,7 @@ const axios = require('axios');
 
 //wrap map data set to store contract addresses
 let contractAddrMap = new Map();
-contractAddrMap.set("eth", "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14");
+contractAddrMap.set("eth", "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c");
 contractAddrMap.set("uni", "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984");
 
 //define select data sets
@@ -778,7 +781,7 @@ export default {
       erc20LimitedAmount: null,
       contractAddrMap: contractAddrMap,
       fee: 3000,
-      routerAddress: "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E",
+      routerAddress: "0xB971eF87ede563556b2ED4b1C0b0019111Dd85d2",//"0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E",
       changePositionFlag: 0,
       changeLimitedPositionFlag: 0,
       subKeySrc: "eth",
@@ -814,18 +817,18 @@ export default {
         // { label: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80a", value: "0xB178e99e401cBbd7F1a9bdafaa7D2D027B42d80a", disabled: false, salt: 1}
       ],
       operationHistory: [
-        { action: "COPY_ORDER", details: { tokenSymbol: "", amount: "" }, status: { code: "active", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        { action: "COPY_ORDER", details: { tokenSymbol: "", amount: "" }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        // { action: "COPY_ORDER", details: { tokenSymbol: "", amount: "" }, status: { code: "active", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        // { action: "COPY_ORDER", details: { tokenSymbol: "", amount: "" }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
         
-        { action: "TRANSFER", details: { tokenSymbol: "ETH", amount: "100" }, status: { code: "success", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        { action: "TRANSFER", details: { tokenSymbol: "ETH", amount: "" }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        { action: "TRANSFER", details: { tokenSymbol: "ETH", amount: "" }, status: { code: "pending", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        { action: "SWAP", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI" }, status: { code: "success", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        { action: "SWAP", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI" }, status: { code: "pending", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        { action: "SWAP", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI" }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        { action: "LIMIT_ORDER", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI", amountOut: "0.1" }, status: { code: "success", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        { action: "LIMIT_ORDER", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI", amountOut: "0.1"  }, status: { code: "pending", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
-        { action: "LIMIT_ORDER", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI", amountOut: "0.1"  }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        // { action: "TRANSFER", details: { tokenSymbol: "ETH", amount: "100" }, status: { code: "success", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        // { action: "TRANSFER", details: { tokenSymbol: "ETH", amount: "" }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        // { action: "TRANSFER", details: { tokenSymbol: "ETH", amount: "" }, status: { code: "pending", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        // { action: "SWAP", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI" }, status: { code: "success", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        // { action: "SWAP", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI" }, status: { code: "pending", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        // { action: "SWAP", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI" }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        // { action: "LIMIT_ORDER", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI", amountOut: "0.1" }, status: { code: "success", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        // { action: "LIMIT_ORDER", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI", amountOut: "0.1"  }, status: { code: "pending", error: "" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
+        // { action: "LIMIT_ORDER", details: { tokenIn: "ETH", amountIn: "100", tokenOut: "UNI", amountOut: "0.1"  }, status: { code: "failed", error: "insufficient balance" }, txHash: "0x61c73a77fbe04ec22fad93c84564261c08a0bc092bfdcf94fa666fa302c27037" },
         
       ],
       operation: {
@@ -847,9 +850,9 @@ export default {
       ],
       hotOperations: [
         "What is going on in tech?",
-        "I wanna swap usdt for eth.",
-        "Is it a good time to buy eth?",
-        "I wanna copy a transaction."
+        "I wanna swap bnb for usdt.",
+        "Is it a good time to buy bnb?",
+        "I wanna copy a BNB transaction."
       ],
       emailAddress: null,
       // contentList: ["Itis also very simple to use and get started with. DOMPurify was started in February 2014 and, meanwhile, has reached version v3.0.8."]
@@ -909,8 +912,8 @@ export default {
                     // add first account address into asset list
                     if (this.tokenObj.length == 0) {
                       console.log("asset Address: ", element.Account);
-                      console.log("asset symbol: ", "ETH");
-                      let tmpObj = { token: "ETH", address: element.Account, balance: "0.0" };
+                      console.log("asset symbol: ", "BNB");
+                      let tmpObj = { token: "BNB", address: element.Account, balance: "0.0" };
                       this.tokenObj.push(tmpObj);
                     }
                   }
@@ -943,6 +946,7 @@ export default {
                       }
                     }
                     this.queryOpAndOrders();
+                    // this.scheduleTask();
                   })
                   .catch(error => {
                     console.log(error);
@@ -1167,8 +1171,8 @@ export default {
                     // add first account address into asset list
                     if (this.tokenObj.length == 0) {
                       console.log("asset Address: ", element.Account);
-                      console.log("asset symbol: ", "ETH");
-                      let tmpObj = { token: "ETH", address: element.Account, balance: "0.0" };
+                      console.log("asset symbol: ", "BNB");
+                      let tmpObj = { token: "BNB", address: element.Account, balance: "0.0" };
                       this.tokenObj.push(tmpObj);
                     }
                   }
@@ -1201,6 +1205,7 @@ export default {
                       }
                     }
                     this.queryOpAndOrders();
+                    // this.scheduleTask();
                     // update erc20 balance
                     // for (let index = 1; index < this.tokenObj.length; index++) {
                     //     const element = this.tokenObj[index];
@@ -1275,10 +1280,13 @@ export default {
         this.openLogoutHint = false;
         this.greeting = true;
         this.iconLoadingLogin = false;
+
+        console.log("cancel schedule jobs ...");
+        for (const job in schedule.scheduledJobs) schedule.cancelJob(job);
       });
     },
     queryOpAndOrders() {
-      return;
+      // return;
       axios.post('/api/v1/query_op_orders', {
         sender: this.walletAddress
       })
@@ -1409,7 +1417,7 @@ export default {
       getEthBalance(this.walletAddress).then((response) => {
         if (response.status) {
           this.tokenObj.forEach(element => {
-            if (element.token == "ETH") {
+            if (element.token == "BNB") {
               // console.log("eth balance:" + String(response.balance));
               element.balance = this.formateNumber(ethers.formatEther(response.balance));
             }
@@ -1419,6 +1427,7 @@ export default {
         }
       });
       // update  erc20 balance
+      console.log("this.tokenObj: ",this.tokenObj);
       for (let index = 1; index < this.tokenObj.length; index++) {
         const element = this.tokenObj[index];
         getErc20Balance(this.walletAddress, element.address).then((response) => {
@@ -1704,7 +1713,7 @@ export default {
                   getEthBalance(this.walletAddress).then((response) => {
                     if (response.status) {
                       this.tokenObj.forEach(element => {
-                        if (element.token == "ETH") {
+                        if (element.token == "BNB") {
                           // console.log("eth balance:" + String(response.balance));
                           element.balance = this.formateNumber(ethers.formatEther(response.balance));
                         }
@@ -1805,7 +1814,7 @@ export default {
                   getEthBalance(this.walletAddress).then((response) => {
                     if (response.status) {
                       this.tokenObj.forEach(element => {
-                        if (element.token == "ETH") {
+                        if (element.token == "BNB") {
                           // console.log("eth balance:" + String(response.balance));
                           element.balance = this.formateNumber(ethers.formatEther(response.balance));
                         }
@@ -1851,7 +1860,7 @@ export default {
         getEthBalance(this.walletAddress).then((response) => {
           if (response.status) {
             this.tokenObj.forEach(element => {
-              if (element.token == "ETH") {
+              if (element.token == "BNB") {
                 // console.log("eth balance:" + String(response.balance));
                 element.balance = this.formateNumber(ethers.formatEther(response.balance));
               }
@@ -1955,7 +1964,7 @@ export default {
       console.log("after change PositionFlag: ", this.changePositionFlag);
     },
     viewTx(txHash) {
-      window.open('https://sepolia.etherscan.io/tx/' + txHash);
+      window.open('https://bscscan.com/tx/' + txHash);
     },
     cancelLimitedOrder(orderNo) {
       for (let index = 0; index < this.orderData.length; index++) {
@@ -1983,7 +1992,8 @@ export default {
         });
     },
     browser() {
-      window.open('https://sepolia.etherscan.io/address/' + this.walletAddress);
+      window.open('https://bscscan.com/address/' + this.walletAddress);
+      // window.open('https://sepolia.etherscan.io/address/' + this.walletAddress);
     },
     homePage() {
       window.open('https://www.sparkybot.xyz');
@@ -2037,8 +2047,8 @@ export default {
                         // add first account address into asset list as ETH
                         if (this.tokenObj.length == 0) {
                           console.log("asset Address: ", element.Account);
-                          console.log("asset symbol: ", "ETH");
-                          let tmpObj = { token: "ETH", address: element.Account, balance: "0.0" };
+                          console.log("asset symbol: ", "BNB");
+                          let tmpObj = { token: "BNB", address: element.Account, balance: "0.0" };
                           this.tokenObj.push(tmpObj);
                         }
                       }
@@ -2120,7 +2130,6 @@ export default {
     },
     // onComplete(data) {
     //     console.log("on complete:", data);
-    //     // this.scheduleTask();
     //     // log out
     //     if (data.metaMaskAddress == "") {
     //         this.user = null;
@@ -2314,8 +2323,8 @@ export default {
           // add new account address into asset list
           if (this.tokenObj.length == 0) {
             console.log("asset Address: ", this.walletAddress);
-            console.log("asset symbol: ", "ETH");
-            let tmpObj = { token: "ETH", address: this.walletAddress, balance: "0.0" };
+            console.log("asset symbol: ", "BNB");
+            let tmpObj = { token: "BNB", address: this.walletAddress, balance: "0.0" };
             this.tokenObj.push(tmpObj);
           }
         }
@@ -2373,7 +2382,7 @@ export default {
           if (response.data.code == 1000) {
             // remove erc20 tokens but keep ETH
             this.tokenObj = [];
-            let tmpObj = { token: "ETH", address: this.walletAddress, balance: "0.0" };
+            let tmpObj = { token: "BNB", address: this.walletAddress, balance: "0.0" };
             this.tokenObj.push(tmpObj);
             console.log("Successfully obtained user asset list.");
             if (response.data.data != null && response.data.data.length > 0) {
@@ -2490,7 +2499,7 @@ export default {
                   getEthBalance(this.walletAddress).then((response) => {
                     if (response.status) {
                       this.tokenObj.forEach(element => {
-                        if (element.token == "ETH") {
+                        if (element.token == "BNB") {
                           // console.log("eth balance:" + String(response.balance));
                           element.balance = this.formateNumber(ethers.formatEther(response.balance));
                         }
@@ -2540,7 +2549,7 @@ export default {
           if (response.status) {
             // console.log(element.token + " balance:" + response.balance.toNumber());
             this.tokenObj.forEach(element => {
-              if (element.token == "ETH") {
+              if (element.token == "BNB") {
                 element.balance = this.formateNumber(ethers.formatEther(response.balance));
               }
             })
@@ -2752,7 +2761,7 @@ export default {
         getEthBalance(this.walletAddress).then((response) => {
           if (response.status) {
             this.tokenObj.forEach(element => {
-              if (element.token == "ETH") {
+              if (element.token == "BNB") {
                 // console.log("eth balance:" + String(response.balance));
                 element.balance = this.formateNumber(ethers.formatEther(response.balance));
               }
@@ -2884,6 +2893,8 @@ export default {
             console.log(error);
           });
         this.addErc20Open = false;
+        this.addErc20Address = null;
+        this.addErc20Symbol = null;
       }
       // alert(this.$refs.exchangeRate.innerHTML());
     },
@@ -3145,7 +3156,7 @@ export default {
                                     getEthBalance(this.walletAddress).then((response) => {
                                       if (response.status) {
                                         this.tokenObj.forEach(element => {
-                                          if (element.token == "ETH") {
+                                          if (element.token == "BNB") {
                                             // console.log("eth balance:" + String(response.balance));
                                             element.balance = this.formateNumber(ethers.formatEther(response.balance));
                                           }
@@ -3370,7 +3381,7 @@ export default {
                                       getEthBalance(this.walletAddress).then((response) => {
                                         if (response.status) {
                                           this.tokenObj.forEach(element => {
-                                            if (element.token == "ETH") {
+                                            if (element.token == "BNB") {
                                               // console.log("eth balance:" + String(response.balance));
                                               element.balance = this.formateNumber(ethers.formatEther(response.balance));
                                             }
@@ -3385,7 +3396,8 @@ export default {
                                         getErc20Balance(this.walletAddress, element.address).then((response) => {
                                           if (response.status) {
                                             // console.log(element.token + " balance:" + String(response.balance));
-                                            this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance));
+                                            let point = this.formateNumber(ethers.formatEther(response.balance)).indexOf(".");
+                                            this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance)).substring(0, point+5);
                                           } else {
                                             console.log("get " + element.token + " balance falied!");
                                           }
@@ -3482,7 +3494,7 @@ export default {
                                       getEthBalance(this.walletAddress).then((response) => {
                                         if (response.status) {
                                           this.tokenObj.forEach(element => {
-                                            if (element.token == "ETH") {
+                                            if (element.token == "BNB") {
                                               // console.log("eth balance:" + String(response.balance));
                                               element.balance = this.formateNumber(ethers.formatEther(response.balance));
                                             }
@@ -3722,7 +3734,7 @@ export default {
           if (response.status) {
             // console.log(element.token + " balance:" + response.balance.toNumber());
             this.tokenObj.forEach(element => {
-              if (element.token == "ETH") {
+              if (element.token == "BNB") {
                 element.balance = this.formateNumber(ethers.formatEther(response.balance));
               }
             })

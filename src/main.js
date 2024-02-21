@@ -12,13 +12,22 @@ const coreKitInstance = new Web3AuthMPCCoreKit({
     uxMode: "popup",
     chainConfig: {
         chainNamespace: "eip155",
-        chainId: "0xAA36A7",
-        rpcTarget: process.env.VUE_APP_RPC_TARGET,
-        displayName: "Ethereum Sepolia",
-        blockExplorer: "https://sepolia.etherscan.io",
-        ticker: "ETH",
-        tickerName: "Ethereum",
+        chainId: "0x38",
+        rpcTarget: "https://side-wandering-firefly.bsc.quiknode.pro/9c233c9f53c4d157c9d53ddf6c0526780fd0f9d8/",
+        displayName: "Binance SmartChain Mainnet",
+        blockExplorer: "https://bscscan.com/",
+        ticker: "BNB",
+        tickerName: "BNB",
     },
+    // chainConfig: {
+    //     chainNamespace: "eip155",
+    //     chainId: "0xAA36A7",
+    //     rpcTarget: process.env.VUE_APP_RPC_TARGET,
+    //     displayName: "Ethereum Sepolia",
+    //     blockExplorer: "https://sepolia.etherscan.io",
+    //     ticker: "ETH",
+    //     tickerName: "Ethereum",
+    // },
   });
 
 console.log("##0##");
