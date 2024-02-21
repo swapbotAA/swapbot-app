@@ -111,7 +111,7 @@
           </a-menu-item>
         </a-menu>
       </a-layout-sider>
-      <a-layout><!--collapsedWidth="0"-->
+      <a-layout>
         <a-layout-sider v-model:collapsed="collapsed" collapsible collapsedWidth="0.01" theme="light"
           :style="{background: 'white', overflow: 'auto', }">
           <!-- <div style="color: black;">abc</div>
@@ -850,9 +850,9 @@ export default {
       ],
       hotOperations: [
         "What is going on in tech?",
-        "I wanna swap bnb for usdt.",
-        "Is it a good time to buy bnb?",
-        "I wanna copy a BNB transaction."
+        "I wanna swap eth for uni.",
+        "Is it a good time to buy eth?",
+        "I wanna copy a transaction."
       ],
       emailAddress: null,
       // contentList: ["Itis also very simple to use and get started with. DOMPurify was started in February 2014 and, meanwhile, has reached version v3.0.8."]
