@@ -2,27 +2,48 @@ import { ethers, BigNumber} from 'ethers6';
 import  Wallet from './abis/Wallet.json';
 import UniswapRouter from "./abis/UniswapRouter.json";
 import Uni from "./abis/Uni.json";
+import WETH9 from "./abis/Weth.json";
+import Usdc from "./abis/Usdc.json";
+import LinkToken from "./abis/Link.json";
+import Usdt from "./abis/Usdt.json";
 import SparkyAccountFactory from "./abis/SparkyAccountFactory.json";
 import EntryPoint from "./abis/EntryPoint.json";
-
+import BN from 'bn.js';
+import Web3 from 'web3';
+import bowser from "bowser";
+// import { storeWebBrowserFactor, keyToMnemonic, mnemonicToKey, COREKIT_STATUS } from "@web3auth/mpc-core-kit";
+import { TssShareType, getWebBrowserFactor, generateFactorKey, COREKIT_STATUS, keyToMnemonic, mnemonicToKey, parseToken } from "@web3auth/mpc-core-kit";
 // web3auth
 import { Web3Auth } from "@web3auth/modal";
 import { web3auth, coreKitInstance } from "../main";
-import { Web3 } from "web3";
 // import BN from 'bn.js'
-// import { getWebBrowserFactor } from "@web3auth/mpc-core-kit";
 let provider = null;
+let signer = null;
 // web3auth end
 
+let coreKitStatus = null;
+let backupFactorKey = "";
+let mnemonicFactor = "";
+
+// =====switch to Eth begin=====
 const wallet_address = "0x90CaF385c36b19d9f2BB9B5098398b6844eff8eB";
 const uniswapRouter_address = "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E";
-const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14"];// [0:Uni]
 
-// ETH-Hangzhou branch begin
+// [uni,weth,usdc,link,usdt]
+const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14","0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8","0x779877A7B0D9E8603169DdbD7836e478b4624789","0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0"];
+const abi_name_list = ["Uni", "Weth", "Usdc", "Link", "Usdt"];
+
 const sparkyAccountFactory_address = "0x97e4Ac7528c1F797Fe5269B0EECCd25D897b3917";//"0xf8F3f05Bb80Ecd7cbF5925598966ea5C9C0857A1";//"0x81003ED6857971b34967dEC7C979a6d51C793Ef4";
 const entryPoint_address = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
 const sparkyPaymaster_address = "0x7BC827dF7aAdD95fCd1F670Bc2c36a860b4518AD";
-// ETH-Hangzhou branch end
+// =====end=====
+
+// =====switch to BSC begin=====
+// sparkyAccountFactory_address = ""
+// sparkyPaymaster_address = ""
+// const erc20_address_list = ["0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984","0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14","0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8","0x779877A7B0D9E8603169DdbD7836e478b4624789","0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0"];
+// const abi_name_list = ["Uni", "Weth", "Usdc", "Link", "Usdt"];
+// =====end=====
 
 let walletInstance = null;
 let uniswapRouterInstance = null;
@@ -84,32 +105,80 @@ const bundler_address = "0x8e19ffB632A8e74F172cfe3082493ACfa8a1556B";
 //     return signedMessage;
 // }
 //##################################single factor login above##############################################
+async function reload() {
+    console.log("COREKIT_STATUS: ", COREKIT_STATUS);
+    console.log("current status: ", coreKitInstance.status);
+    // reload google login
+    if (coreKitInstance.status === COREKIT_STATUS.LOGGED_IN) {
+        const user = await coreKitInstance.getUserInfo();
+        console.log("User info", user);
+        const detail = await coreKitInstance.getKeyDetails();
+        console.log("key details", detail);
+    
+        const web3authProvider = await coreKitInstance.provider;
+        provider = new ethers.BrowserProvider(web3authProvider); 
+        signer = await provider.getSigner();
+        const userAccounts = await signer.getAddress();
+        console.log("userAccounts: ",userAccounts);
+        const email = user.email;
+        console.log("email: ",email);
+        let platform = 0;// 0 represent normal platform, such as google
+
+        return {
+            userAccounts: userAccounts, 
+            platform: platform,
+            emailAddress: email
+        };
+    }
+    // reload metamask login
+    if (localStorage.getItem("userAccounts") != null) {
+        let platform = 1;// 1 represent web3 platform, such as metaMask
+        console.log("userAccounts: ", localStorage.getItem("userAccounts"));
+        return {
+            userAccounts: localStorage.getItem("userAccounts"), 
+            platform: platform
+        };
+    }
+
+    return false;
+}
 
 async function login() {
-    await coreKitInstance.loginWithOauth({
-        subVerifierDetails: {
-            typeOfLogin: "google",
-            verifier: "sparky-test-verifier", // you verifier name
-            clientId: process.env.VUE_APP_VERIFIER_ID, // your client id recieved from google
-        },
-    });
-    console.log("Login succeed");
-    const user = await coreKitInstance.getUserInfo();
-    console.log("User info", user);
-    const detail = await coreKitInstance.getKeyDetails();
-    console.log("key details", detail);
+    try {
+        await coreKitInstance.loginWithOauth({
+            subVerifierDetails: {
+                typeOfLogin: "google",
+                verifier: "sparky-test-verifier", // you verifier name
+                clientId: process.env.VUE_APP_VERIFIER_ID, // your client id recieved from google
+            },
+        });
+        console.log("Login succeed");
+        const user = await coreKitInstance.getUserInfo();
+        if (coreKitInstance.status === COREKIT_STATUS.REQUIRED_SHARE) {
+            console.log("required more shares, please enter your backup/ device factor key, or reset account [unrecoverable once reset, please use it with caution]");
+            return;
+          }
+        console.log("User info", user);
+        const detail = await coreKitInstance.getKeyDetails();
+        console.log("key details", detail);
+    
+        const web3authProvider = await coreKitInstance.provider;
+        provider = new ethers.BrowserProvider(web3authProvider); 
+        signer = await provider.getSigner();
+        const userAccounts = await signer.getAddress();
+        console.log("userAccounts: ",userAccounts);
+        const email = user.email;
+        console.log("email: ",email);
+        let platform = 0;// 0 represent normal platform, such as google
 
-    const web3authProvider = await coreKitInstance.provider;
-    provider = new ethers.BrowserProvider(web3authProvider); 
-    const signer = await provider.getSigner();
-    const userAccounts = await signer.getAddress();
-    console.log("userAccounts: ",userAccounts);
-    let platform = 0;// 0 represent normal platform, such as google
-
-    return {
-        userAccounts: userAccounts, 
-        platform: platform
-    };
+        return {
+            userAccounts: userAccounts, 
+            platform: platform,
+            emailAddress: email
+        };
+    } catch (error) {
+        console.log(error);
+    }
 
 }
 
@@ -118,61 +187,159 @@ async function logout() {
         uiConsole("coreKitInstance not initialized yet");
         return;
     }
-    await coreKitInstance.logout();
+    try {
+        await coreKitInstance.logout();
+        if (localStorage.getItem("userAccounts") != null) {
+            localStorage.removeItem("userAccounts");
+        }
+        // clear variables
+        provider = null;
+        signer = null;
+        
+        coreKitStatus = null;
+        backupFactorKey = "";
+        mnemonicFactor = "";
+    } catch (error) {
+        console.log(error);
+    }
 }
 
-async function addDeviceKey(DeviceKey) {
-    // let rtv = await coreKitInstance.exportBackupShare();
-    // console.log(rtv);
-    
-    // const factorKey1 = await coreKitInstance.getCurrentFactorKey();
-    // console.log("getCurrentFactorKey: ",factorKey1);
-    // return;
-    // const factorKey = await coreKitInstance.getCurrentFactorKey();
-    // const factorKey = await getWebBrowserFactor(coreKitInstance!);
+async function resetAccount() {
+    await coreKitInstance.tKey.storageLayer.setMetadata({
+        privKey: new BN(coreKitInstance.metadataKey, "hex"),
+        input: { message: "KEY_NOT_FOUND" },
+      });
+    console.log("reset");
+    // ========================
+    // try {
+    //     await getDeviceFactor();
+    //     await inputBackupFactorKey();
+    //   } catch (e) {
+    //       console.log(e);
+    //   }
+}
 
-    // const devicekey = "1beaec2523953a43d500413826050b9b6af67d759fd600646e521bc9b27e6860"
-    console.log(DeviceKey);
-    return;
-    const DeviceKeyBN = new BN(DeviceKey, "hex");
-    await coreKitInstance.inputFactorKey(DeviceKeyBN);
-    // const factorKeyMnemonic = factorKey;
-    // const factorKeyMnemonic = keyToMnemonic(factorKey);
+async function getDeviceFactor() {
+    try {
+      const factorKey = await getWebBrowserFactor(coreKitInstance);
+      backupFactorKey = factorKey;
+      console.log("Device share: ", factorKey);
+      return factorKey;
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+async function inputBackupFactorKey () {
+    if (!coreKitInstance) {
+      return new Error("coreKitInstance not found");
+    }
+    if (!backupFactorKey) {
+      return new Error("backupFactorKey not found");
+    }
+    const factorKey = new BN(backupFactorKey, "hex")
+    await coreKitInstance.inputFactorKey(factorKey);
+
+    coreKitStatus = coreKitInstance.status;
+
+    if (coreKitInstance.status === COREKIT_STATUS.REQUIRED_SHARE) {
+      console.log("required more shares even after inputing backup factor key, please enter your backup/ device factor key, or reset account [unrecoverable once reset, please use it with caution]");
+    }
+    console.log("=========");
     const detail = await coreKitInstance.getKeyDetails();
     console.log("key details", detail);
-    // uiConsole("MFA enabled, device factor stored in local store, deleted hashed cloud key, your backup factor key: ", factorKeyMnemonic);
+    const web3authProvider = await coreKitInstance.provider;
+    provider = new ethers.BrowserProvider(web3authProvider); 
+    signer = await provider.getSigner();
+    const userAccounts = await signer.getAddress();
+    console.log("userAccounts: ",userAccounts);
 }
 
-async function signTx(content) {
-    // const provider = await coreKitInstance.loginWithOauth({
-    //     subVerifierDetails: {
-    //         typeOfLogin: "google",
-    //         verifier: "google-test-sparky", // you verifier name
-    //         clientId: "891554446842-updnhqiutf8j2575mq5sasrebg79prlh.apps.googleusercontent.com", // your client id recieved from google
-    //     },
-    // });
-    // const provider = await coreKitInstance.provider;
-    // console.log(provider);
-    // const ethersProvider = new ethers.BrowserProvider(provider); // web3auth.provider
+async function enableMFA() {
+    // return "apart climb quarter minimum okay direct medal soft venue pulse valid quality next chronic garden notable alone nominee frozen uniform bachelor current blue this";
+    try {
+        const factorKey = await coreKitInstance.enableMFA({});
+        const factorKeyMnemonic = keyToMnemonic(factorKey);
+        console.log("MFA enabled, device factor stored in local store, deleted hashed cloud key, your backup factor key: ", factorKeyMnemonic);
+        return factorKeyMnemonic;
+    } catch (error) {
+        console.log(error);
+        return;
+    }
+}
 
-    const signer = await provider.getSigner();
+async function RecoveryFactorKeyUsingMnemonic(DeviceKey) {
+    if (!coreKitInstance) {
+        throw new Error("coreKitInstance is not set");
+      }
+      try {
+        const factorKey = await mnemonicToKey(DeviceKey);
+        backupFactorKey = factorKey;
+        return factorKey;
+      } catch (error) {
+        console.log(error);
+      }
+}
 
+async function exportMnemonicFactor() {
+    if (!coreKitInstance) {
+      throw new Error("coreKitInstance is not set");
+    }
+    uiConsole("export share type: ", TssShareType.RECOVERY);
+    const factorKey = generateFactorKey();
+    await coreKitInstance.createFactor({
+      shareType: TssShareType.RECOVERY,
+      factorKey: factorKey.private
+    });
+    const factorKeyMnemonic = await keyToMnemonic(factorKey.private.toString("hex"));
+    console.log("Export factor key mnemonic: ", factorKeyMnemonic);
+}
 
-    // const originalMessage = "Hello World";
+async function signTx(UserOperationWithoutSig, chainId) {
 
-    const signedMessage = await signer.signMessage(JSON.stringify(content));
-    console.log("signed message: ", signedMessage)
-    return signedMessage;
+    const domain = {
+        name: 'SparkyAccount',
+        version: '1',
+        chainId: chainId,
+        verifyingContract: UserOperationWithoutSig.sender
+    };
+    const types = {
+        UserOperationWithoutSig: [
+            { name: 'sender', type: 'address' },
+            // { name: 'nonce', type: 'uint256' },
+            { name: 'initCode', type: 'bytes' },
+            { name: 'callData', type: 'bytes' },
+            { name: 'callGasLimit', type: 'uint256' },
+            { name: 'verificationGasLimit', type: 'uint256' },
+            { name: 'preVerificationGas', type: 'uint256' },
+            { name: 'maxFeePerGas', type: 'uint256' },
+            { name: 'maxPriorityFeePerGas', type: 'uint256' },
+            { name: 'paymasterAndData', type: 'bytes' },
+        ],
+    };
+
+    console.log("signer: ",signer);
+    console.log("UserOperationWithoutSig: ",UserOperationWithoutSig);
+    let signature = await signer.signTypedData(domain, types, { ...UserOperationWithoutSig });
+    console.log("signed message: ", signature);
+    return signature;
 }
 
 //获取 provider
-function getWeb3Provider() {
-
+async function getWeb3Provider() {
+    console.log("###provider###: ", provider);
     if (provider === null) {
         // if (!window.ethereum) {
         //     return null;
         // }
         provider = new ethers.BrowserProvider(window.ethereum, "any");
+        signer = await provider.getSigner();
+        const userAccounts = await signer.getAddress();
+        console.log("user account: ", userAccounts.toLowerCase());
+        console.log("localStorage userAccounts: ",localStorage.getItem("userAccounts"));
+        if (localStorage.getItem("userAccounts") == null) {
+            localStorage.setItem("userAccounts", userAccounts.toLowerCase());
+        }
         // provider = new ethers.providers.Web3Provider(window.ethereum, "any");
     }
     // return window.web3Provider;
@@ -197,8 +364,31 @@ async function initInstances() {
         for (let index = 0; index < erc20_address_list.length; index++) {
             const element = erc20_address_list[index];
             console.log("erc20_address_list "+index+": ",element);
-            let erc20Instance = new ethers.Contract(element, Uni.abi, provider);//.getSigner());
-            erc20InstanceList.push(erc20Instance);
+            if (element == "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984") {
+                console.log("init uni instance...");
+                let erc20Instance = new ethers.Contract(element, Uni.abi, provider);//.getSigner());
+                erc20InstanceList.push(erc20Instance);
+            }
+            if (element == "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14") {
+                console.log("init weth instance...");
+                let erc20Instance = new ethers.Contract(element, WETH9.abi, provider);//.getSigner());
+                erc20InstanceList.push(erc20Instance);
+            }
+            if (element == "0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8") {
+                console.log("init usdc instance...");
+                let erc20Instance = new ethers.Contract(element, Usdc.abi, provider);//.getSigner());
+                erc20InstanceList.push(erc20Instance);
+            }
+            if (element == "0x779877A7B0D9E8603169DdbD7836e478b4624789") {
+                console.log("init link instance...");
+                let erc20Instance = new ethers.Contract(element, LinkToken.abi, provider);//.getSigner());
+                erc20InstanceList.push(erc20Instance);
+            }
+            if (element == "0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0") {
+                console.log("init usdt instance...");
+                let erc20Instance = new ethers.Contract(element, Usdt.abi, provider);//.getSigner());
+                erc20InstanceList.push(erc20Instance);
+            }
         }
         
         console.log("wallet Instance: ",walletInstance);
@@ -245,6 +435,7 @@ async function getEthBalance(addr) {
 //get account balance ETH-Hangzhou
 async function getErc20Balance(addr, erc20Address) {
     let flag = null;
+    console.log("erc20Address: ", erc20Address);
     for (let index = 0; index < erc20_address_list.length; index++) {
         if(erc20_address_list[index] == erc20Address) {
             flag = index;
@@ -252,11 +443,11 @@ async function getErc20Balance(addr, erc20Address) {
     }
     if (flag == null) {
         console.log("Invalid erc20Address!");
-        return;
+        return { status: false, response: null };
     }
     let amount = await erc20InstanceList[flag].balanceOf(addr);
-    // console.log("erc20 amount: ",amount);
-    if (amount != "") {
+    console.log("erc20 amount: ",amount);
+    if (amount != null) {
         return { status: true, balance: amount };
     } else {
         return { status: false, response: null };
@@ -319,18 +510,24 @@ async function delegate(user, addr, chainId, platform, salt) {
             300000, // You can use this value temporarily, and then increase it
             VerificationGasLimit, // You can use this value temporarily, and then increase it
             100000, // You can use this value temporarily, and then increase it
-            String(Math.round(1.2*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
+            String(Math.round(1*ethers.formatUnits(feeData.maxFeePerGas, "wei"))), // value can be adjusted according to the actual situation
             ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address, // sparkyPaymaster address
         );
         // user sign 
         let sig = null;
         if (platform) {
-            sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, await provider.getSigner());
+            sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
-                sig = await signTx(userOperationWithoutSig); 
+                sig = await signTx(userOperationWithoutSig,chainId); 
             }else{
                 return;
             }
@@ -376,11 +573,17 @@ async function transferETH(user ,addr, toAddr, amount, salt, chainId, platform, 
         // user sign 
         let sig = null;
         if (platform) {
-            sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, await provider.getSigner());
+            sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         }else {
-            let r = confirm("Sign this Tx?");
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
             if (r) {
-                sig = await signTx(userOperationWithoutSig); 
+                sig = await signTx(userOperationWithoutSig, chainId, signer); 
             }else{
                 return;
             }
@@ -402,11 +605,11 @@ async function transferETH(user ,addr, toAddr, amount, salt, chainId, platform, 
         return userOperation;
     } catch (e) {
         console.error(e);
-        callback(0);
+        // callback(0);
     }
 }
 // transfer erc20
-async function transferErc20(user ,addr, toAddr, tokenAddr, amount, salt, chainId, callback) {
+async function transferErc20(user ,addr, toAddr, tokenAddr, amount, salt, chainId, platform, callback) {
     try {
         let someEther = ethers.parseEther(amount);
         let func = createCallData("transfer", [toAddr, someEther])
@@ -437,7 +640,23 @@ async function transferErc20(user ,addr, toAddr, tokenAddr, amount, salt, chainI
             sparkyPaymaster_address, // sparkyPaymaster address
         );
         // user sign 
-        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, await provider.getSigner());
+        let sig = null;
+        if (platform) {
+            sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
+        }else {
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
+            if (r) {
+                sig = await signTx(userOperationWithoutSig,chainId); 
+            }else{
+                return;
+            }
+        }
         // add user signature to userOperation
         let userOperation = userOperationWithoutSig.addSig(sig);
 
@@ -577,7 +796,7 @@ async function withdrawETH(user, addr, salt, wethAddr, amount, chainId, callback
             sparkyPaymaster_address, // sparkyPaymaster address
         );
         // user sign 
-        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, await provider.getSigner());
+        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         // add user signature to userOperation
         let userOperation = userOperationWithoutSig.addSig(sig);
         await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
@@ -626,7 +845,7 @@ async function withdrawERC20(user, addr, salt, uniAddr, rawAmount, chainId, call
             sparkyPaymaster_address, // sparkyPaymaster address
         );
         // user sign 
-        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, await provider.getSigner());
+        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
         // add user signature to userOperation
         let userOperation = userOperationWithoutSig.addSig(sig);
         await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
@@ -642,7 +861,7 @@ async function withdrawERC20(user, addr, salt, uniAddr, rawAmount, chainId, call
     }
 }
 //erc20ToEthDataOperationWrapper
-async function erc20ToEthDataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
+async function erc20ToEthDataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, platform,callback) {
     console.log("erc20 To Eth DataOperation Wrapper start:");
     try {
         let feeData = await GetEstimatedGasFee();
@@ -683,7 +902,24 @@ async function erc20ToEthDataOperationWrapper(user, addr, salt, tokenIn, tokenOu
             ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address,
         );
-        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, await provider.getSigner());
+        // user sign 
+        let sig = null;
+        if (platform) {
+            sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
+        }else {
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
+            if (r) {
+                sig = await signTx(userOperationWithoutSig,chainId); 
+            }else{
+                return;
+            }
+        }
         let userOperation = userOperationWithoutSig.addSig(sig);
         // await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
         //     transactionResponse.wait().then(receipt => {
@@ -699,7 +935,7 @@ async function erc20ToEthDataOperationWrapper(user, addr, salt, tokenIn, tokenOu
 }
 
 //ethToErc20DataOperationWrapper
-async function ethToErc20DataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
+async function ethToErc20DataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, platform,callback) {
     console.log("eth To Erc20 DataOperation Wrapper start:");
     try {
         let feeData = await GetEstimatedGasFee();
@@ -742,7 +978,24 @@ async function ethToErc20DataOperationWrapper(user, addr, salt, tokenIn, tokenOu
             ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address,
         );
-        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, await provider.getSigner());
+        // user sign 
+        let sig = null;
+        if (platform) {
+            sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
+        }else {
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
+            if (r) {
+                sig = await signTx(userOperationWithoutSig,chainId); 
+            }else{
+                return;
+            }
+        }
         let userOperation = userOperationWithoutSig.addSig(sig);
 
         // userOperation.nonce = nonce; //为userOperation添加nonce值
@@ -761,7 +1014,7 @@ async function ethToErc20DataOperationWrapper(user, addr, salt, tokenIn, tokenOu
     }
 }
 //ethToErc20LimitedDataOperationWrapper
-async function ethToErc20LimitedDataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
+async function ethToErc20LimitedDataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, platform,callback) {
     console.log("eth To Erc20 limited orders DataOperation Wrapper start:");
     try {
         let feeData = await GetEstimatedGasFee();
@@ -804,7 +1057,24 @@ async function ethToErc20LimitedDataOperationWrapper(user, addr, salt, tokenIn, 
             ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address,
         );
-        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, await provider.getSigner());
+        // user sign 
+        let sig = null;
+        if (platform) {
+            sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
+        }else {
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
+            if (r) {
+                sig = await signTx(userOperationWithoutSig,chainId); 
+            }else{
+                return;
+            }
+        }
         let userOperation = userOperationWithoutSig.addSig(sig);
 
         // await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
@@ -821,7 +1091,7 @@ async function ethToErc20LimitedDataOperationWrapper(user, addr, salt, tokenIn, 
     }
 }
 //erc20ToEthLimitedDataOperationWrapper
-async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, callback) {
+async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, tokenOut, fee, routerAddress, amountIn, amountOutMinimum, chainId, platform,callback) {
     console.log("erc20 To eth limited orders DataOperation Wrapper start:");
     try {
         let feeData = await GetEstimatedGasFee();
@@ -863,7 +1133,24 @@ async function erc20ToEthLimitedDataOperationWrapper(user, addr, salt, tokenIn, 
             ethers.formatUnits(feeData.maxPriorityFeePerGas, "wei"),// value can be adjusted according to the actual situation
             sparkyPaymaster_address,
         );
-        let sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, await provider.getSigner());
+        // user sign 
+        let sig = null;
+        if (platform) {
+            sig = await createTypedDataAndSign(userOperationWithoutSig, chainId, signer);
+        }else {
+            // let r = window.confirm("Sign this Tx?");
+            let r = await new Promise((resolve) => {
+                setTimeout(() => {
+                  const userResponse = window.confirm("Sign this Tx?");
+                  resolve(userResponse);
+                }, 2000); // 使用setTimeout来确保在下一个事件循环中执行
+              });
+            if (r) {
+                sig = await signTx(userOperationWithoutSig,chainId); 
+            }else{
+                return;
+            }
+        }
         let userOperation = userOperationWithoutSig.addSig(sig);
         // await entryPointInstance.handleOps([userOperation], user, {gasLimit: 1000000}).then(transactionResponse => {
         //     transactionResponse.wait().then(receipt => {
@@ -1101,7 +1388,7 @@ async function createTypedDataAndSign(UserOperationWithoutSig, chainId, signer) 
     // console.log(ethers._TypedDataEncoder.hashDomain(domain))
 
     console.log(signer);
-
+    console.log("UserOperationWithoutSig: ",UserOperationWithoutSig);
     let signature = await signer.signTypedData(domain, types, { ...UserOperationWithoutSig });
     return signature;
 }
@@ -1126,6 +1413,12 @@ export {
   transferErc20,
   login,
   logout,
-  addDeviceKey,
-  delegate
+  getDeviceFactor,
+  delegate,
+  inputBackupFactorKey,
+  resetAccount,
+  enableMFA,
+  RecoveryFactorKeyUsingMnemonic,
+  exportMnemonicFactor,
+  reload
 }

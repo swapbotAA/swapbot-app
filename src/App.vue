@@ -1,20 +1,23 @@
 <template>
   <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
-  <BaseLayout/>
+  <!-- <BaseLayout/> -->
   <!-- <MainPage/> -->
   <!-- <Chat/> -->
+  <LayoutTest/>
 </template>
 
 <script>
 import BaseLayout from './components/BaseLayout.vue'
 import MainPage from './components/MainPage.vue'
 import Chat from './components/chatBot/Chat.vue'
+import LayoutTest from './components/LayoutTest.vue'
 export default {
   name: 'App',
   components: {
     BaseLayout,
     MainPage,
-    Chat
+    Chat,
+    LayoutTest
   }
 }
 </script>
