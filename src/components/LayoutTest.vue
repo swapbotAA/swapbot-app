@@ -435,7 +435,7 @@
                 </span>
             </a-drawer>
         </a-layout-sider>
-        <a-layout-content style="height:93vh; background: white;"><!--linear-gradient(to right, #80ddf3, #7bebc3)-->
+        <a-layout-content style="height:93vh; background: white; border-left-style: solid; border-left-color: #f5f5f6;"><!--linear-gradient(to right, #80ddf3, #7bebc3)-->
           <div class="rightbar" ref="chatwindow">
             <div class="list" id="list" ref="list">
               <ul style="padding: 0; margin: 0;" v-if="greeting == false">
