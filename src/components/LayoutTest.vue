@@ -113,7 +113,7 @@
       </a-layout-sider>
       <a-layout>
         <a-layout-sider v-model:collapsed="collapsed" collapsible collapsedWidth="0.01" theme="light"
-          :style="{background: 'white', overflow: 'auto', }">
+          :style="{background: 'white', overflow: 'auto',}">
           <!-- <div style="color: black;">abc</div>
           <div style="color: black;">def</div> -->
           <div id="contentAsset" v-show="selectedKeys == 1">
@@ -435,7 +435,7 @@
                 </span>
             </a-drawer>
         </a-layout-sider>
-        <a-layout-content style="height:93vh; background: white;"><!--linear-gradient(to right, #80ddf3, #7bebc3)-->
+        <a-layout-content style="height:93vh; background: white;  border-left-style: solid; border-left-color: #f5f5f6;"><!--linear-gradient(to right, #80ddf3, #7bebc3)-->
           <div class="rightbar" ref="chatwindow">
             <div class="list" id="list" ref="list">
               <ul style="padding: 0; margin: 0;" v-if="greeting == false">
@@ -781,7 +781,7 @@ export default {
       erc20LimitedAmount: null,
       contractAddrMap: contractAddrMap,
       fee: 3000,
-      routerAddress: "0xB971eF87ede563556b2ED4b1C0b0019111Dd85d2",//"0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E",
+      routerAddress: "0xeC8B0F7Ffe3ae75d7FfAb09429e3675bb63503e4",//"0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E",
       changePositionFlag: 0,
       changeLimitedPositionFlag: 0,
       subKeySrc: "eth",
