@@ -120,7 +120,7 @@
             <span class="menuTitle">Assets</span>
               <span ref="tokenList">
                   <span v-for="value in tokenObj">
-                      <a-button type="text" style="text-align: center; width: 100%; height: 50px; border-radius: 0px;margin-left: 0px;"
+                      <a-button type="text" style="text-align: left; width: 100%; height: 50px; border-radius: 0px;margin-left: 0px;"
                           @click="showOperateDrawer(value)">
                           <DollarOutlined />
                           <span>{{ value.token }}</span><span>:&nbsp</span><span>{{ value.balance }}</span>
@@ -1434,7 +1434,7 @@ export default {
           if (response.status) {
             // console.log(element.token + " balance:" + String(response.balance));
             let point = this.formateNumber(ethers.formatEther(response.balance)).indexOf(".");
-            this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance)).substring(0, point+5);
+            this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance)).substring(0, point+10);
           } else {
             console.log("get " + element.token + " balance falied!");
           }
@@ -3397,7 +3397,7 @@ export default {
                                           if (response.status) {
                                             // console.log(element.token + " balance:" + String(response.balance));
                                             let point = this.formateNumber(ethers.formatEther(response.balance)).indexOf(".");
-                                            this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance)).substring(0, point+5);
+                                            this.tokenObj[index].balance = this.formateNumber(ethers.formatEther(response.balance)).substring(0, point+10);
                                           } else {
                                             console.log("get " + element.token + " balance falied!");
                                           }
