@@ -781,7 +781,7 @@ export default {
       erc20LimitedAmount: null,
       contractAddrMap: contractAddrMap,
       fee: 3000,
-      routerAddress: "0xeC8B0F7Ffe3ae75d7FfAb09429e3675bb63503e4",//"0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E",
+      routerAddress: "0xB971eF87ede563556b2ED4b1C0b0019111Dd85d2",//"0xeC8B0F7Ffe3ae75d7FfAb09429e3675bb63503e4",//"0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E",
       changePositionFlag: 0,
       changeLimitedPositionFlag: 0,
       subKeySrc: "eth",
@@ -946,7 +946,7 @@ export default {
                       }
                     }
                     this.queryOpAndOrders();
-                    // this.scheduleTask();
+                    this.scheduleTask();
                   })
                   .catch(error => {
                     console.log(error);
@@ -1205,7 +1205,7 @@ export default {
                       }
                     }
                     this.queryOpAndOrders();
-                    // this.scheduleTask();
+                    this.scheduleTask();
                     // update erc20 balance
                     // for (let index = 1; index < this.tokenObj.length; index++) {
                     //     const element = this.tokenObj[index];
@@ -1315,7 +1315,7 @@ export default {
                     }
                   }
                   if (symbol == null || element.Details.TokenIn == "0x0000000000000000000000000000000000000000") {
-                    symbol = "eth";
+                    symbol = "BNB";
                   }
                   let details = { tokenSymbol: symbol, amount: ethers.formatEther(element.Details.TokenInAmount != "" ? element.Details.TokenInAmount : 0) };
                   operation.action = element.Action;
@@ -1343,10 +1343,10 @@ export default {
                   }
 
                   if (symbolIn == null || element.Details.TokenIn == "0x0000000000000000000000000000000000000000") {
-                    symbolIn = "eth";
+                    symbolIn = "BNB";
                   }
                   if (symbolOut == null || element.Details.TokenOut == "0x0000000000000000000000000000000000000000") {
-                    symbolOut = "eth";
+                    symbolOut = "BNB";
                   }
                   let details = { tokenIn: symbolIn, amountIn: ethers.formatEther(element.Details.TokenInAmount != "" ? element.Details.TokenInAmount : 0), tokenOut: symbolOut };
                   operation.action = element.Action;
@@ -1374,10 +1374,10 @@ export default {
                   }
 
                   if (symbolIn == null || element.Details.TokenIn == "0x0000000000000000000000000000000000000000") {
-                    symbolIn = "eth";
+                    symbolIn = "BNB";
                   }
                   if (symbolOut == null || element.Details.TokenOut == "0x0000000000000000000000000000000000000000") {
-                    symbolOut = "eth";
+                    symbolOut = "BNB";
                   }
 
                   let details = { tokenIn: symbolIn, amountIn: ethers.formatEther(element.Details.TokenInAmount != "" ? element.Details.TokenInAmount : 0), tokenOut: symbolOut, amountOut: ethers.formatEther(element.Details.TokenOutAmount != "" ? element.Details.TokenOutAmount : 0) };

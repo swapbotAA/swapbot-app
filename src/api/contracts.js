@@ -7,9 +7,14 @@ import Usdc from "./abis/Usdc.json";
 import LinkToken from "./abis/Link.json";
 import Usdt from "./abis/Usdt.json";
 
-import WBNB from "./bsc/WBNB.json";
-import BEP20USDT from "./bsc/BEP20USDT.json";
-import BEP20Ethereum from "./bsc/BEP20Ethereum.json";
+import WBNB from "./bsc/WBNB.json";//WBNB
+import BEP20USDT from "./bsc/BEP20USDT.json";//USDT
+import BEP20Ethereum from "./bsc/BEP20Ethereum.json";//ETH
+import FetchToken from "./bsc/FetchToken.json";//FET
+import BEP20BUSD from "./bsc/BEP20BUSD.json";//BUSD
+import BEP20TUSD from "./bsc/BEP20TUSD.json";//TUSD
+import BEP20USDC from "./bsc/BEP20USDC.json";//USDC
+import BEP20UNI from "./bsc/BEP20UNI.json";//UNI
 
 import SparkyAccountFactory from "./abis/SparkyAccountFactory.json";
 import EntryPoint from "./abis/EntryPoint.json";
@@ -45,8 +50,15 @@ let mnemonicFactor = "";
 const sparkyAccountFactory_address = "0xc2795C25f3e09B8554C349885570E0f615ec7E64";
 const entryPoint_address = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
 const sparkyPaymaster_address = "0xbbf04ef94e5bd84c24ad4b7d9707a9867acd642b";
-const erc20_address_list = ["0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c","0x55d398326f99059fF775485246999027B3197955","0x2170Ed0880ac9A755fd29B2688956BD959F933F8","0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56","0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9","0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d","0xBf5140A22578168FD562DCcF235E5D43A02ce9B1"];
-const abi_name_list = ["WBNB", "USDT", "ETH", "BUSD", "TUSD", "USDC", "UNI"];
+const erc20_address_list = ["0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+                            "0x55d398326f99059fF775485246999027B3197955",
+                            "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+                            "0x031b41e504677879370e9DBcF937283A8691Fa7f", 
+                            "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+                            "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9",
+                            "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+                            "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1"];
+const abi_name_list = ["WBNB", "USDT", "ETH", "FET", "BUSD", "TUSD", "USDC", "UNI"];
 // =====end=====
 
 let walletInstance = null;
@@ -411,16 +423,31 @@ async function initInstances() {
                 let erc20Instance = new ethers.Contract(element, BEP20Ethereum.abi, provider);//.getSigner());
                 erc20InstanceList.push(erc20Instance);
             }
-            // if (element == "0x779877A7B0D9E8603169DdbD7836e478b4624789") {
-            //     console.log("init link instance...");
-            //     let erc20Instance = new ethers.Contract(element, LinkToken.abi, provider);//.getSigner());
-            //     erc20InstanceList.push(erc20Instance);
-            // }
-            // if (element == "0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0") {
-            //     console.log("init usdt instance...");
-            //     let erc20Instance = new ethers.Contract(element, Usdt.abi, provider);//.getSigner());
-            //     erc20InstanceList.push(erc20Instance);
-            // }
+            if (element == "0x031b41e504677879370e9DBcF937283A8691Fa7f") {
+                console.log("init FET instance...");
+                let erc20Instance = new ethers.Contract(element, FetchToken.abi, provider);//.getSigner());
+                erc20InstanceList.push(erc20Instance);
+            }
+            if (element == "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56") {
+                console.log("init BUSD instance...");
+                let erc20Instance = new ethers.Contract(element, BEP20BUSD.abi, provider);//.getSigner());
+                erc20InstanceList.push(erc20Instance);
+            }
+            if (element == "0x40af3827F39D0EAcBF4A168f8D4ee67c121D11c9") {
+                console.log("init TUSD instance...");
+                let erc20Instance = new ethers.Contract(element, BEP20TUSD.abi, provider);//.getSigner());
+                erc20InstanceList.push(erc20Instance);
+            }
+            if (element == "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d") {
+                console.log("init USDC instance...");
+                let erc20Instance = new ethers.Contract(element, BEP20USDC.abi, provider);//.getSigner());
+                erc20InstanceList.push(erc20Instance);
+            }
+            if (element == "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1") {
+                console.log("init UNI instance...");
+                let erc20Instance = new ethers.Contract(element, BEP20UNI.abi, provider);//.getSigner());
+                erc20InstanceList.push(erc20Instance);
+            }
         }
         
         console.log("wallet Instance: ",walletInstance);
